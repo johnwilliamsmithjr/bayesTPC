@@ -3,7 +3,7 @@
 #' Retrieve default prior choices for a given thermal performance curve model
 #'
 #' @details This function returns the default prior choices for the parameters of the thermal performance curve model that is passed as an input argument
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", and "lactin2".
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", and "ratkowski".
 #'
 #' @return list, named list detailing the default prior distributions for each parameter of the model
 #' @examples
@@ -39,6 +39,19 @@ defaultPriors <- function(model){
               T.max = 'T.max ~ dunif(0, 70)',
               delta_t = 'delta_t ~ T(dt(mu = 0, tau = 100, df = 1), 0, )',
               sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
+  } else if (model == 'kamykowski'){
+    p <- list(a = 'a ~ dunif(0, 50)',
+              b = 'b ~ dunif(0, 1)',
+              T.min = 'T.min ~ dunif(0, 25)',
+              T.max = 'T.max ~ dunif(25, 70)',
+              c = 'c ~ dunif(0, 5)',
+              sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
+  } else if (model == 'ratkowsky'){
+    p <- list(a = 'a ~ dunif(0, 5)',
+              b = 'b ~ dunif(0, 5)',
+              T.min = 'T.min ~ dunif(0, 25)',
+              T.max = 'T.max ~ dunif(25, 70)',
+              sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
   } else{
     stop('Model type not currently supported. Options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", and "lactin2".')
   }
@@ -50,7 +63,7 @@ defaultPriors <- function(model){
 #' Retrieve default model formulation for a given thermal performance curve model
 #'
 #' @details This function returns a character string of the `nimble` likelihood model for a user-specified thermal performance curve
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", and "lactin2".
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", and "ratkowsky".
 #'
 #' @return character, character string specifying the default likelihood model formulation to be passed to `nimble`
 #' @examples
@@ -74,8 +87,12 @@ defaultModel <- function(model){
     model_string = paste0('{\n    for (i in 1:N){\n    ', '        Trait[i] ~ T(dnorm(mean = step(e_h - e)*r_tref*exp((e/(8.62e-05))*((1/(T.ref+273.15)) - (1/(Temp[i] + 273.15)))) / (1 + (e / (e_h-e)) * exp((e_h/(8.62e-05))*(1/(T.opt + 273.15) - 1/(Temp[i] + 273.15)))), var = sigma.sq), 0, )\n    }\n')
   } else if (model == 'lactin2'){
     model_string = paste0('{\n    for (i in 1:N){\n    ', '        Trait[i] ~ T(dnorm(mean = step(T.max - Temp[i])*step(exp(a*Temp[i]) - exp(a*T.max - ((T.max - Temp[i]) / delta_t)) + b)*(exp(a*Temp[i]) - exp(a*T.max - ((T.max - Temp[i]) / delta_t)) + b), var = sigma.sq), 0, )\n    }\n')
+  } else if (model == 'kamykowski'){
+    model_string = paste0('{\n    for (i in 1:N){\n    ', '        Trait[i] ~ T(dnorm(mean = step(Temp[i] - T.min)*step(T.max - Temp[i])*a*(1 - exp(-b*(Temp[i] - T.min)))*(1 - exp(-c*(T.max - Temp[i]))), var = sigma.sq), 0, )\n    }\n')
+  } else if (model == 'ratkowsky'){
+    model_string = paste0('{\n    for (i in 1:N){\n    ', '        Trait[i] ~ T(dnorm(mean = step(Temp[i] - T.min)*step(T.max - Temp[i])*((a*(Temp[i] - T.min))*(1 - exp(b*(Temp[i] - T.max))))^2, var = sigma.sq), 0, )\n    }\n')
   } else{
-    stop("Argument for 'model' not currently supported. Current options include: quadratic, briere, weibull, gaussian, pawar-shsch")
+    stop("Argument for 'model' not currently supported. Current options include: quadratic, briere, weibull, gaussian, pawar-shsch, lactin2, ratkowsky")
   }
   return(model_string)
 }
@@ -100,7 +117,7 @@ defaultModel <- function(model){
 
 configureModel <- function(model, priors = NULL, verbose = TRUE){
   ## checks if model type is supported
-  if (!(model %in% c('quadratic', 'briere', 'weibull', 'gaussian', 'pawar-shsch', 'lactin2'))) stop('Model choice not currently supported')
+  if (!(model %in% c('quadratic', 'briere', 'weibull', 'gaussian', 'pawar-shsch', 'lactin2', 'kamykowski', 'ratkowsky'))) stop('Model choice not currently supported')
   ## makes sure prior information has correct types and classes
   if (!is.null(priors)){
     if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
