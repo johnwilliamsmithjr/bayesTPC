@@ -7,7 +7,7 @@
 defaultModel(model)
 }
 \arguments{
-\item{model}{character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", and "lactin2".}
+\item{model}{character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", and "ratkowsky".}
 }
 \value{
 character, character string specifying the default likelihood model formulation to be passed to `nimble`

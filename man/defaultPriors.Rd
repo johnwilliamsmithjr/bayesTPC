@@ -7,7 +7,7 @@
 defaultPriors(model)
 }
 \arguments{
-\item{model}{character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", and "lactin2".}
+\item{model}{character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", and "ratkowsky".}
 }
 \value{
 list, named list detailing the default prior distributions for each parameter of the model
