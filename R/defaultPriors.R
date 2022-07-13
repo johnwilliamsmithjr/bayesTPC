@@ -946,3 +946,32 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
     }
   }
 }
+
+#' Wrapper for coda::traceplot()
+#'
+#' Wrapper for coda::traceplot() that can both directly accept samples of object type `mcmc` or `mcmc.list` as well as an object of class `list` with an element `samples` that is of class `mcmc` or `mcmc.list`
+#'
+#' @details This is a wrapper to create trace plots using coda's `traceplot` function.
+#' @param object Either an object of class `mcmc` or `mcmc.list` OR an object of class `list` which contains an element called `samples` that is of class `mcmc` or `mcmc.list`
+#' @param ... additional graphical parameters to be passed as arguments to coda::traceplot
+#' @return Returns invisible(NULL) and creates trace plots for MCMC parameters
+#' @examples
+#' ## need data to set up example here. placeholder for now
+#' ## set params and reference temperature set
+#' myfun = str2tpc_fun(model = 'gaussian')
+#' param_set = c(T.opt = 36, a = 6.5, rmax = 2.75)
+#' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
+#' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
+
+
+traceplot <- function(object, ...){
+  if (is.list(object) & !(is.null(object$samples))){
+    if (is.mcmc(object$samples)){
+      coda::traceplot(x = object$samples, ...)
+      return(invisible(NULL))
+    }
+  } else{
+    coda::traceplot(x = object, ...)
+    return(invisible(NULL))
+  }
+}
