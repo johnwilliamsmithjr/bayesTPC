@@ -679,7 +679,7 @@ str2tpc_fun = function(model){
   if (model == 'briere') fun = briere_tpc
   if (model == 'weibull') fun = weibull_tpc
   if (model == 'gaussian') fun = gauss_tpc
-  if (model == 'pawar_shsch') fun = pawar_shsch_tpc
+  if (model == 'pawar-shsch') fun = pawar_shsch_tpc
   if (model == 'kamykowski') fun = kamykowski_tpc
   if (model == 'ratkowsky') fun = ratkowsky_tpc
   return(fun)
@@ -700,7 +700,7 @@ str2tpc_fun = function(model){
 #' @param burn numeric, initial number of iterations to be discarded as burn-in (default = 0)
 #' @param plotOnly logical, should a plot be generated without returning a list of summaries? if plotOnly = TRUE, an invisible NULL is returned and only plot is generated. Default = FALSE
 #' @param traitName string, name of Trait to be used as y-axis if a plot is generated. default = "Trait"
-#' @param ... additional plotting parameters to be passed as arguments
+#' @param ... additional parameters to be passed as arguments
 #' @return return types vary by argument. For plotOnly = TRUE, invisible NULL is returned. For summaryOnly = TRUE, a list of summaries is returned. For summaryOnly = FALSE, a list is returned with summaries as well as the entire set of thermal performance curve evaluations
 #' @examples
 #' ## need data to set up example here. placeholder for now
@@ -741,7 +741,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   if (is.null(Temp_interval)) Temp_interval = seq(from = min(TPC$data$data$Temp), to = max(TPC$data$data$Temp), length.out = 1000)
   tpc_fun = str2tpc_fun(TPC$modelType)
   max.ind = nrow(TPC$samples)
-  tpc_evals = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, posteriorPredictive = FALSE)
+  tpc_evals = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, posteriorPredictive = FALSE, ...)
 
   if (centralSummary == 'median'){
     if (summaryType == 'quantile'){
@@ -756,7 +756,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       medians = rowMedians(tpc_evals)
     }
     if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', lty = 2, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ...)
+      plot(Temp_interval, upper_bounds, type = 'l', lty = 2, col = 'blue', xlab = 'Temperature (C)', ylab = traitName)
       points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
       points(Temp_interval, medians, type = 'l', col = 'blue')
       #points(TPC$data$data$Temp, TPC$data$data$Trait)
@@ -791,7 +791,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       means = rowMeans2(tpc_evals)
     }
     if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 2, xlab = 'Temperature (C)', ylab = traitName, ...)
+      plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 2, xlab = 'Temperature (C)', ylab = traitName)
       points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
       points(Temp_interval, means, type = 'l', col = 'blue')
       if (plotOnly){
@@ -830,7 +830,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
 #' @param plotOnly logical, should a plot be generated without returning a list of summaries? if plotOnly = TRUE, an invisible NULL is returned and only plot is generated. Default = FALSE
 #' @param traitName string, name of Trait to be used as y-axis if a plot is generated. default = "Trait"
 #' @param seed integer, seed value to be used. Useful for ensuring that results are reproducible. default = NULL
-#' @param ... additional plotting parameters to be passed as arguments
+#' @param ... additional parameters to be passed as arguments
 #' @return return types vary by argument. For plotOnly = TRUE, invisible NULL is returned. For summaryOnly = TRUE, a list of summaries is returned. For summaryOnly = FALSE, a list is returned with summaries as well as the entire set of thermal performance curve posterior predictive samples
 #' @examples
 #' ## need data to set up example here. placeholder for now
@@ -874,7 +874,7 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   tpc_fun = str2tpc_fun(TPC$modelType)
   max.ind = nrow(TPC$samples)
   if (!is.null(seed)) set.seed(seed)
-  post_pred_samples = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, posteriorPredictive = TRUE)
+  post_pred_samples = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, posteriorPredictive = TRUE, ...)
 
   if (centralSummary == 'median'){
     if (summaryType == 'quantile'){
@@ -889,7 +889,7 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       medians = rowMedians(post_pred_samples)
     }
     if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', lty = 2, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ...)
+      plot(Temp_interval, upper_bounds, type = 'l', lty = 2, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$data$Trait))))
       points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
       points(Temp_interval, medians, type = 'l', col = 'blue')
       points(TPC$data$data$Temp, TPC$data$data$Trait)
@@ -924,7 +924,7 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       means = rowMeans2(post_pred_samples)
     }
     if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 2, xlab = 'Temperature (C)', ylab = traitName, ...)
+      plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 2, xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$data$Trait))))
       points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
       points(Temp_interval, means, type = 'l', col = 'blue')
       if (plotOnly){

@@ -39,7 +39,7 @@ bayesTPC_summary(
 
 \item{traitName}{string, name of Trait to be used as y-axis if a plot is generated. default = "Trait"}
 
-\item{...}{additional plotting parameters to be passed as arguments}
+\item{...}{additional parameters to be passed as arguments}
 }
 \value{
 return types vary by argument. For plotOnly = TRUE, invisible NULL is returned. For summaryOnly = TRUE, a list of summaries is returned. For summaryOnly = FALSE, a list is returned with summaries as well as the entire set of thermal performance curve evaluations
