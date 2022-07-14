@@ -756,7 +756,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       medians = rowMedians(tpc_evals)
     }
     if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', lty = 2, col = 'blue', xlab = 'Temperature (C)', ylab = traitName)
+      plot(Temp_interval, upper_bounds, type = 'l', lty = 2, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(upper_bounds)))
       points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
       points(Temp_interval, medians, type = 'l', col = 'blue')
       #points(TPC$data$data$Temp, TPC$data$data$Trait)
@@ -804,7 +804,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       means = rowMeans2(tpc_evals)
     }
     if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 2, xlab = 'Temperature (C)', ylab = traitName)
+      plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 2, xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(upper_bounds)))
       points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
       points(Temp_interval, means, type = 'l', col = 'blue')
       if (plotOnly){
