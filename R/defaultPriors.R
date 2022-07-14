@@ -776,6 +776,19 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                       Medians = medians))
         }
       }
+    } else{
+      if (summaryOnly == FALSE){
+        return(list(TPC_vals = tpc_evals,
+                    Temp_interval = Temp_interval,
+                    Upper_bounds = upper_bounds,
+                    Lower_bounds = lower_bounds,
+                    Medians = medians))
+      } else{
+        return(list(Temp_interval = Temp_interval,
+                    Upper_bounds = upper_bounds,
+                    Lower_bounds = lower_bounds,
+                    Medians = medians))
+      }
     }
   }
   if (centralSummary == 'mean'){
@@ -809,6 +822,19 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                       Lower_bounds = lower_bounds,
                       Means = means))
         }
+      }
+    } else{
+      if (summaryOnly == FALSE){
+        return(list(TPC_vals = tpc_evals,
+                    Temp_interval = Temp_interval,
+                    Upper_bounds = upper_bounds,
+                    Lower_bounds = lower_bounds,
+                    Means = means))
+      } else{
+        return(list(Temp_interval = Temp_interval,
+                    Upper_bounds = upper_bounds,
+                    Lower_bounds = lower_bounds,
+                    Means = means))
       }
     }
   }
@@ -909,6 +935,19 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                       Medians = medians))
         }
       }
+    } else{
+      if (summaryOnly == FALSE){
+        return(list(Posterior_predictive_samples = post_pred_samples,
+                    Temp_interval = Temp_interval,
+                    Upper_bounds = upper_bounds,
+                    Lower_bounds = lower_bounds,
+                    Medians = medians))
+      } else{
+        return(list(Temp_interval = Temp_interval,
+                    Upper_bounds = upper_bounds,
+                    Lower_bounds = lower_bounds,
+                    Medians = medians))
+      }
     }
   }
   if (centralSummary == 'mean'){
@@ -935,13 +974,26 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                       Temp_interval = Temp_interval,
                       Upper_bounds = upper_bounds,
                       Lower_bounds = lower_bounds,
-                      Medians = means))
+                      Means = means))
         } else{
           return(list(Temp_interval = Temp_interval,
                       Upper_bounds = upper_bounds,
                       Lower_bounds = lower_bounds,
-                      Medians = means))
+                      Means = means))
         }
+      }
+    } else{
+      if (summaryOnly == FALSE){
+        return(list(Posterior_predictive_samples = post_pred_samples,
+                    Temp_interval = Temp_interval,
+                    Upper_bounds = upper_bounds,
+                    Lower_bounds = lower_bounds,
+                    Means = means))
+      } else{
+        return(list(Temp_interval = Temp_interval,
+                    Upper_bounds = upper_bounds,
+                    Lower_bounds = lower_bounds,
+                    Means = means))
       }
     }
   }
