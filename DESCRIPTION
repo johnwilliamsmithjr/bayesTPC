@@ -8,5 +8,5 @@ Description: An R package for fitting mathematical models that describe thermal 
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Imports: nimble, coda, matrixStats, truncnorm, HDInterval
+Imports: nimble, coda, matrixStats, truncnorm, HDInterval, IDPmisc
 RoxygenNote: 7.1.1

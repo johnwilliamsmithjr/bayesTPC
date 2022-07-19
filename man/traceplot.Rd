@@ -4,10 +4,14 @@
 \alias{traceplot}
 \title{Wrapper for coda::traceplot()}
 \usage{
-traceplot(object, ...)
+traceplot(object, burn = 0, thin = 1, ...)
 }
 \arguments{
 \item{object}{Either an object of class `mcmc` or `mcmc.list` OR an object of class `list` which contains an element called `samples` that is of class `mcmc` or `mcmc.list`}
+
+\item{burn}{Integer, number of samples to discard as burn-in before creating traceplot (default = 0)}
+
+\item{thin}{Integer, thinning interval used to generate traceplots (default = 1)}
 
 \item{...}{additional graphical parameters to be passed as arguments to coda::traceplot}
 }
