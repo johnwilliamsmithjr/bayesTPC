@@ -1066,7 +1066,6 @@ bayesTPC.ipairs <- function(x, burn = 0, thin = 1,
     } else{
       samples = x$samples
     }
-    print(class(samples[thinned,]))
     ipairs(samples[thinned,], ztransf = ztransf, ...)
   } else{
     N = nrow(x)
