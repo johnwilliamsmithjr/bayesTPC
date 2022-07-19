@@ -693,7 +693,7 @@ str2tpc_fun = function(model){
 #' @param TPC list, object output from performing MCMC using the `bTPC` function.
 #' @param Temp_interval vector, reference values to use to compute values of the thermal performance curve. If no vector is provided, Temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1000 equally spaced points
 #' @param summaryOnly logical, should the function return only summaries, or the entire matrix of thermal performance curve evaluations AND the summaries? default = TRUE
-#' @param summaryType character, type of summary used. Currently supported options are "quantile" (default option) and "hdi". Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
+#' @param summaryType character, type of summary used. Currently supported options are "quantile" and "hdi" (default option). Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
 #' @param centralSummary character, central summary measure used. Currently supported options are "median" (default) and "mean". Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
 #' @param plot logical, should a plot be created? default = TRUE
 #' @param probs numeric, represents either the quantiles to be used during summarization (in the form c(lower, upper)) or the credible mass used to compute the highest density intervals
@@ -712,7 +712,7 @@ str2tpc_fun = function(model){
 
 
 bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
-                             summaryType = 'quantile', centralSummary = 'median',
+                             summaryType = 'hdi', centralSummary = 'median',
                              plot = TRUE, probs = c(.05, .95),
                              burn = 0, plotOnly = FALSE, traitName = 'Trait', ...){
   if (!(summaryType %in% c('hdi', 'quantile')) & summaryOnly) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
@@ -848,7 +848,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
 #' @param TPC list, object output from performing MCMC using the `bTPC` function.
 #' @param Temp_interval vector, reference values to use to compute values of the thermal performance curve. If no vector is provided, Temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1000 equally spaced points
 #' @param summaryOnly logical, should the function return only summaries, or the entire matrix of thermal performance curve posterior predictive samples AND the summaries? default = TRUE
-#' @param summaryType character, type of summary used. Currently supported options are "quantile" (default option) and "hdi". Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
+#' @param summaryType character, type of summary used. Currently supported options are "quantile" and "hdi" (default option). Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
 #' @param centralSummary character, central summary measure used. Currently supported options are "median" (default) and "mean". Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
 #' @param plot logical, should a plot be created? default = TRUE
 #' @param probs numeric, represents either the quantiles to be used during summarization (in the form c(lower, upper)) or the credible mass used to compute the highest density intervals
@@ -868,7 +868,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
 
 
 posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
-                             summaryType = 'quantile', centralSummary = 'median',
+                             summaryType = 'hdi', centralSummary = 'median',
                              plot = TRUE, probs = c(.05, .95),
                              burn = 0, plotOnly = FALSE, traitName = 'Trait', seed = NULL, ...){
   if (!(summaryType %in% c('hdi', 'quantile')) & summaryOnly) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
@@ -901,7 +901,7 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   max.ind = nrow(TPC$samples)
   if (!is.null(seed)) set.seed(seed)
   post_pred_samples = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, posteriorPredictive = TRUE, ...)
-
+  tpc_ev = rowMeans2(apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, posteriorPredictive = FALSE, ...))
   if (centralSummary == 'median'){
     if (summaryType == 'quantile'){
       upper_bounds = rowQuantiles(post_pred_samples, probs = probs[2])
@@ -915,8 +915,9 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       medians = rowMedians(post_pred_samples)
     }
     if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', lty = 2, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$data$Trait))))
-      points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
+      plot(Temp_interval, upper_bounds, type = 'l', lty = 3, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$data$Trait))))
+      points(Temp_interval, tpc_ev, col = 'red', type = 'l', lty = 2, lwd = 1.1)
+      points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 3)
       points(Temp_interval, medians, type = 'l', col = 'blue')
       points(TPC$data$data$Temp, TPC$data$data$Trait)
       if (plotOnly){
@@ -927,12 +928,14 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                       Temp_interval = Temp_interval,
                       Upper_bounds = upper_bounds,
                       Lower_bounds = lower_bounds,
-                      Medians = medians))
+                      Medians = medians,
+                      TPC_mean = tpc_ev))
         } else{
           return(list(Temp_interval = Temp_interval,
                       Upper_bounds = upper_bounds,
                       Lower_bounds = lower_bounds,
-                      Medians = medians))
+                      Medians = medians,
+                      TPC_mean = tpc_ev))
         }
       }
     } else{
@@ -941,12 +944,14 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                     Temp_interval = Temp_interval,
                     Upper_bounds = upper_bounds,
                     Lower_bounds = lower_bounds,
-                    Medians = medians))
+                    Medians = medians,
+                    TPC_mean = tpc_ev))
       } else{
         return(list(Temp_interval = Temp_interval,
                     Upper_bounds = upper_bounds,
                     Lower_bounds = lower_bounds,
-                    Medians = medians))
+                    Medians = medians,
+                    TPC_mean = tpc_ev))
       }
     }
   }
@@ -963,9 +968,12 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       means = rowMeans2(post_pred_samples)
     }
     if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 2, xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$data$Trait))))
-      points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
+      plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 3, xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$data$Trait))))
+      points(Temp_interval, tpc_ev, col = 'red', type = 'l', lty = 2, lwd = 1.1)
+      points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 3)
       points(Temp_interval, means, type = 'l', col = 'blue')
+      points(TPC$data$data$Temp, TPC$data$data$Trait)
+
       if (plotOnly){
         return(invisible(NULL))
       } else{
@@ -974,12 +982,14 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                       Temp_interval = Temp_interval,
                       Upper_bounds = upper_bounds,
                       Lower_bounds = lower_bounds,
-                      Means = means))
+                      Means = means,
+                      TPC_mean = tpc_ev))
         } else{
           return(list(Temp_interval = Temp_interval,
                       Upper_bounds = upper_bounds,
                       Lower_bounds = lower_bounds,
-                      Means = means))
+                      Means = means,
+                      TPC_mean = tpc_ev))
         }
       }
     } else{
@@ -988,12 +998,14 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                     Temp_interval = Temp_interval,
                     Upper_bounds = upper_bounds,
                     Lower_bounds = lower_bounds,
-                    Means = means))
+                    Means = means,
+                    TPC_mean = tpc_ev))
       } else{
         return(list(Temp_interval = Temp_interval,
                     Upper_bounds = upper_bounds,
                     Lower_bounds = lower_bounds,
-                    Means = means))
+                    Means = means,
+                    TPC_mean = tpc_ev))
       }
     }
   }

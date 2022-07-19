@@ -8,7 +8,7 @@ posteriorPredTPC(
   TPC,
   Temp_interval = NULL,
   summaryOnly = TRUE,
-  summaryType = "quantile",
+  summaryType = "hdi",
   centralSummary = "median",
   plot = TRUE,
   probs = c(0.05, 0.95),
@@ -26,7 +26,7 @@ posteriorPredTPC(
 
 \item{summaryOnly}{logical, should the function return only summaries, or the entire matrix of thermal performance curve posterior predictive samples AND the summaries? default = TRUE}
 
-\item{summaryType}{character, type of summary used. Currently supported options are "quantile" (default option) and "hdi". Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.}
+\item{summaryType}{character, type of summary used. Currently supported options are "quantile" and "hdi" (default option). Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.}
 
 \item{centralSummary}{character, central summary measure used. Currently supported options are "median" (default) and "mean". Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.}
 
