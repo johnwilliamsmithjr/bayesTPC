@@ -224,6 +224,7 @@ bTPC <- function(data, model, priors = NULL, samplerType = 'RW',
     mcmcConfig$removeSamplers(names(defaultPriors(model)))
     mcmcConfig$addSampler(names(defaultPriors(model)), type = samplerType)
   }
+  mcmcConfig$enableWAIC = TRUE
   mcmc <- buildMCMC(mcmcConfig)
   tpc_mcmc <- compileNimble(mcmc, project = nimTPCmod)
   tpc_mcmc$run(niter, ...)
@@ -231,7 +232,7 @@ bTPC <- function(data, model, priors = NULL, samplerType = 'RW',
 
 
   #tpc_mcmc = nimbleMCMC(model = nimTPCmod_compiled, niter = 10000)
-  return(list(samples = samples, model = nimTPCmod_compiled, data = data.nimble, modelType = model))
+  return(list(samples = samples, model = tpc_mcmc, data = data.nimble, modelType = model))
 }
 
 #' Evaluate Ratkowsky model
