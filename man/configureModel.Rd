@@ -7,7 +7,7 @@
 configureModel(model, priors = NULL, verbose = TRUE)
 }
 \arguments{
-\item{model}{character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski" and "ratkowsky".}
+\item{model}{character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski","ratkowsky", "stinner".}
 
 \item{priors}{list, optional input specifying prior distributions for parameters (default = NULL). Elements of the list should correspond to model parameters, and written using nimble logic. For parameters not specified in the list, default priors are used.}
 

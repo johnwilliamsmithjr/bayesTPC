@@ -3,7 +3,7 @@
 #' Retrieve default prior choices for a given thermal performance curve model
 #'
 #' @details This function returns the default prior choices for the parameters of the thermal performance curve model that is passed as an input argument
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", and "ratkowsky".
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky", and "stinner".
 #'
 #' @return list, named list detailing the default prior distributions for each parameter of the model
 #' @examples
@@ -52,8 +52,14 @@ defaultPriors <- function(model){
               T.min = 'T.min ~ dunif(0, 25)',
               T.max = 'T.max ~ dunif(25, 70)',
               sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
+  } else if (model == 'stinner'){
+    p <- list(C = 'C ~ dunif(0, 1000)',
+              k1 = 'k1 ~ dunif(0, 100)',
+              k2 = 'k2 ~ dunif(0, 100)',
+              T.opt = 'T.opt ~ dunif(15, 70)',
+              sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
   } else{
-    stop('Model type not currently supported. Options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", and "lactin2".')
+    stop('Model type not currently supported. Options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "ratkowsky", "kamykowski", and "stinner".')
   }
   return(p)
 }
@@ -91,8 +97,10 @@ defaultModel <- function(model){
     model_string = paste0('{\n    for (i in 1:N){\n    ', '        Trait[i] ~ T(dnorm(mean = step(Temp[i] - T.min)*step(T.max - Temp[i])*a*(1 - exp(-b*(Temp[i] - T.min)))*(1 - exp(-c*(T.max - Temp[i]))), var = sigma.sq), 0, )\n    }\n')
   } else if (model == 'ratkowsky'){
     model_string = paste0('{\n    for (i in 1:N){\n    ', '        Trait[i] ~ T(dnorm(mean = step(Temp[i] - T.min)*step(T.max - Temp[i])*((a*(Temp[i] - T.min))*(1 - exp(b*(Temp[i] - T.max))))^2, var = sigma.sq), 0, )\n    }\n')
+  } else if (model == 'stinner'){
+    model_string = paste0('{\n    for (i in 1:N){\n    ', '        Trait[i] ~ T(dnorm(mean = C / (1 + exp(k1 + k2*(T.opt - abs(T.opt - Temp[i])))), var = sigma.sq), 0, )\n    }\n')
   } else{
-    stop("Argument for 'model' not currently supported. Current options include: quadratic, briere, weibull, gaussian, pawar-shsch, lactin2, ratkowsky")
+    stop("Argument for 'model' not currently supported. Current options include: quadratic, briere, weibull, gaussian, pawar-shsch, lactin2, ratkowsky, stinner")
   }
   return(model_string)
 }
@@ -102,7 +110,7 @@ defaultModel <- function(model){
 #' Create model string for thermal performance curve model to be passed to nimble
 #'
 #' @details This function returns a character string of the full `nimble` model for a user-specified thermal performance curve and prior distributions
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski" and "ratkowsky".
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski","ratkowsky", "stinner".
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL). Elements of the list should correspond to model parameters, and written using nimble logic. For parameters not specified in the list, default priors are used.
 #' @param verbose logical, optional input. If verbose = TRUE, messages are printed when for priors that deviate from the defaultPriors(model) (see ?defaultPriors for additional information). Default = TRUE
 #' @return character, character string specifying the default model formulation to be passed to `nimble`.
@@ -117,7 +125,7 @@ defaultModel <- function(model){
 
 configureModel <- function(model, priors = NULL, verbose = TRUE){
   ## checks if model type is supported
-  if (!(model %in% c('quadratic', 'briere', 'weibull', 'gaussian', 'pawar-shsch', 'lactin2', 'kamykowski', 'ratkowsky'))) stop('Model choice not currently supported')
+  if (!(model %in% c('quadratic', 'briere', 'weibull', 'gaussian', 'pawar-shsch', 'lactin2', 'kamykowski', 'ratkowsky', 'stinner'))) stop('Model choice not currently supported')
   ## makes sure prior information has correct types and classes
   if (!is.null(priors)){
     if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
@@ -180,7 +188,7 @@ checkData <- function(data){
 #'
 #' @details This function returns a list, containing entries: `samples` - object of class `mcmc.list` containing posterior samples of parameters for corresponding model; `model` - object of class `nimbleModel` containing `nimble` model object corresponding to model being fit; `data` - object of class `list` containing trait and temperature data and number of observations (N); `modelType` - object of class `character` containing the type of thermal performance curve being fit.
 #' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve) and "Temp" (corresponding to the temperature in Celcius that the trait is being measured at).
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski" and "ratkowsky".
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky" and "stinner".
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL). Elements of the list should correspond to model parameters, and written using nimble logic. For parameters not specified in the list, default priors are used.
 #' @param samplerType character string, specifying the sampling method used during the MCMC. Currently, supported options are Random Walk Metropolis (samplerType = 'RW'), Blocked Random Walk Metropolis (samplerType = 'RW_block'), Automated Factor Slice Sampling (samplerType = 'AF_slice'), and Slice sampling (samplerType = 'slice')
 #' @param niter integer, number of MCMC iterations to perform (default is niter = 10000)
@@ -203,26 +211,42 @@ bTPC <- function(data, model, priors = NULL, samplerType = 'RW',
   const.list = vector('list', 0)
   const.list$N = data.nimble$N
 
+  if (is.null(constant_list)){
+    if (model == 'pawar-shsch'){
+      warning("Constant list not found for model = 'pawar-shsch'. Setting default value for parameter T.ref to 20.\n")
+      constant_list = list(T.ref = 20)
+    }
+  }
+
   if(!is.null(constant_list)){
     if (!is.list(constant_list)){
-      stop('If constants are provided, they must be formatted as a list')
+      stop('If constants are provided, they must be formatted as a list\n')
+    }
+    if (model == 'pawar-shsch'){
+      if (!('T.ref' %in% names(constant_list))){
+        warning("Constant list not found for model = 'pawar-shsch'. Setting default value for parameter T.ref to 20.\n")
+        constant_list$T.ref = 20
+      }
     }
     for (i in names(constant_list)){
       const.list[i] = constant_list[i]
     }
   }
-  #print(const.list)
-  #print(inits)
-  #print('Starting nimble comp')
   nimTPCmod = nimbleModel(str2expression(modelStr), constants = const.list,
                           data = data.nimble$data, inits = inits)
   #nimTPCmod = initializeModel(nimTPCmod)
   nimTPCmod_compiled = compileNimble(nimTPCmod)
 
   mcmcConfig <- configureMCMC(nimTPCmod)
-  if (samplerType != 'RW'){
+  if (samplerType != 'RW' & samplerType != 'slice'){
     mcmcConfig$removeSamplers(names(defaultPriors(model)))
     mcmcConfig$addSampler(names(defaultPriors(model)), type = samplerType)
+  }
+  if (samplerType == 'slice'){
+    for (i in names(defaultPriors(model))){
+      mcmcConfig$removeSamplers(i)
+      mcmcConfig$addSampler(i, type = samplerType)
+    }
   }
   mcmcConfig$enableWAIC = TRUE
   mcmc <- buildMCMC(mcmcConfig)
@@ -230,9 +254,17 @@ bTPC <- function(data, model, priors = NULL, samplerType = 'RW',
   tpc_mcmc$run(niter, ...)
   samples = as.mcmc(as.matrix(tpc_mcmc$mvSamples))
 
-
+  dp <- defaultPriors(model)
+  prior_list = list()
+  for (i in 1:length(names(dp))){
+    if (names(dp)[i] %in% names(priors)){
+      prior_list[names(dp)[i]] = priors[names(dp)[i]]
+    } else{
+      prior_list[names(dp)[i]] = dp[names(dp)[i]]
+    }
+  }
   #tpc_mcmc = nimbleMCMC(model = nimTPCmod_compiled, niter = 10000)
-  return(list(samples = samples, model = tpc_mcmc, data = data.nimble, modelType = model))
+  return(list(samples = samples, model = tpc_mcmc, data = data.nimble, modelType = model, priors = prior_list))
 }
 
 #' Evaluate Ratkowsky model
@@ -292,6 +324,67 @@ ratkowsky_tpc <- function(params, Temp, posteriorPredictive = FALSE){
     curve = (Temp > T.min)*(T.max > Temp)*((a*(Temp - T.min))*(1 - exp(b*(Temp - T.max))))^2
   } else{
     truncmeans = (Temp > T.min)*(T.max > Temp)*((a*(Temp - T.min))*(1 - exp(b*(Temp - T.max))))^2
+    curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
+  }
+  return(curve)
+}
+
+#' Evaluate Stinner model
+#'
+#' Evaluate Stinner model for thermal performance for a given parameter set
+#'
+#' @details This function returns a numeric vector of evaluations of the Stinner thermal performance curve for a reference set `Temp`
+#' @param params named vector, with entries `C`, `k1`, `k2`, `T.opt`. If posteriorPredictive = TRUE, `sigma.sq` must also be present.
+#' @param Temp numeric vector, set of temperature values to evaluate the Stinner model at
+#' @param posteriorPredictive logical, should posterior predictive samples be generated instead of evaluating the deterministic Stinner model. default = FALSE.
+#' @return numeric vector, where entry `k` represents either the value of the Stinner model at `Temp[k]` for the given vector `params` (posteriorPredictive = FALSE), or a sigle draw from the posterior predictive distribution of the Stinner model at `Temp[k]` for the given vector `params` (posteriorPredictive = TRUE)
+#' @examples
+#' ## set params and reference temperature set
+#' param_set = c(T.max = 47, T.min = 10, a = .06, b = .5)
+#' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
+#' plot(Temp_ref, ratkowsky_tpc(params = param_set, Temp = Temp_ref), type = 'l')
+
+stinner_tpc <- function(params, Temp, posteriorPredictive = FALSE){
+  if (!is.logical(posteriorPredictive)) stop('posteriorPredictive argument must be supplied as a logical (= TRUE or = FALSE)')
+  if (is.null(names(params))) stop('Error in call to function stinner_tpc. param input must be named.')
+  if (!is.vector(params)){
+    warning('Expected params input to be a vector. Attempting to convert to vector')
+    params = as.vector(params)
+  }
+  if (!('C' %in% names(params))){
+    stop('Parameter vector is expected to be a named vector with element "C"')
+  } else{
+    if (!is.numeric(params['C'])) stop('Value for params["C"] is non-numeric')
+    C = params['C']
+  }
+  if (!('k1' %in% names(params))){
+    stop('Parameter vector is expected to be a named vector with element "k1"')
+  } else{
+    if (!is.numeric(params['k1'])) stop('Value for params["k1"] is non-numeric')
+    k1 = params['k1']
+  }
+  if (!('T.opt' %in% names(params))){
+    stop('Parameter vector is expected to be a named vector with element "T.opt"')
+  } else{
+    if (!is.numeric(params['T.opt'])) stop('Value for params["T.opt"] is non-numeric')
+    T.opt = params['T.opt']
+  }
+  if (!('k2' %in% names(params))){
+    stop('Parameter vector is expected to be a named vector with element "k2"')
+  } else{
+    if (!is.numeric(params['k2'])) stop('Value for params["k2"] is non-numeric')
+    k2 = params['k2']
+  }
+  if (!('sigma.sq' %in% names(params)) && posteriorPredictive == TRUE){
+    stop('Parameter vector is expected to be a named vector with element "sigma.sq"')
+  } else{
+    if (!is.numeric(params['sigma.sq'])) stop('Value for params["sigma.sq"] is non-numeric')
+    sigma.sq = params['sigma.sq']
+  }
+  if (posteriorPredictive == FALSE){
+    curve = C / (1 + exp(k1 + k2*(T.opt - abs(T.opt - Temp))))
+  } else{
+    truncmeans = C / (1 + exp(k1 + k2*(T.opt - abs(T.opt - Temp))))
     curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
   }
   return(curve)
@@ -662,7 +755,7 @@ gauss_tpc <- function(params, Temp, posteriorPredictive = FALSE){
 #' Extract thermal performance curve function from model string used to specify type of model to fit
 #'
 #' @details This function returns a function that can be used to evaluate a thermal performance for a model. Designed to be called internally by `posteriorPredTPC()` and `bayesTPC_summary()`. Not recommended to be called directly, though it is possible (see examples)
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski" and "ratkowsky".
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky" and "stinner".
 #' @return function handle, corresponding to function used to evaluate the thermal performance curve for a given `model` input
 #' @examples
 #' ## set params and reference temperature set
@@ -673,7 +766,7 @@ gauss_tpc <- function(params, Temp, posteriorPredictive = FALSE){
 
 str2tpc_fun = function(model){
   ## check if model type is supported
-  if (!(model %in% c('quadratic', 'briere', 'weibull', 'gaussian', 'pawar-shsch', 'lactin2', 'kamykowski', 'ratkowsky'))) stop('Model choice not currently supported')
+  if (!(model %in% c('quadratic', 'briere', 'weibull', 'gaussian', 'pawar-shsch', 'lactin2', 'kamykowski', 'ratkowsky', 'stinner'))) stop('Model choice not currently supported')
   ## if it is, assign the appropriate function
   if (model == 'lactin2') stop('lactin2 is currently under construction')
   if (model == 'quadratic') fun = quadratic_tpc
@@ -683,6 +776,7 @@ str2tpc_fun = function(model){
   if (model == 'pawar-shsch') fun = pawar_shsch_tpc
   if (model == 'kamykowski') fun = kamykowski_tpc
   if (model == 'ratkowsky') fun = ratkowsky_tpc
+  if (model == 'stinner') fun = stinner_tpc
   return(fun)
 }
 
@@ -1091,4 +1185,35 @@ bayesTPC.ipairs <- function(x, burn = 0, thin = 1,
     ipairs(samples[thinned,], ztransf = ztransf, ...)
   }
   return(invisible(NULL))
+}
+
+#' Prior-Posterior Overlap Plot
+#'
+#' Create a prior-posterior overlap plot from output of the bTPC function
+#'
+#' @details This is a wrapper to create trace plots using coda's `traceplot` function.
+#' @param bTPC.object List, usually output from the `bTPC` function. `ppo_plot` expects this list to have entries "samples", of class `mcmc` or `numeric` and "priors", with class `list` and entries that match the corresponding model parameters
+#' @param burn Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot (default = 0)
+#' @return Returns invisible(NULL) and creates a prior posterior overlap plot
+#' @examples
+#' ## need data to set up example here. placeholder for now
+#' ## set params and reference temperature set
+#' myfun = str2tpc_fun(model = 'gaussian')
+#' param_set = c(T.opt = 36, a = 6.5, rmax = 2.75)
+#' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
+#' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
+
+ppo_plot <- function(bTPC.object, burn = 0){
+  if (!is.list(bTPC.object)) stop('Expected input bTPC.object to be a list')
+  if (is.null(bTPC.object$samples)) stop('Expected input bTPC.object to have an entry called "samples"')
+  if (is.null(bTPC.object$priors)) stop('Expected input bTPC.object to have an entry called "priors"')
+  for (i in colnames(bTPC.object$samples)){
+    par_samples <- as.numeric(bTPC.object$samples[(burn+1):(nrow(bTPC.object$samples)),i])
+    #print(strsplit(bTPC.object$priors[i], '~')[[1]][2])
+    prior_exp = strsplit(strsplit(as.character(bTPC.object$priors[i]), '~')[[1]][2], '\\(')
+    prior_exp = paste0(prior_exp[[1]][1], '(', 'sort(par_samples),', prior_exp[[1]][2])
+    plot(density(par_samples), type = 'l', col = 'red', lwd = 2, xlab = i,
+         main = paste0('Prior-Posterior Overlap for ', i))
+    points(sort(par_samples), eval(str2expression(prior_exp)), type = 'l', col = 'blue', lwd = 2, lty = 2)
+  }
 }
