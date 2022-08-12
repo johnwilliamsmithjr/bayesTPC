@@ -7,7 +7,7 @@
 str2tpc_fun(model)
 }
 \arguments{
-\item{model}{character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky" and "stinner".}
+\item{model}{character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky", "binomial_glm_lin", "binomial_glm_quad",  and "stinner".}
 }
 \value{
 function handle, corresponding to function used to evaluate the thermal performance curve for a given `model` input

@@ -3,7 +3,7 @@
 #' Retrieve default prior choices for a given thermal performance curve model
 #'
 #' @details This function returns the default prior choices for the parameters of the thermal performance curve model that is passed as an input argument
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky", and "stinner".
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky", "binomial_glm_lin", "binomial_glm_quad",  and "stinner".
 #'
 #' @return list, named list detailing the default prior distributions for each parameter of the model
 #' @examples
@@ -54,12 +54,19 @@ defaultPriors <- function(model){
               sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
   } else if (model == 'stinner'){
     p <- list(C = 'C ~ dunif(0, 1000)',
-              k1 = 'k1 ~ dunif(0, 100)',
-              k2 = 'k2 ~ dunif(0, 100)',
+              k1 = 'k1 ~ dunif(-100, 100)',
+              k2 = 'k2 ~ dunif(-10, 10)',
               T.opt = 'T.opt ~ dunif(15, 70)',
               sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
+  } else if (model == 'binomial_glm_lin'){
+    p <- list(B0 = 'B0 ~ dnorm(0, var = 250000)',
+              B1 = 'B1 ~ dnorm(0, var = 250000)')
+  } else if (model == 'binomial_glm_quad'){
+    p <- list(B0 = 'B0 ~ dnorm(0, var = 250000)',
+              B1 = 'B1 ~ dnorm(0, var = 250000)',
+              B2 = 'B2 ~ dnorm(0, var = 250000)')
   } else{
-    stop('Model type not currently supported. Options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "ratkowsky", "kamykowski", and "stinner".')
+    stop('Model type not currently supported. Options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "ratkowsky", "kamykowski", "binomial_glm_lin", "binomial_glm_quad",  and "stinner".')
   }
   return(p)
 }
@@ -69,7 +76,7 @@ defaultPriors <- function(model){
 #' Retrieve default model formulation for a given thermal performance curve model
 #'
 #' @details This function returns a character string of the `nimble` likelihood model for a user-specified thermal performance curve
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", and "ratkowsky".
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky", "binomial_glm_lin", "binomial_glm_quad", and "stinner".
 #'
 #' @return character, character string specifying the default likelihood model formulation to be passed to `nimble`
 #' @examples
@@ -99,8 +106,12 @@ defaultModel <- function(model){
     model_string = paste0('{\n    for (i in 1:N){\n    ', '        Trait[i] ~ T(dnorm(mean = step(Temp[i] - T.min)*step(T.max - Temp[i])*((a*(Temp[i] - T.min))*(1 - exp(b*(Temp[i] - T.max))))^2, var = sigma.sq), 0, )\n    }\n')
   } else if (model == 'stinner'){
     model_string = paste0('{\n    for (i in 1:N){\n    ', '        Trait[i] ~ T(dnorm(mean = C / (1 + exp(k1 + k2*(T.opt - abs(T.opt - Temp[i])))), var = sigma.sq), 0, )\n    }\n')
+  } else if (model == 'binomial_glm_lin'){
+    model_string = paste0('{\n    for (i in 1:N){\n    ', '        Trait[i] ~ dbinom(p[i], n[i])\n            logit(p[i]) <- B0 + B1*Temp[i] \n    }\n')
+  } else if (model == 'binomial_glm_quad'){
+    model_string = paste0('{\n    for (i in 1:N){\n    ', '        Trait[i] ~ dbinom(p[i], n[i])\n            logit(p[i]) <- B0 + B1*Temp[i] + B2*(Temp[i])^2 \n    }\n')
   } else{
-    stop("Argument for 'model' not currently supported. Current options include: quadratic, briere, weibull, gaussian, pawar-shsch, lactin2, ratkowsky, stinner")
+    stop("Argument for 'model' not currently supported. Current options include: quadratic, briere, weibull, gaussian, pawar-shsch, lactin2, ratkowsky, stinner, binomial_glm_lin, binomial_glm_quad")
   }
   return(model_string)
 }
@@ -110,7 +121,7 @@ defaultModel <- function(model){
 #' Create model string for thermal performance curve model to be passed to nimble
 #'
 #' @details This function returns a character string of the full `nimble` model for a user-specified thermal performance curve and prior distributions
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski","ratkowsky", "stinner".
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski","ratkowsky", "stinner", "binomial_glm_lin", "binomial_glm_quad".
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL). Elements of the list should correspond to model parameters, and written using nimble logic. For parameters not specified in the list, default priors are used.
 #' @param verbose logical, optional input. If verbose = TRUE, messages are printed when for priors that deviate from the defaultPriors(model) (see ?defaultPriors for additional information). Default = TRUE
 #' @return character, character string specifying the default model formulation to be passed to `nimble`.
@@ -125,7 +136,7 @@ defaultModel <- function(model){
 
 configureModel <- function(model, priors = NULL, verbose = TRUE){
   ## checks if model type is supported
-  if (!(model %in% c('quadratic', 'briere', 'weibull', 'gaussian', 'pawar-shsch', 'lactin2', 'kamykowski', 'ratkowsky', 'stinner'))) stop('Model choice not currently supported')
+  if (!(model %in% c('binomial_glm_lin', 'binomial_glm_quad', 'quadratic', 'briere', 'weibull', 'gaussian', 'pawar-shsch', 'lactin2', 'kamykowski', 'ratkowsky', 'stinner', "binomial_glm_lin", "binomial_glm_quad"))) stop('Model choice not currently supported')
   ## makes sure prior information has correct types and classes
   if (!is.null(priors)){
     if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
@@ -188,7 +199,7 @@ checkData <- function(data){
 #'
 #' @details This function returns a list, containing entries: `samples` - object of class `mcmc.list` containing posterior samples of parameters for corresponding model; `model` - object of class `nimbleModel` containing `nimble` model object corresponding to model being fit; `data` - object of class `list` containing trait and temperature data and number of observations (N); `modelType` - object of class `character` containing the type of thermal performance curve being fit.
 #' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve) and "Temp" (corresponding to the temperature in Celcius that the trait is being measured at).
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky" and "stinner".
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky", "binomial_glm_lin", "binomial_glm_quad", and "stinner".
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL). Elements of the list should correspond to model parameters, and written using nimble logic. For parameters not specified in the list, default priors are used.
 #' @param samplerType character string, specifying the sampling method used during the MCMC. Currently, supported options are Random Walk Metropolis (samplerType = 'RW'), Blocked Random Walk Metropolis (samplerType = 'RW_block'), Automated Factor Slice Sampling (samplerType = 'AF_slice'), and Slice sampling (samplerType = 'slice')
 #' @param niter integer, number of MCMC iterations to perform (default is niter = 10000)
@@ -210,6 +221,11 @@ bTPC <- function(data, model, priors = NULL, samplerType = 'RW',
 
   const.list = vector('list', 0)
   const.list$N = data.nimble$N
+
+  if (model %in% c('binomial_glm_lin', 'binomial_glm_quad')){
+    if (is.null(unlist(data['n']))) stop("For a Binomial GLM, data list must have a variable called 'n'. Perhaps check spelling and capitalization?")
+    #const.list$n = unlist(data['n'])
+  }
 
   if (is.null(constant_list)){
     if (model == 'pawar-shsch'){
@@ -755,7 +771,7 @@ gauss_tpc <- function(params, Temp, posteriorPredictive = FALSE){
 #' Extract thermal performance curve function from model string used to specify type of model to fit
 #'
 #' @details This function returns a function that can be used to evaluate a thermal performance for a model. Designed to be called internally by `posteriorPredTPC()` and `bayesTPC_summary()`. Not recommended to be called directly, though it is possible (see examples)
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky" and "stinner".
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky", "binomial_glm_lin", "binomial_glm_quad",  and "stinner".
 #' @return function handle, corresponding to function used to evaluate the thermal performance curve for a given `model` input
 #' @examples
 #' ## set params and reference temperature set
@@ -766,7 +782,7 @@ gauss_tpc <- function(params, Temp, posteriorPredictive = FALSE){
 
 str2tpc_fun = function(model){
   ## check if model type is supported
-  if (!(model %in% c('quadratic', 'briere', 'weibull', 'gaussian', 'pawar-shsch', 'lactin2', 'kamykowski', 'ratkowsky', 'stinner'))) stop('Model choice not currently supported')
+  if (!(model %in% c('quadratic', 'briere', 'weibull', 'gaussian', 'pawar-shsch', 'lactin2', 'kamykowski', 'ratkowsky', 'stinner', "binomial_glm_lin", "binomial_glm_quad"))) stop('Model choice not currently supported')
   ## if it is, assign the appropriate function
   if (model == 'lactin2') stop('lactin2 is currently under construction')
   if (model == 'quadratic') fun = quadratic_tpc
@@ -1217,3 +1233,49 @@ ppo_plot <- function(bTPC.object, burn = 0){
     points(sort(par_samples), eval(str2expression(prior_exp)), type = 'l', col = 'blue', lwd = 2, lty = 2)
   }
 }
+
+#' Thermal performance data on fecundity for
+#'
+#' Data from a QTL experiment on gravitropism in
+#' Arabidopsis, with data on 162 recombinant inbred lines (Ler x
+#' Cvi). The outcome is the root tip angle (in degrees) at two-minute
+#' increments over eight hours.
+#'
+#' @docType data
+#'
+#' @usage data("fecundity_tpc")
+#'
+#' @format An object of class \code{"cross"}; see \code{\link[qtl]{read.cross}}.
+#'
+#' @keywords datasets
+#'
+#' @references Reference here
+#'
+#'
+#' @source reference here
+#'
+#' @examples
+#' data(grav)
+
+#' Thermal performance data on longevity for
+#'
+#' Data from a QTL experiment on gravitropism in
+#' Arabidopsis, with data on 162 recombinant inbred lines (Ler x
+#' Cvi). The outcome is the root tip angle (in degrees) at two-minute
+#' increments over eight hours.
+#'
+#' @docType data
+#'
+#' @usage data('longevity_tpc')
+#'
+#' @format An object of class \code{"cross"}; see \code{\link[qtl]{read.cross}}.
+#'
+#' @keywords datasets
+#'
+#' @references Reference here
+#'
+#'
+#' @source reference here
+#'
+#' @examples
+#' data(grav)
