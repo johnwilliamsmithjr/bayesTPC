@@ -9,17 +9,26 @@
 #' @return list, input params coerced as a vector, if necessary
 
 checkParams <- function(model, params, posteriorPredictive){
+  #having an external function call in our model evaluation
+  #might cause issues, but we can use an error handling wrapper
+  #that calls the nimble function, probably
   if (!is.logical(posteriorPredictive)) stop('posteriorPredictive argument must be supplied as a logical (= TRUE or = FALSE)')
   if (is.null(names(params))) stop('Error in call to tpc evaluation function. param input must be named.')
-  if (!all(is.numeric(params))) stop("All parameter values must be numeric.")
+  if (!all(sapply(params, is.numeric))) stop("All parameter values must be numeric.")
   priorNames <- names(defaultPriors(model))
-  if (!all(priorNames %in% params)){
-    missingpriors <- paste(priorNames[!(priorNames %in% params)], collapse = " ")
+  priorNames <- priorNames[priorNames != "sigma.sq"]
+  if (!all(priorNames %in% names(params))){
+    missingpriors <- paste(priorNames[!(priorNames %in% names(params))], collapse = " ")
     stop(paste("Missing model parameters: ", missingpriors))
   }
   if (!is.vector(params)){
-    warning('Expected params input to be a vector. Attempting to convert to vector')
-    params = as.vector(params)
+    warning('Expected params input to be a named vector. Attempting to convert to vector')
+    params <- tryCatch({
+      as.vector(params)
+    },
+    error = function(e){ #custom error message
+    stop("Params input unable to be coerced to a vector.")
+    })
   }
 
   if (posteriorPredictive && !('sigma.sq' %in% names(params))){

@@ -16,10 +16,10 @@
 
 ratkowsky_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   params = checkParams('ratkowsky', params, posteriorPredictive)
-  a = params['a']
-  b = params['b']
-  T.min = params['T.min']
-  T.max = params['T.max']
+  a = params[['a']]
+  b = params[['b']]
+  T.min = params[['T.min']]
+  T.max = params[['T.max']]
 
   if (posteriorPredictive == FALSE){
     curve = (Temp > T.min)*(T.max > Temp)*((a*(Temp - T.min))*(1 - exp(b*(Temp - T.max))))^2
@@ -49,10 +49,10 @@ ratkowsky_tpc <- function(params, Temp, posteriorPredictive = FALSE){
 
 stinner_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   params = checkParams('stinner',params, posteriorPredictive)
-  C = params['C']
-  k1 = params['k1']
-  k2 = params['k2']
-  T.opt = params['T.opt']
+  C = params[['C']]
+  k1 = params[['k1']]
+  k2 = params[['k2']]
+  T.opt = params[['T.opt']]
 
   if (posteriorPredictive == FALSE){
     curve = C / (1 + exp(k1 + k2*(T.opt - abs(T.opt - Temp))))
@@ -83,11 +83,11 @@ stinner_tpc <- function(params, Temp, posteriorPredictive = FALSE){
 
 kamykowski_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   params = checkParams('kamykowski', params, posteriorPredictive)
-  a = params['a']
-  b = params['b']
-  c = params['c']
-  T.min = params['T.min']
-  T.max = params['T.max']
+  a = params[['a']]
+  b = params[['b']]
+  c = params[['c']]
+  T.min = params[['T.min']]
+  T.max = params[['T.max']]
 
   if (posteriorPredictive == FALSE){
     curve = (Temp > T.min)*(T.max > Temp)*a*(1 - exp(-b*(Temp - T.min)))*(1 - exp(-c*(T.max - Temp)))
@@ -119,10 +119,10 @@ kamykowski_tpc <- function(params, Temp, posteriorPredictive = FALSE){
 
 pawar_shsch_tpc <- function(params, Temp, T.ref, posteriorPredictive = FALSE){
   params = checkParams('pawar-shsch', params, posteriorPredictive)
-  T.opt = params['T.opt']
-  e = params['e']
-  e_h = params['e_h']
-  r_tref = params['r_tref']
+  T.opt = params[['T.opt']]
+  e = params[['e']]
+  e_h = params[['e_h']]
+  r_tref = params[['r_tref']]
 
   if (posteriorPredictive == FALSE){
     curve = (e_h > e)*r_tref*exp((e/(8.62e-05))*((1/(T.ref+273.15)) - (1/(Temp + 273.15)))) / (1 + (e / (e_h-e)) * exp((e_h/(8.62e-05))*(1/(T.opt + 273.15) - 1/(Temp + 273.15))))
@@ -152,16 +152,16 @@ pawar_shsch_tpc <- function(params, Temp, T.ref, posteriorPredictive = FALSE){
 
 quadratic_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   params = checkParams('quadratic', params, posteriorPredictive)
-  q = params['q']
-  T.min = params['T.min']
-  T.max = params['T.max']
+  q = params[['q']]
+  T.min = params[['T.min']]
+  T.max = params[['T.max']] #exception handling and var assignment
 
   if (posteriorPredictive == FALSE){
-    curve = -q*(Temp - T.min)*(Temp - T.max) * (T.max > Temp) * (Temp > T.min)
+    curve = -1*q*(Temp - T.min)*(Temp - T.max) * (T.max > Temp) * (Temp > T.min)
   } else{
     sigma.sq = params['sigma.sq']
 
-    truncmeans = -q*(Temp - T.min)*(Temp - T.max) * (T.max > Temp) * (Temp > T.min)
+    truncmeans = -1*q*(Temp - T.min)*(Temp - T.max) * (T.max > Temp) * (Temp > T.min)
     curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
   }
   return(curve)
@@ -184,9 +184,9 @@ quadratic_tpc <- function(params, Temp, posteriorPredictive = FALSE){
 
 briere_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   params = checkParams('briere', params, posteriorPredictive)
-  q = params['q']
-  T.min = params['T.min']
-  T.max = params['T.max']
+  q = params[['q']]
+  T.min = params[['T.min']]
+  T.max = params[['T.max']]
 
   if (posteriorPredictive == FALSE){
     curve = q*(Temp - T.min)*sqrt((T.max>Temp)*abs(T.max-Temp)) * (T.max > Temp) * (Temp > T.min)
@@ -216,10 +216,10 @@ briere_tpc <- function(params, Temp, posteriorPredictive = FALSE){
 
 weibull_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   params = checkParams('weibull', params, posteriorPredictive)
-  a = params['a']
-  b = params['b']
-  c = params['c']
-  T.opt = params['T.opt']
+  a = params[['a']]
+  b = params[['b']]
+  c = params[['c']]
+  T.opt = params[['T.opt']]
 
   if (posteriorPredictive == FALSE){
     curve = ((a*(((c-1)/c)^((1-c)/c))*((((Temp-T.opt)/b)+(((c-1)/c)^(1/c)))^(c-1))*(exp(-((((Temp-T.opt)/b)+(((c-1)/c)^(1/c)))^c)+((c-1)/c)))))
@@ -252,9 +252,9 @@ weibull_tpc <- function(params, Temp, posteriorPredictive = FALSE){
 
 gauss_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   params = checkParams('gaussian', params, posteriorPredictive)
-  a = params['a']
-  rmax = params['rmax']
-  T.opt = params['T.opt']
+  a = params[['a']]
+  rmax = params[['rmax']]
+  T.opt = params[['T.opt']]
 
   if (posteriorPredictive == FALSE){
     curve = rmax*exp(-0.5*(abs(Temp - T.opt)/a)^2)
