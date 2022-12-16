@@ -101,12 +101,6 @@ configureModel <- function(model, priors = NULL, verbose = TRUE){
 bTPC <- function(data, model, priors = NULL, samplerType = 'RW',
                  niter = 10000, inits = NULL, burn = 0, constant_list = NULL, ...){
   if (!(samplerType %in% c('RW', 'RW_block', 'AF_slice', 'slice'))) stop('Unsupported option for input samplerType. Currently only RW, RW_block, slice, and AF_slice are supported.')
-  data.nimble = checkData(data)
-  modelStr = configureModel(model = model, priors = priors, ...)
-
-  const.list = vector('list', 0)
-  const.list$N = data.nimble$N
-
   if (model %in% c('binomial_glm_lin', 'binomial_glm_quad')){
     if (is.null(unlist(data['n']))) stop("For a Binomial GLM, data list must have a variable called 'n'. Perhaps check spelling and capitalization?")
     #const.list$n = unlist(data['n'])
@@ -118,8 +112,7 @@ bTPC <- function(data, model, priors = NULL, samplerType = 'RW',
       constant_list = list(T.ref = 20)
     }
   }
-
-  if(!is.null(constant_list)){
+  else{
     if (!is.list(constant_list)){
       stop('If constants are provided, they must be formatted as a list\n')
     }
@@ -133,22 +126,32 @@ bTPC <- function(data, model, priors = NULL, samplerType = 'RW',
       const.list[i] = constant_list[i]
     }
   }
+
+  data.nimble = checkData(data)
+  modelStr = configureModel(model = model, priors = priors, ...)
+
+  const.list = vector('list', 0)
+  const.list$N = data.nimble$N
+
+
   nimTPCmod = nimbleModel(str2expression(modelStr), constants = const.list,
                           data = data.nimble$data, inits = inits)
   #nimTPCmod = initializeModel(nimTPCmod)
   nimTPCmod_compiled = compileNimble(nimTPCmod)
 
   mcmcConfig <- configureMCMC(nimTPCmod)
-  if (samplerType != 'RW' & samplerType != 'slice'){
-    mcmcConfig$removeSamplers(names(defaultPriors(model)))
-    mcmcConfig$addSampler(names(defaultPriors(model)), type = samplerType)
-  }
-  if (samplerType == 'slice'){
+
+  if (samplerType == 'slice'){ #why is this written like this?
     for (i in names(defaultPriors(model))){
       mcmcConfig$removeSamplers(i)
       mcmcConfig$addSampler(i, type = samplerType)
     }
   }
+  else if (samplerType != 'RW'){
+    mcmcConfig$removeSamplers(names(defaultPriors(model)))
+    mcmcConfig$addSampler(names(defaultPriors(model)), type = samplerType)
+  }
+
   mcmcConfig$enableWAIC = TRUE
   mcmc <- buildMCMC(mcmcConfig)
   tpc_mcmc <- compileNimble(mcmc, project = nimTPCmod)
