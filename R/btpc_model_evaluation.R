@@ -24,7 +24,7 @@ ratkowsky_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   if (posteriorPredictive == FALSE){
     curve = (Temp > T.min)*(T.max > Temp)*((a*(Temp - T.min))*(1 - exp(b*(Temp - T.max))))^2
   } else{
-    sigma.sq = params['sigma.sq']
+    sigma.sq = params[['sigma.sq']]
 
     truncmeans = (Temp > T.min)*(T.max > Temp)*((a*(Temp - T.min))*(1 - exp(b*(Temp - T.max))))^2
     curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
@@ -57,7 +57,7 @@ stinner_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   if (posteriorPredictive == FALSE){
     curve = C / (1 + exp(k1 + k2*(T.opt - abs(T.opt - Temp))))
   } else{
-    sigma.sq = params['sigma.sq']
+    sigma.sq = params[['sigma.sq']]
 
     truncmeans = C / (1 + exp(k1 + k2*(T.opt - abs(T.opt - Temp))))
     curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
@@ -92,7 +92,7 @@ kamykowski_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   if (posteriorPredictive == FALSE){
     curve = (Temp > T.min)*(T.max > Temp)*a*(1 - exp(-b*(Temp - T.min)))*(1 - exp(-c*(T.max - Temp)))
   } else{
-    sigma.sq = params['sigma.sq']
+    sigma.sq = params[['sigma.sq']]
 
     truncmeans = (Temp > T.min)*(T.max > Temp)*a*(1 - exp(-b*(Temp - T.min)))*(1 - exp(-c*(T.max - Temp)))
     curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
@@ -127,7 +127,7 @@ pawar_shsch_tpc <- function(params, Temp, T.ref, posteriorPredictive = FALSE){
   if (posteriorPredictive == FALSE){
     curve = (e_h > e)*r_tref*exp((e/(8.62e-05))*((1/(T.ref+273.15)) - (1/(Temp + 273.15)))) / (1 + (e / (e_h-e)) * exp((e_h/(8.62e-05))*(1/(T.opt + 273.15) - 1/(Temp + 273.15))))
   } else{
-    sigma.sq = params['sigma.sq']
+    sigma.sq = params[['sigma.sq']]
 
     truncmeans = (e_h > e)*r_tref*exp((e/(8.62e-05))*((1/(T.ref+273.15)) - (1/(Temp + 273.15)))) / (1 + (e / (e_h-e)) * exp((e_h/(8.62e-05))*(1/(T.opt + 273.15) - 1/(Temp + 273.15))))
     curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
@@ -159,7 +159,7 @@ quadratic_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   if (posteriorPredictive == FALSE){
     curve = -1*q*(Temp - T.min)*(Temp - T.max) * (T.max > Temp) * (Temp > T.min)
   } else{
-    sigma.sq = params['sigma.sq']
+    sigma.sq = params[['sigma.sq']]
 
     truncmeans = -1*q*(Temp - T.min)*(Temp - T.max) * (T.max > Temp) * (Temp > T.min)
     curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
@@ -191,7 +191,7 @@ briere_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   if (posteriorPredictive == FALSE){
     curve = q*(Temp - T.min)*sqrt((T.max>Temp)*abs(T.max-Temp)) * (T.max > Temp) * (Temp > T.min)
   } else{
-    sigma.sq = params['sigma.sq']
+    sigma.sq = params[['sigma.sq']]
 
     truncmeans = q*(Temp - T.min)*sqrt((T.max>Temp)*abs(T.max-Temp)) * (T.max > Temp) * (Temp > T.min)
     curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
@@ -225,7 +225,7 @@ weibull_tpc <- function(params, Temp, posteriorPredictive = FALSE){
     curve = ((a*(((c-1)/c)^((1-c)/c))*((((Temp-T.opt)/b)+(((c-1)/c)^(1/c)))^(c-1))*(exp(-((((Temp-T.opt)/b)+(((c-1)/c)^(1/c)))^c)+((c-1)/c)))))
 
   } else{
-    sigma.sq = params['sigma.sq']
+    sigma.sq = params[['sigma.sq']]
 
     truncmeans = ((a*(((c-1)/c)^((1-c)/c))*((((Temp-T.opt)/b)+(((c-1)/c)^(1/c)))^(c-1))*(exp(-((((Temp-T.opt)/b)+(((c-1)/c)^(1/c)))^c)+((c-1)/c)))))
     curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
@@ -259,7 +259,7 @@ gauss_tpc <- function(params, Temp, posteriorPredictive = FALSE){
   if (posteriorPredictive == FALSE){
     curve = rmax*exp(-0.5*(abs(Temp - T.opt)/a)^2)
   } else{
-    sigma.sq = params['sigma.sq']
+    sigma.sq = params[['sigma.sq']]
 
     truncmeans = rmax*exp(-0.5*(abs(Temp - T.opt)/a)^2)
     curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))

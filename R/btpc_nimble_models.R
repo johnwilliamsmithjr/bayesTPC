@@ -1,4 +1,4 @@
-#' Evaluate Ratkowsky model
+#' Evaluate Ratkowsky model in Nimble
 #'
 #' Evaluate Ratkowsky model for thermal performance for a given parameter set
 #'
@@ -13,21 +13,14 @@
 #' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
 #' plot(Temp_ref, ratkowsky_tpc(params = param_set, Temp = Temp_ref), type = 'l')
 
+ratkowsky_tpc_nimble <-
+  nimbleRcall(prototype = function(params = double(1),
+                                   Temp = double(0),
+                                   posteriorPredictive = logical(0)){},
+              Rfun = 'ratkowsky_tpc',
+              returnType = double(0))
 
-alt_ratkowsky_tpc <- function(a,b,c,T.min,T.max, Temp, posteriorPredictive = FALSE){
-
-  if (posteriorPredictive == FALSE){
-    curve = (Temp > T.min)*(T.max > Temp)*((a*(Temp - T.min))*(1 - exp(b*(Temp - T.max))))^2
-  } else{
-    sigma.sq = params['sigma.sq']
-
-    truncmeans = (Temp > T.min)*(T.max > Temp)*((a*(Temp - T.min))*(1 - exp(b*(Temp - T.max))))^2
-    curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
-  }
-  return(curve)
-}
-
-#' Evaluate Stinner model
+#' Evaluate Stinner model in Nimble
 #'
 #' Evaluate Stinner model for thermal performance for a given parameter set
 #'
@@ -42,20 +35,14 @@ alt_ratkowsky_tpc <- function(a,b,c,T.min,T.max, Temp, posteriorPredictive = FAL
 #' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
 #' plot(Temp_ref, ratkowsky_tpc(params = param_set, Temp = Temp_ref), type = 'l')
 
-alt_stinner_tpc <- function(C,k1,k2,T.opt, Temp, posteriorPredictive = FALSE){
+stinner_tpc_nimble <-
+  nimbleRcall(prototype = function(params = double(1),
+                                   Temp = double(0),
+                                   posteriorPredictive = logical(0)){},
+              Rfun = 'stinner_tpc',
+              returnType = double(0))
 
-  if (posteriorPredictive == FALSE){
-    curve = C / (1 + exp(k1 + k2*(T.opt - abs(T.opt - Temp))))
-  } else{
-    sigma.sq = params['sigma.sq']
-
-    truncmeans = C / (1 + exp(k1 + k2*(T.opt - abs(T.opt - Temp))))
-    curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
-  }
-  return(curve)
-}
-
-#' Evaluate Kamykowski model
+#' Evaluate Kamykowski model in Nimble
 #'
 #' Evaluate Kamykowski model for thermal performance for a given parameter set
 #'
@@ -70,21 +57,14 @@ alt_stinner_tpc <- function(C,k1,k2,T.opt, Temp, posteriorPredictive = FALSE){
 #' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
 #' plot(Temp_ref, kamykowski_tpc(params = param_set, Temp = Temp_ref), type = 'l')
 
+kamykowski_tpc_nimble <-
+  nimbleRcall(prototype = function(params = double(1),
+                                   Temp = double(0),
+                                   posteriorPredictive = logical(0)){},
+              Rfun = 'kamykowski_tpc',
+              returnType = double(0))
 
-alt_kamykowski_tpc <- function(a,b,c,T.min,T.max, Temp, posteriorPredictive = FALSE){
-
-  if (posteriorPredictive == FALSE){
-    curve = (Temp > T.min)*(T.max > Temp)*a*(1 - exp(-b*(Temp - T.min)))*(1 - exp(-c*(T.max - Temp)))
-  } else{
-    sigma.sq = params['sigma.sq']
-
-    truncmeans = (Temp > T.min)*(T.max > Temp)*a*(1 - exp(-b*(Temp - T.min)))*(1 - exp(-c*(T.max - Temp)))
-    curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
-  }
-  return(curve)
-}
-
-#' Evaluate Schoolfield-Sharpe model
+#' Evaluate Schoolfield-Sharpe model in Nimble
 #'
 #' Evaluate Schoolfield-Sharpe model for thermal performance for a given parameter set using the Schoolfield-Sharpe formulation from Kontopoulos et al, 2018
 #'
@@ -100,19 +80,12 @@ alt_kamykowski_tpc <- function(a,b,c,T.min,T.max, Temp, posteriorPredictive = FA
 #' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
 #' plot(Temp_ref, pawar_shsch_tpc(params = param_set, Temp = Temp_ref, T.ref = 20), type = 'l')
 
-
-alt_pawar_shsch_tpc <- function(T.opt,e,e_h,r_tref, Temp, T.ref, posteriorPredictive = FALSE){
-
-  if (posteriorPredictive == FALSE){
-    curve = (e_h > e)*r_tref*exp((e/(8.62e-05))*((1/(T.ref+273.15)) - (1/(Temp + 273.15)))) / (1 + (e / (e_h-e)) * exp((e_h/(8.62e-05))*(1/(T.opt + 273.15) - 1/(Temp + 273.15))))
-  } else{
-    sigma.sq = params['sigma.sq']
-
-    truncmeans = (e_h > e)*r_tref*exp((e/(8.62e-05))*((1/(T.ref+273.15)) - (1/(Temp + 273.15)))) / (1 + (e / (e_h-e)) * exp((e_h/(8.62e-05))*(1/(T.opt + 273.15) - 1/(Temp + 273.15))))
-    curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
-  }
-  return(curve)
-}
+pawar_shsch_tpc_nimble <-
+  nimbleRcall(prototype = function(params = double(1),
+                                   Temp = double(0),
+                                   posteriorPredictive = logical(0)){},
+              Rfun = 'pawar_shsch_tpc',
+              returnType = double(0))
 
 #' Evaluate Quadratic TPC model
 #'
@@ -129,18 +102,12 @@ alt_pawar_shsch_tpc <- function(T.opt,e,e_h,r_tref, Temp, T.ref, posteriorPredic
 #' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
 #' plot(Temp_ref, quadratic_tpc(params = param_set, Temp = Temp_ref), type = 'l')
 
-alt_quadratic_tpc <- function(q,T.min,T.max, Temp, posteriorPredictive = FALSE){
-
-  if (posteriorPredictive == FALSE){
-    curve = -1*q*(Temp - T.min)*(Temp - T.max) * (T.max > Temp) * (Temp > T.min)
-  } else{
-    sigma.sq = params['sigma.sq']
-
-    truncmeans = -1*q*(Temp - T.min)*(Temp - T.max) * (T.max > Temp) * (Temp > T.min)
-    curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
-  }
-  return(curve)
-}
+quadratic_tpc_nimble <-
+  nimbleRcall(prototype = function(params = double(1),
+                                   Temp = double(0),
+                                   posteriorPredictive = logical(0)){},
+              Rfun = 'quadratic_tpc',
+              returnType = double(0))
 
 #' Evaluate Briere TPC model
 #'
@@ -157,18 +124,12 @@ alt_quadratic_tpc <- function(q,T.min,T.max, Temp, posteriorPredictive = FALSE){
 #' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
 #' plot(Temp_ref, briere_tpc(params = param_set, Temp = Temp_ref), type = 'l')
 
-alt_briere_tpc <- function(q,T.min,T.max, Temp, posteriorPredictive = FALSE){
-
-  if (posteriorPredictive == FALSE){
-    curve = q*(Temp - T.min)*sqrt((T.max>Temp)*abs(T.max-Temp)) * (T.max > Temp) * (Temp > T.min)
-  } else{
-    sigma.sq = params['sigma.sq']
-
-    truncmeans = q*(Temp - T.min)*sqrt((T.max>Temp)*abs(T.max-Temp)) * (T.max > Temp) * (Temp > T.min)
-    curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
-  }
-  return(curve)
-}
+briere_tpc_nimble <-
+  nimbleRcall(prototype = function(params = double(1),
+                                   Temp = double(0),
+                                   posteriorPredictive = logical(0)){},
+              Rfun = 'briere_tpc',
+              returnType = double(0))
 
 #' Evaluate Weibull TPC model
 #'
@@ -185,20 +146,12 @@ alt_briere_tpc <- function(q,T.min,T.max, Temp, posteriorPredictive = FALSE){
 #' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
 #' plot(Temp_ref, weibull_tpc(params = param_set, Temp = Temp_ref), type = 'l')
 
-alt_weibull_tpc <- function(a,b,c,T.opt, Temp, posteriorPredictive = FALSE){
-
-  if (posteriorPredictive == FALSE){
-    curve = ((a*(((c-1)/c)^((1-c)/c))*((((Temp-T.opt)/b)+(((c-1)/c)^(1/c)))^(c-1))*(exp(-((((Temp-T.opt)/b)+(((c-1)/c)^(1/c)))^c)+((c-1)/c)))))
-
-  } else{
-    sigma.sq = params['sigma.sq']
-
-    truncmeans = ((a*(((c-1)/c)^((1-c)/c))*((((Temp-T.opt)/b)+(((c-1)/c)^(1/c)))^(c-1))*(exp(-((((Temp-T.opt)/b)+(((c-1)/c)^(1/c)))^c)+((c-1)/c)))))
-    curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
-  }
-  return(curve)
-}
-
+weibull_tpc_nimble <-
+  nimbleRcall(prototype = function(params = double(1),
+                                   Temp = double(0),
+                                   posteriorPredictive = logical(0)){},
+              Rfun = 'weibull_tpc',
+              returnType = double(0))
 
 #' Evaluate Gaussian TPC model
 #'
@@ -215,17 +168,10 @@ alt_weibull_tpc <- function(a,b,c,T.opt, Temp, posteriorPredictive = FALSE){
 #' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
 #' plot(Temp_ref, gauss_tpc(params = param_set, Temp = Temp_ref), type = 'l')
 
-
-alt_gauss_tpc <- function(a,rmax,T.opt, Temp, posteriorPredictive = FALSE){
-
-  if (posteriorPredictive == FALSE){
-    curve = rmax*exp(-0.5*(abs(Temp - T.opt)/a)^2)
-  } else{
-    sigma.sq = params['sigma.sq']
-
-    truncmeans = rmax*exp(-0.5*(abs(Temp - T.opt)/a)^2)
-    curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
-  }
-  return(curve)
-}
+gauss_tpc_nimble <-
+  nimbleRcall(prototype = function(params = double(1),
+                                   Temp = double(0),
+                                   posteriorPredictive = logical(0)){},
+              Rfun = 'gauss_tpc',
+              returnType = double(0))
 
