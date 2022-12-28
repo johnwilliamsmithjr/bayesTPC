@@ -87,7 +87,7 @@ pawar_shsch_tpc_nimble <-
               Rfun = 'pawar_shsch_tpc',
               returnType = double(0))
 
-#' Evaluate Quadratic TPC model
+#' Evaluate Quadratic TPC model in Nimble
 #'
 #' Evaluate Quadratic model for thermal performance for a given parameter set.
 #'
@@ -109,7 +109,7 @@ quadratic_tpc_nimble <-
               Rfun = 'quadratic_tpc',
               returnType = double(0))
 
-#' Evaluate Briere TPC model
+#' Evaluate Briere TPC model in Nimble
 #'
 #' Evaluate Briere model for thermal performance for a given parameter set.
 #'
@@ -131,7 +131,7 @@ briere_tpc_nimble <-
               Rfun = 'briere_tpc',
               returnType = double(0))
 
-#' Evaluate Weibull TPC model
+#' Evaluate Weibull TPC model in Nimble
 #'
 #' Evaluate Weibull model for thermal performance for a given parameter set.
 #'
@@ -153,7 +153,7 @@ weibull_tpc_nimble <-
               Rfun = 'weibull_tpc',
               returnType = double(0))
 
-#' Evaluate Gaussian TPC model
+#' Evaluate Gaussian TPC model in Nimble
 #'
 #' Evaluate Gaussian model for thermal performance for a given parameter set.
 #'
