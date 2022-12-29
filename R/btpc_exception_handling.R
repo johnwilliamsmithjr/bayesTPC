@@ -19,7 +19,7 @@ checkParams <- function(model, params, posteriorPredictive){
   priorNames <- priorNames[priorNames != "sigma.sq"]
   if (!all(priorNames %in% names(params))){
     missingpriors <- paste(priorNames[!(priorNames %in% names(params))], collapse = " ")
-    stop(paste("Missing model parameters: ", missingpriors))
+    stop(paste("Missing model parameters:", missingpriors))
   }
   if (!is.vector(params)){
     warning('Expected params input to be a named vector. Attempting to convert to vector')

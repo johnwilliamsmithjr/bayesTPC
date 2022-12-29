@@ -1,3 +1,5 @@
+require(nimble)
+
 #' Evaluate Ratkowsky model in Nimble
 #'
 #' Evaluate Ratkowsky model for thermal performance for a given parameter set
