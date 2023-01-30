@@ -16,48 +16,36 @@
 #'  in the source code
 #'
 
-model_names <- c("quad", "briere")
+model_names <- c("quadratic", "briere")
 model_params <- list(list("q","T.max", "T.min"), list("q","T.max", "T.min"))
 
-quad_tpc <- function(params,
-                     Temps,
-                     posteriorPredictive = FALSE){
-  q = params[[1]] #parameter checking is done previously
-  T.max = params[[2]]
-  T.min = params[[3]]
-
-  if (posteriorPredictive == FALSE){
-    curve = -1*q*(Temp - T.min)*(Temp - T.max) * (T.max > Temp) * (Temp > T.min)
-  } else{
-    sigma.sq = params[[4]]
-
-    truncmeans = -1*q*(Temp - T.min)*(Temp - T.max) * (T.max > Temp) * (Temp > T.min)
-    curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
-  }
-  return(curve)
-}
-
-briere_tpc <- function(params,
-                     Temps,
-                     posteriorPredictive = FALSE){
-  q = params[[1]] #parameter checking is done previously
-  T.max = params[[2]]
-  T.min = params[[3]]
-
-  if (posteriorPredictive == FALSE){
-    curve = q*(Temp - T.min)*sqrt((T.max>Temp)*abs(T.max-Temp)) * (T.max > Temp) * (Temp > T.min)
-  } else{
-    sigma.sq = params[['sigma.sq']]
-
-    truncmeans = q*(Temp - T.min)*sqrt((T.max>Temp)*abs(T.max-Temp)) * (T.max > Temp) * (Temp > T.min)
-    curve = rtruncnorm(length(Temp), a = 0, b = Inf, mean = truncmeans, sd = sqrt(sigma.sq))
-  }
-  return(curve)
-}
 
 quad_formula <- "-1*q*(Temp - T.min)*(Temp - T.max) * (T.max > Temp) * (Temp > T.min)"
 briere_formula <- "q*(Temp - T.min)*sqrt((T.max>Temp)*abs(T.max-Temp)) * (T.max > Temp) * (Temp > T.min)"
 master_list <- data.frame("name" = model_names)
 master_list$params <- model_params
 master_list$formula <- list(quad_formula, briere_formula)
+master_list$default_priors <- list(defaultPriors("quadratic"), defaultPriors("briere"))
 
+build_Rfunction <- function(model){
+  model_info <- master_list[master_list$name == model,]
+  model_function <- function(params, Temp){
+    params <- checkParams(model, params, F)
+    for (i in 1:length(params)){
+      assign(names(params[i]), unlist(as.vector(params[i])))
+    }
+    curve <- eval(str2expression(model_info$formula[[1]]))
+    return(curve)
+  }
+
+  return(model_function)
+}
+
+test_quadR <- build_Rfunction("quadratic")
+test_params <- list(q = .75,
+                                 T.max = 35,
+                                 T.min = 10)
+test_temp <- 20:25
+
+test_quadR(test_params, test_temp)
+quadratic_tpc(test_params, test_temp) #looks good!
