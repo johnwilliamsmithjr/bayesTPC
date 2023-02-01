@@ -117,6 +117,26 @@ test_nimble_quad <- build_nimble_model("quadratic")
 #as the nimble function. This isn't a problem, as long as
 #we are careful how we call the functions
 
+#testing with briere model
+test_brieR <- build_Rfunction("briere")
+test_brie_unproc <- build_unprotected("briere")
+test_brie_nimble <-
+  nimbleRcall(prototype = function(params = double(1),
+                                   Temp = double(0)){},
+              Rfun = 'test_brie_unproc',
+              returnType = double(0))
+
+test_brieR(test_params, test_temp)
+briere_tpc(test_params, test_temp, F)
+test_brie_unproc(test_params, test_temp)
+test_brie_nimble(test_params, test_temp)
+
+test_brieR(params_badorder, test_temp)
+briere_tpc(params_badorder, test_temp, F)
+test_brie_unproc(params_badorder, test_temp)
+test_brie_nimble(params_badorder, test_temp)
+
+
 ## test this, by simulating data
 set.seed(12345)
 N = 16
@@ -159,7 +179,7 @@ alt_quadCode <- nimbleCode({
   sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )
 })
 
-## This block is commented out so the package doesnt run it when loaded
+#### This block is commented out so the package doesnt run it when loaded
 # alt_quadInits <- list(pars = c(.50,50,5), #unnamed parameters!
 #                       sigma.sq=2)
 #
