@@ -31,9 +31,13 @@ build_Rfunction <- function(model){
   model_info <- master_list[master_list$name == model,]
   model_function <- function(params, Temp){
     params <- checkParams(model, params, F)
+
+    #assign parameters into individual variables
     for (i in 1:length(params)){
       assign(names(params[i]), unlist(as.vector(params[i])))
     }
+
+    #get formula from dataframe and parse
     curve <- eval(str2expression(model_info$formula[[1]]))
     return(curve)
   }
@@ -49,3 +53,52 @@ test_temp <- 20:25
 
 test_quadR(test_params, test_temp)
 quadratic_tpc(test_params, test_temp) #looks good!
+
+build_unprotected <- function(model){
+  #we should add custom error handling at some point
+  #R's default message would be confusing here
+  model_info <- master_list[master_list$name == model,]
+
+  model_function <- function(params, Temp){
+    #assume params is sorted lexicographically
+    sorted_vars <- sort(unlist(model_info$params))
+
+    #assign parameters into individual variables
+    for (i in 1:length(sorted_vars)){
+      assign(sorted_vars[[i]], unlist(as.vector(params[i])))
+    }
+
+    #get formula from dataframe and parse
+    curve <- eval(str2expression(model_info$formula[[1]]))
+    return(curve)
+  }
+
+  return(model_function)
+}
+
+test_unprotected_quad <- build_unprotected("quadratic")
+
+test_unprotected_quad(test_params, test_temp)
+#works when parameters are in the correct order
+
+params_badorder <- list(T.max = 35,
+                                       T.min = 10,
+                                       q = .75
+                                       )
+
+quadratic_tpc(params_badorder, test_temp)
+test_quadR(params_badorder, test_temp)
+test_unprotected_quad(params_badorder, test_temp)
+#as expected, the protected version was correct
+#but the unprotected version failed!
+test_unprotected_nimble <-
+  nimbleRcall(prototype = function(params = double(1),
+                                   Temp = double(0)){},
+              Rfun = 'test_unprotected_quad',
+              returnType = double(0))
+
+test_unprotected_nimble(test_params, test_temp)
+test_unprotected_nimble(params_badorder, test_temp)
+#Wow! it is that easy.
+#I am actually surprised nimble is smart enough to do this
+#R is a lovely language sometimes
