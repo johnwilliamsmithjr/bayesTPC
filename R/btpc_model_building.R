@@ -141,7 +141,7 @@ bTPC <- function(data, model, priors = NULL, samplerType = 'RW',
 
   mcmcConfig <- configureMCMC(nimTPCmod)
 
-  if (samplerType == 'slice'){ #why is this written like this?
+  if (samplerType == 'slice'){
     for (i in names(defaultPriors(model))){
       mcmcConfig$removeSamplers(i)
       mcmcConfig$addSampler(i, type = samplerType)
