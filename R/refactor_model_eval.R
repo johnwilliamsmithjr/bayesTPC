@@ -1,5 +1,6 @@
 model_evaluation_function <- function(model){
-  model_info <- master_list[master_list$name == model,]
+  model_info <-
+    model_master_list[model_master_list$name == model,]
   model_function <- function(params,
                              Temp,
                              posteriorPredictive = F,
@@ -20,6 +21,7 @@ model_evaluation_function <- function(model){
       return(evaluated_model)
     }
     else{
+      #this means the binomial functions dont work
       curve <- rtruncnorm(length(Temp), a = 0, b = Inf,
                           mean = evaluated_model,
                           sd = sqrt(sigma.sq))
@@ -32,7 +34,8 @@ model_evaluation_function <- function(model){
 
 #for INTERNAL USE ONLY
 .model_eval <- function(model){
-  model_info <- master_list[master_list$name == model,]
+  model_info <-
+    model_master_list[model_master_list$name == model,]
   model_function <- function(params,
                              Temp,
                              posteriorPredictive = F,
@@ -51,6 +54,7 @@ model_evaluation_function <- function(model){
       return(evaluated_model)
     }
     else{
+      #this means the binomial functions dont work
       curve <- rtruncnorm(length(Temp), a = 0, b = Inf,
                           mean = evaluated_model,
                           sd = sqrt(sigma.sq))

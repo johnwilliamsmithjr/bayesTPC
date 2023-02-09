@@ -31,9 +31,9 @@ checkParams <- function(model, params, posteriorPredictive){
     })
   }
 
-  if (posteriorPredictive && !('sigma.sq' %in% names(params))){
-    stop('Parameter "sigma.sq" is required to generate posterior predictive samples.')
-  }
+  # if (posteriorPredictive && !('sigma.sq' %in% names(params))){
+  #   stop('Parameter "sigma.sq" is required to generate posterior predictive samples.')
+  # }
 
   return(params)
 }

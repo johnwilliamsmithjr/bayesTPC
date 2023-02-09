@@ -14,50 +14,42 @@ defaultPriors <- function(model){
   if (model == 'quadratic' || model == 'briere'){
     p <- list(q = 'q ~ dunif(0, 1)',
               T.min = 'T.min ~ dunif(0, 24)',
-              T.max = 'T.max ~ dunif(25, 60)',
-              sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
+              T.max = 'T.max ~ dunif(25, 60)')
   } else if (model == 'weibull'){
     p <- list(a = 'a ~ dunif(0, 10)',
               T.opt = 'T.opt ~ dunif(0, 60)',
               b = 'b ~ dunif(0, 1e10)',
-              c = 'c ~ dunif(0, 1e10)',
-              sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
+              c = 'c ~ dunif(0, 1e10)')
   } else if (model == 'gaussian'){
     p <- list(a = 'a ~ T(dt(mu = 0, tau = 10, df = 1), 0, )',
               T.opt = 'T.opt ~ dunif(0, 60)',
-              rmax = 'rmax ~ dunif(0, 1000)',
-              sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
+              rmax = 'rmax ~ dunif(0, 1000)')
   } else if (model == 'pawar-shsch'){
     p <- list(r_tref = 'r_tref ~ dunif(0, 10)',
               e = 'e ~ dunif(0, 1)',
               T.opt = 'T.opt ~ dunif(0, 50)',
-              e_h = 'e_h ~ dunif(0, 30)',
-              sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
+              e_h = 'e_h ~ dunif(0, 30)')
   } else if (model == 'lactin2'){
     p <- list(a = 'a ~ dunif(0, 100)',
               b = 'b ~ dunif(-10, 10)',
               T.max = 'T.max ~ dunif(0, 70)',
-              delta_t = 'delta_t ~ T(dt(mu = 0, tau = 100, df = 1), 0, )',
-              sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
+              delta_t = 'delta_t ~ T(dt(mu = 0, tau = 100, df = 1), 0, )')
   } else if (model == 'kamykowski'){
     p <- list(a = 'a ~ dunif(0, 50)',
               b = 'b ~ dunif(0, 1)',
               T.min = 'T.min ~ dunif(0, 25)',
               T.max = 'T.max ~ dunif(25, 70)',
-              c = 'c ~ dunif(0, 5)',
-              sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
+              c = 'c ~ dunif(0, 5)')
   } else if (model == 'ratkowsky'){
     p <- list(a = 'a ~ dunif(0, 5)',
               b = 'b ~ dunif(0, 5)',
               T.min = 'T.min ~ dunif(0, 25)',
-              T.max = 'T.max ~ dunif(25, 70)',
-              sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
+              T.max = 'T.max ~ dunif(25, 70)')
   } else if (model == 'stinner'){
     p <- list(C = 'C ~ dunif(0, 1000)',
               k1 = 'k1 ~ dunif(-100, 100)',
               k2 = 'k2 ~ dunif(-10, 10)',
-              T.opt = 'T.opt ~ dunif(15, 70)',
-              sigma.sq = 'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )')
+              T.opt = 'T.opt ~ dunif(15, 70)')
   } else if (model == 'binomial_glm_lin'){
     p <- list(B0 = 'B0 ~ dnorm(0, var = 250000)',
               B1 = 'B1 ~ dnorm(0, var = 250000)')
