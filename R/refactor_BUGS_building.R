@@ -2,9 +2,9 @@ loop_string <- function(model){
   model_info <-
     model_master_list[model_master_list$name == model,]
   model_string = paste0('{\n    for (i in 1:N){\n    ',
-                        '        Trait[i] ~ nimble_model_function(params[1:',
+                        '        Trait[i] ~ T(dnorm(mean = nimble_mod_function(params[1:',
                         length(model_info[[2]][[1]]),
-                        "], Temp[i], T, sigma.sq)\n    }\n")
+                        "], Temp[i], FALSE, 0), var = sigma.sq), 0, )\n    }\n")
   return(model_string)
 }
 
@@ -110,17 +110,22 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
   const.list = vector('list', 0)
   const.list$N = data.nimble$N
 
+  #' The way NIMBLE does environmental management
+  #' makes me want to tear my hair out.
   model_function <- .model_eval(model)
-  nimble_model_function <-
+  nimble_mod_function <-
     nimbleRcall(prototype = function(params = double(1),
                                      Temp = double(0),
                                      posteriorPredictive = logical(0),
                                      sigma.sq = double(0)){},
                 Rfun = 'model_function',
-                returnType = double(0))
-
+                returnType = double(0),
+                where = environment())
+  assign('nimble_mod_function', nimble_mod_function, envir = .GlobalEnv)
+  assign('model_function', model_function, envir = .GlobalEnv)
   nimTPCmod = nimbleModel(str2expression(modelStr), constants = const.list,
-                          data = data.nimble$data, inits = inits)
+                          data = data.nimble$data, inits = inits,
+                          where = environment())
   #nimTPCmod = initializeModel(nimTPCmod)
   nimTPCmod_compiled = compileNimble(nimTPCmod)
 
@@ -145,11 +150,12 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
 
   default_priors <- model_info[[4]][[1]]
   prior_list = list()
-  for (i in 1:length(model_params)){
+  for (i in 1:length(model_params)){ #probably doesnt work right
+    colnames(samples)[i] <- model_params[i]
     if (model_params[i] %in% names(priors)){
-      prior_list[model_params[i]] = priors[model_params[i]]
+      prior_list[model_params[[i]]] = priors[model_params[[i]]]
     } else{
-      prior_list[model_params[i]] = default_priors[model_params[i]]
+      prior_list[model_params[[i]]] = default_priors[i]
     }
   }
   #tpc_mcmc = nimbleMCMC(model = nimTPCmod_compiled, niter = 10000)
