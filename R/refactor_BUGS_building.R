@@ -1,10 +1,22 @@
 loop_string <- function(model){
   model_info <-
     model_master_list[model_master_list$name == model,]
-  model_string = paste0('{\n    for (i in 1:N){\n    ',
-                        '        Trait[i] ~ T(dnorm(mean = nimble_mod_function(params[1:',
-                        length(model_info[[2]][[1]]),
-                        "], Temp[i], FALSE, 0), var = sigma.sq), 0, )\n    }\n")
+  if (model_info$density_function == "normal"){
+    model_string = paste0('{\n    for (i in 1:N){\n            ',
+                          'Trait[i] ~ T(dnorm(mean = nimble_mod_function(params[1:',
+                          length(model_info[[2]][[1]]),
+                          "], Temp[i]), var = sigma.sq), 0, )\n    }\n")
+  }
+  else if (model_info$density_function == "binomial"){
+    model_string = paste0('{\n    for (i in 1:N){\n            ',
+                          'Trait[i] ~ dbinom(p[i], n[i])\n            ',
+                          'logit(p[i]) <- nimble_mod_function(params[1:',
+                          length(model_info[[2]][[1]]),
+                          "], Temp[i])\n    }\n")
+  }
+  else{
+    stop("Unexpected density Function in model specification")
+  }
   return(model_string)
 }
 
@@ -46,6 +58,22 @@ priors_string <- function(model, priors = NULL, verbose = TRUE){
   return(param_string)
 }
 
+#' Create model string
+#'
+#' Create model string for thermal performance curve model to be passed to nimble
+#'
+#' @details This function returns a character string of the full `nimble` model for a user-specified thermal performance curve and prior distributions
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski","ratkowsky", "stinner", "binomial_glm_lin", "binomial_glm_quad".
+#' @param priors list, optional input specifying prior distributions for parameters (default = NULL). Elements of the list should correspond to model parameters, and written using nimble logic. For parameters not specified in the list, default priors are used.
+#' @param verbose logical, optional input. If verbose = TRUE, messages are printed when for priors that deviate from the defaultPriors(model) (see ?defaultPriors for additional information). Default = TRUE
+#' @return character, character string specifying the default model formulation to be passed to `nimble`.
+#' @examples
+#' ## Print default model for briere
+#' cat(defaultModel(model = 'briere'))
+#'
+#' ## Use custom prior for 'q' parameter in quadratic curve
+#' my_prior = list(q = 'q~beta(.5, .5)')
+#' cat(defaultModel(model = 'quadratic', priors = my_prior))
 configure_model <- function(model, priors = NULL, verbose = TRUE){
   model_info <-
     model_master_list[model_master_list$name == model,]
@@ -115,12 +143,11 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
   model_function <- .model_eval(model)
   nimble_mod_function <-
     nimbleRcall(prototype = function(params = double(1),
-                                     Temp = double(0),
-                                     posteriorPredictive = logical(0),
-                                     sigma.sq = double(0)){},
+                                     Temp = double(0)){},
                 Rfun = 'model_function',
                 returnType = double(0),
                 where = environment())
+
   assign('nimble_mod_function', nimble_mod_function, envir = .GlobalEnv)
   assign('model_function', model_function, envir = .GlobalEnv)
   nimTPCmod = nimbleModel(str2expression(modelStr), constants = const.list,

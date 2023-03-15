@@ -2,7 +2,7 @@
 #'
 #' Check if data is correctly formatted
 #'
-#' @details
+#' @details TODO
 #' @param model character, the model type
 #' @param params named vector, contains the actual params from the function call
 #' @param posteriorPredictive logical, should posterior predictive be generated insread of evaluating the deterministic model. default = FALSE

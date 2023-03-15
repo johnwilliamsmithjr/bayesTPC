@@ -2,9 +2,7 @@ model_evaluation_function <- function(model){
   model_info <-
     model_master_list[model_master_list$name == model,]
   model_function <- function(params,
-                             Temp,
-                             posteriorPredictive = F,
-                             sigma.sq = 0){
+                             Temp){
 
     #assign parameters into individual variables
     params <- checkParams(model, params, F)
@@ -16,17 +14,7 @@ model_evaluation_function <- function(model){
     evaluated_model <-
       eval(str2expression(model_info$formula[[1]]))
 
-    #determine output
-    if (posteriorPredictive == F){
-      return(evaluated_model)
-    }
-    else{
-      #this means the binomial functions dont work
-      curve <- rtruncnorm(length(Temp), a = 0, b = Inf,
-                          mean = evaluated_model,
-                          sd = sqrt(sigma.sq))
-      return(curve)
-    }
+    return(evaluated_model)
   }
 
   return(model_function)
@@ -37,9 +25,7 @@ model_evaluation_function <- function(model){
   model_info <-
     model_master_list[model_master_list$name == model,]
   model_function <- function(params,
-                             Temp,
-                             posteriorPredictive = F,
-                             sigma.sq = 0){
+                             Temp){
 
     #assign parameters into individual variables
     #assume params is sorted lexicographically
@@ -54,17 +40,7 @@ model_evaluation_function <- function(model){
     evaluated_model <-
       eval(str2expression(model_info$formula[[1]]))
 
-    #determine output
-    if (posteriorPredictive == F){
-      return(evaluated_model)
-    }
-    else{
-      #this means the binomial functions dont work
-      curve <- rtruncnorm(length(Temp), a = 0, b = Inf,
-                          mean = evaluated_model,
-                          sd = sqrt(sigma.sq))
-      return(curve)
-    }
+    return(evaluated_model)
   }
 
   return(model_function)
