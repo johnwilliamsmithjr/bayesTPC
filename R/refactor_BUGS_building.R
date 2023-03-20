@@ -158,15 +158,16 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
 
   mcmcConfig <- configureMCMC(nimTPCmod)
 
+  bugs_params <- c(paste0("params[",1:length(model_params),"]"), "sigma.sq")
   if (samplerType == 'slice'){
-    for (i in model_params){
+    for (i in bugs_params){
       mcmcConfig$removeSamplers(i)
       mcmcConfig$addSampler(i, type = samplerType)
     }
   }
   else if (samplerType != 'RW'){
-    mcmcConfig$removeSamplers(model_params)
-    mcmcConfig$addSampler(model_params, type = samplerType)
+    mcmcConfig$removeSamplers(bugs_params)
+    mcmcConfig$addSampler(bugs_params, type = samplerType)
   }
 
   mcmcConfig$enableWAIC = TRUE
