@@ -2,12 +2,20 @@ model_evaluation_function <- function(model){
   model_info <-
     model_master_list[model_master_list$name == model,]
   model_function <- function(params,
-                             Temp){
+                             Temp,
+                             constants = NULL){
 
     #assign parameters into individual variables
     params <- checkParams(model, params, F)
     for (i in 1:length(params)){
       assign(names(params[i]), unlist(as.vector(params[i])))
+    }
+
+    #assign constants
+    if (!is.null(constants)){
+      for (i in 1:length(sorted_consts)){
+        assign(names(constants[i]), unlist(as.vector(constants[i])))
+      }
     }
 
     #get formula from dataframe and parse
@@ -24,17 +32,28 @@ model_evaluation_function <- function(model){
 .model_eval <- function(model){
   model_info <-
     model_master_list[model_master_list$name == model,]
+  #A concerted effort to optimize this function will have high reward
+  # It's run thousands of times, and R calls are expensive.
   model_function <- function(params,
-                             Temp){
+                             Temp,
+                             constants = NULL){
 
     #assign parameters into individual variables
     #assume params is sorted lexicographically
-    sorted_vars <- sort(unlist(model_info$params))
+    sorted_pars <- sort(unlist(model_info$params))
+    sorted_consts <- sort(unlist(model_info$constants))
 
     #assign parameters into individual variables
-    for (i in 1:length(sorted_vars)){
-      assign(sorted_vars[[i]], unlist(as.vector(params[i])))
+    for (i in 1:length(sorted_pars)){
+      assign(sorted_pars[[i]], unlist(as.vector(params[i])))
     }
+
+    if (!is.null(constants)){
+      for (i in 1:length(sorted_consts)){
+        assign(sorted_consts[[i]], unlist(as.vector(constants[i])))
+      }
+    }
+
 
     #get formula from dataframe and parse
     evaluated_model <-
