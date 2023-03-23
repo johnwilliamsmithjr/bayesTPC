@@ -32,6 +32,11 @@ model_evaluation_function <- function(model){
 .model_eval <- function(model){
   model_info <-
     model_master_list[model_master_list$name == model,]
+
+  #assume params and constants are sorted lexicographically
+  sorted_pars <- sort(unlist(model_info$params))
+  sorted_consts <- sort(unlist(model_info$constants))
+
   #A concerted effort to optimize this function will have high reward
   # It's run thousands of times, and R calls are expensive.
   model_function <- function(params,
@@ -39,18 +44,13 @@ model_evaluation_function <- function(model){
                              constants = NULL){
 
     #assign parameters into individual variables
-    #assume params is sorted lexicographically
-    sorted_pars <- sort(unlist(model_info$params))
-    sorted_consts <- sort(unlist(model_info$constants))
-
-    #assign parameters into individual variables
     for (i in 1:length(sorted_pars)){
-      assign(sorted_pars[[i]], unlist(as.vector(params[i])))
+      assign(sorted_pars[[i]], params[[i]])
     }
 
     if (!is.null(constants)){
-      for (i in 1:length(sorted_consts)){
-        assign(sorted_consts[[i]], unlist(as.vector(constants[i])))
+      for (i in 1:(length(sorted_consts))){
+        assign(sorted_consts[[i]], constants[[i]])
       }
     }
 
