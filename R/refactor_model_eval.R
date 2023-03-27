@@ -48,7 +48,7 @@ model_evaluation_function <- function(model){
       assign(sorted_pars[[i]], params[[i]])
     }
 
-    if (!is.null(constants)){
+    if (length(sorted_consts) > 0){
       for (i in 1:(length(sorted_consts))){
         assign(sorted_consts[[i]], constants[[i]])
       }

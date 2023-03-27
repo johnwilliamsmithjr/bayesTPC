@@ -1,48 +1,29 @@
 loop_string <- function(model){
   model_info <-
     model_master_list[model_master_list$name == model,]
-  if (is.null(model_info$constants[[1]])){
+  if (is.null(model_info$constants[[1]]) | length(model_info$constants[[1]]) <= 1){
+
     if (model_info$density_function == "normal"){
       model_string = paste0('{\n    for (i in 1:N){\n            ',
                             'Trait[i] ~ T(dnorm(mean = nimble_mod_function(params[1:',
                             length(model_info[[2]][[1]]),
-                            "], Temp[i], NULL), var = sigma.sq), 0, )\n    }\n")
+                            "], Temp[i], constants[1:2]), var = sigma.sq), 0, )\n    }\n")
     }
     else if (model_info$density_function == "binomial"){
       model_string = paste0('{\n    for (i in 1:N){\n            ',
                             'Trait[i] ~ dbinom(p[i], n[i])\n            ',
                             'logit(p[i]) <- nimble_mod_function(params[1:',
                             length(model_info[[2]][[1]]),
-                            "], Temp[i], NULL)\n    }\n")
+                            "], Temp[i], constants[1:2])\n    }\n")
     }
     else{
       stop("Unexpected density Function in model specification")
     }
+
   }
   else{
-    #BUGS doesn't allow length 1 vectors
-    if (length(model_info$constants[[1]])){
 
       if (model_info$density_function == "normal"){
-        model_string = paste0('{\n    for (i in 1:N){\n            ',
-                              'Trait[i] ~ T(dnorm(mean = nimble_mod_function(params[1:',
-                              length(model_info[[2]][[1]]),
-                              "], Temp[i], constants[1:2]), var = sigma.sq), 0, )\n    }\n")
-      }
-      else if (model_info$density_function == "binomial"){
-        model_string = paste0('{\n    for (i in 1:N){\n            ',
-                              'Trait[i] ~ dbinom(p[i], n[i])\n            ',
-                              'logit(p[i]) <- nimble_mod_function(params[1:',
-                              length(model_info[[2]][[1]]),
-                              "], Temp[i], constants[1:2])\n    }\n")
-      }
-      else{
-        stop("Unexpected density Function in model specification")
-      }
-    }
-    else{
-      if (model_info$density_function == "normal"){
-
         model_string = paste0('{\n    for (i in 1:N){\n            ',
                               'Trait[i] ~ T(dnorm(mean = nimble_mod_function(params[1:',
                               length(model_info[[2]][[1]]),
@@ -59,7 +40,6 @@ loop_string <- function(model){
       else{
         stop("Unexpected density Function in model specification")
       }
-    }
 
   }
   return(model_string)
@@ -194,9 +174,17 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
         }
 
       }
-      constants[length(constant_list) + 1] = NA
-      const.list$constants = constants
+
+      if (length(constant_list) == 1){
+        #to ensure nimble sees this as a vector and not a scalar
+        constants[length(constant_list) + 1] = NA
+        const.list$constants = constants
+      }
     }
+  }
+  else{
+    constants[1:2] <- NA
+    const.list$constants = constants
   }
 
 
