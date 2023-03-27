@@ -6,7 +6,7 @@ model_evaluation_function <- function(model){
                              constants = NULL){
 
     #assign parameters into individual variables
-    params <- checkParams(model, params, F)
+    params <- checkParams(model, params)
     for (i in 1:length(params)){
       assign(names(params[i]), unlist(as.vector(params[i])))
     }

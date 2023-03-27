@@ -131,6 +131,7 @@ configure_model <- function(model, priors = NULL, constants = NULL,verbose = TRU
 b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
                   niter = 10000, inits = NULL, burn = 0, constant_list = NULL, ...){
 
+  #error correction and variable setup
   data.nimble = checkData(data)
 
   model_info <-
@@ -148,6 +149,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
     #const.list$n = unlist(data['n'])
   }
 
+  #configure model constants
   if (length(model_constants) > 0){
     #possibly turn this into a helper function
     if (is.null(constant_list)){
@@ -187,12 +189,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
     const.list$constants = constants
   }
 
-
-
-
   modelStr = configure_model(model = model, priors = priors, ...)
-
-
 
   #' The way NIMBLE does environmental management
   #' makes me want to tear my hair out.

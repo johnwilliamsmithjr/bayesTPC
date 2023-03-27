@@ -5,14 +5,12 @@
 #' @details TODO
 #' @param model character, the model type
 #' @param params named vector, contains the actual params from the function call
-#' @param posteriorPredictive logical, should posterior predictive be generated insread of evaluating the deterministic model. default = FALSE
 #' @return list, input params coerced as a vector, if necessary
 
-checkParams <- function(model, params, posteriorPredictive){
+checkParams <- function(model, params){
   #having an external function call in our model evaluation
   #might cause issues, but we can use an error handling wrapper
   #that calls the nimble function, probably
-  if (!is.logical(posteriorPredictive)) stop('posteriorPredictive argument must be supplied as a logical (= TRUE or = FALSE)')
   if (is.null(names(params))) stop('Error in call to tpc evaluation function. param input must be named.')
   if (!all(sapply(params, is.numeric))) stop("All parameter values must be numeric.")
   priorNames <- names(defaultPriors(model))
@@ -30,10 +28,6 @@ checkParams <- function(model, params, posteriorPredictive){
     stop("Params input unable to be coerced to a vector.")
     })
   }
-
-  # if (posteriorPredictive && !('sigma.sq' %in% names(params))){
-  #   stop('Parameter "sigma.sq" is required to generate posterior predictive samples.')
-  # }
 
   return(params)
 }
