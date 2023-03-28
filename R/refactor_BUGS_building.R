@@ -114,7 +114,7 @@ configure_model <- function(model, priors = NULL, constants = NULL,verbose = TRU
     }
   }
   ## check for proper names in prior list
-  param_names <- model_info[,2]
+  param_names <- model_info$params[[1]]
   if (any(!(names(priors) %in% param_names))){
     stop('One or more priors do not have names that correspond to model parameters.')
   }
