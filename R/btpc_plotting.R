@@ -54,7 +54,7 @@ traceplot <- function(object, burn = 0, thin = 1, ...){
 #' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
 #' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
 
-bayesTPC.ipairs <- function(x, burn = 0, thin = 1,
+bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
                             ztransf = function(x){x[x<1] <- 1; log2(x)}, ...){
   if (is.list(x)) if(is.null(x$samples)) stop('Expected list "x" to have an element called samples')
   if (!(is.mcmc(x)) & !(is.matrix(x)) & !(is.list(x))) stop('Input "x" is expected as a list, matrix, or mcmc object. See ?bayesTPC.ipairs')
@@ -96,14 +96,14 @@ bayesTPC.ipairs <- function(x, burn = 0, thin = 1,
 #' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
 #' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
 
-ppo_plot <- function(bTPC.object, burn = 0){
-  if (!is.list(bTPC.object)) stop('Expected input bTPC.object to be a list')
-  if (is.null(bTPC.object$samples)) stop('Expected input bTPC.object to have an entry called "samples"')
-  if (is.null(bTPC.object$priors)) stop('Expected input bTPC.object to have an entry called "priors"')
-  for (i in colnames(bTPC.object$samples)){
-    par_samples <- as.numeric(bTPC.object$samples[(burn+1):(nrow(bTPC.object$samples)),i])
+ppo_plot <- function(bTPC_object, burn = 0){
+  if (!is.list(bTPC_object)) stop('Expected input bTPC_object to be a list')
+  if (is.null(bTPC_object$samples)) stop('Expected input bTPC_object to have an entry called "samples"')
+  if (is.null(bTPC_object$priors)) stop('Expected input bTPC_object to have an entry called "priors"')
+  for (i in colnames(bTPC_object$samples)){
+    par_samples <- as.numeric(bTPC_object$samples[(burn+1):(nrow(bTPC_object$samples)),i])
     #print(strsplit(bTPC.object$priors[i], '~')[[1]][2])
-    prior_exp = strsplit(strsplit(as.character(bTPC.object$priors[i]), '~')[[1]][2], '\\(')
+    prior_exp = strsplit(strsplit(as.character(bTPC_object$priors[i]), '~')[[1]][2], '\\(')
     prior_exp = paste0(prior_exp[[1]][1], '(', 'sort(par_samples),', prior_exp[[1]][2])
     plot(density(par_samples), type = 'l', col = 'red', lwd = 2, xlab = i,
          main = paste0('Prior-Posterior Overlap for ', i))

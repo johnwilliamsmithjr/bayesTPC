@@ -241,5 +241,5 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
     }
   }
   #tpc_mcmc = nimbleMCMC(model = nimTPCmod_compiled, niter = 10000)
-  return(list(samples = samples, model = tpc_mcmc, data = data.nimble, modelType = model, priors = prior_list))
+  return(list(samples = samples, model = tpc_mcmc, data = data.nimble, modelType = model, priors = prior_list, uncomp_model = nimTPCmod))
 }
