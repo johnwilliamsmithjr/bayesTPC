@@ -1,6 +1,7 @@
 loop_string <- function(model){
   model_info <-
     model_master_list[model_master_list$name == model,]
+  #TODO clean this, possible into helper functions
   if (is.null(model_info$constants[[1]]) | length(model_info$constants[[1]]) <= 1){
 
     if (model_info$density_function == "normal"){
@@ -86,6 +87,53 @@ priors_string <- function(model,
   return(param_string)
 }
 
+configure_constants <- function(N, model_constants, constant_list){
+  constants = vector('list', 0)
+  const.list = vector('list', 0)
+  const.list$N = N
+
+  if (length(model_constants) > 0){
+    #possibly turn this into a helper function
+    if (is.null(constant_list)){
+      warning(paste0("Constant list not found for model = '", model ,
+                     "'. Setting default value for all constants.\n"))
+      constants = c(model_info$default_constants[[1]], NA)
+      const.list$constants = constants
+    }
+    else{
+      if (!is.list(constant_list)){
+        stop('If constants are provided, they must be formatted as a list\n')
+      }
+
+      sorted_constants <- sort(model_constants)
+      for (i in 1:length(model_constants)){
+        if (sorted_constants[i] %in% names(constant_list)){
+          constants[i] = constant_list[sorted_constants[i]]
+        }
+        else{
+          warning("Constant '", sorted_constants[i],
+                  "' not provided. Using default value '",
+                  sorted_constants[i],"' = ",model_info$default_constants[[1]][i],".")
+          constants[i] = model_info$default_constants[[1]][i]
+        }
+
+      }
+
+      if (length(constant_list) == 1){
+        #to ensure nimble sees this as a vector and not a scalar
+        constants[length(constant_list) + 1] = NA
+        const.list$constants = constants
+      }
+    }
+  }
+  else{
+    constants[1:2] <- NA
+    const.list$constants = constants
+  }
+
+  return(const.list)
+}
+
 #' Create model string
 #'
 #' Create model string for thermal performance curve model to be passed to nimble
@@ -131,7 +179,7 @@ configure_model <- function(model, priors = NULL, constants = NULL,verbose = TRU
 b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
                   niter = 10000, inits = NULL, burn = 0, constant_list = NULL, ...){
 
-  #error correction and variable setup
+  #exception handling and variable setup
   data.nimble = checkData(data)
 
   model_info <-
@@ -139,56 +187,15 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
   model_params <- model_info$params[[1]]
   model_constants <- model_info$constants[[1]]
 
-  constants = vector('list', 0)
-  const.list = vector('list', 0)
-  const.list$N = data.nimble$N
-
   if (!(samplerType %in% c('RW', 'RW_block', 'AF_slice', 'slice'))) stop('Unsupported option for input samplerType. Currently only RW, RW_block, slice, and AF_slice are supported.')
   if (model %in% c('binomial_glm_lin', 'binomial_glm_quad')){
     if (is.null(unlist(data['n']))) stop("For a Binomial GLM, data list must have a variable called 'n'. Perhaps check spelling and capitalization?")
     #const.list$n = unlist(data['n'])
   }
 
-  #configure model constants
-  if (length(model_constants) > 0){
-    #possibly turn this into a helper function
-    if (is.null(constant_list)){
-      warning(paste0("Constant list not found for model = '", model ,
-                     "'. Setting default value for constants.\n"))
-      constants = c(model_info$default_constants[[1]], NA)
-      const.list$constants = constants
-    }
-    else{
-      if (!is.list(constant_list)){
-        stop('If constants are provided, they must be formatted as a list\n')
-      }
 
-      sorted_constants <- sort(model_constants)
-      for (i in 1:length(model_constants)){
-        if (sorted_constants[i] %in% names(constant_list)){
-          constants[i] = constant_list[sorted_constants[i]]
-        }
-        else{
-          warning("Constant '", sorted_constants[i],
-                  "' not provided. Using default value '",
-                  sorted_constants[i],"' = ",model_info$default_constants[[1]][i],".")
-          constants[i] = model_info$default_constants[[1]][i]
-        }
-
-      }
-
-      if (length(constant_list) == 1){
-        #to ensure nimble sees this as a vector and not a scalar
-        constants[length(constant_list) + 1] = NA
-        const.list$constants = constants
-      }
-    }
-  }
-  else{
-    constants[1:2] <- NA
-    const.list$constants = constants
-  }
-
+  #configure model
+  const.list <- configure_constants(data.nimble$N, model_constants, constant_list)
   modelStr = configure_model(model = model, priors = priors, ...)
 
   #' The way NIMBLE does environmental management
