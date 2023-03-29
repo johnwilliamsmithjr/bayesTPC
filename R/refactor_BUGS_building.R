@@ -60,7 +60,7 @@ priors_string <- function(model,
   }
 
   ## check for proper names in lists
-  param_names <- model_info[,"params"]
+  param_names <- model_info$params[[1]]
 
 
   param_string <- vector("character", num_params + 1)
@@ -72,7 +72,7 @@ priors_string <- function(model,
                    '. To suppress these messagess use verbose = FALSE\n'))
       }
       param_string[i] <- paste0(
-        "params[",i,"] ~ ",priors[[param_names[i]]])
+        "params[",i,"] ~ ",priors[[param_names[[i]]]])
     }
     else{
       param_string[i] <- paste0(
