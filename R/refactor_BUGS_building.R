@@ -68,9 +68,9 @@ priors_string <- function(model,
   for (i in 1:num_params){
     if (param_names[i] %in% names(priors)){
       if (verbose){
-        simpleMessage(paste0('Not using default prior for parameter ',
+        simpleMessage(paste0("Not using default prior for parameter '",
                    param_names[i],
-                   '. To suppress these messagess use verbose = FALSE\n'))
+                   "'. To suppress these messages use verbose = FALSE\n"))
       }
       param_string[i] <- paste0(
         "params[",i,"] ~ ",priors[[param_names[[i]]]])
@@ -81,8 +81,18 @@ priors_string <- function(model,
     }
   }
 
-  param_string[num_params + 1] <-
-    'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )'
+  if ("sigma.sq" %in% names(priors)){
+    if (verbose){
+      simpleMessage(paste0("Not using default prior for parameter 'sigma.sq'. To suppress these messages use verbose = FALSE\n"))
+    }
+    param_string[num_params + 1] <-
+      paste0('sigma.sq ~ ',priors['sigma.sq'])
+  }
+  else{
+    param_string[num_params + 1] <-
+      'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )'
+  }
+
 
   return(param_string)
 }
@@ -162,8 +172,9 @@ configure_model <- function(model, priors = NULL, constants = NULL,verbose = TRU
     }
   }
   ## check for proper names in prior list
+  # should move this error check to priors_string
   param_names <- model_info$params[[1]]
-  if (any(!(names(priors) %in% param_names))){
+  if (any(!(names(priors) %in% c(param_names, "sigma.sq")))){
     stop('One or more priors do not have names that correspond to model parameters.')
   }
 
@@ -247,7 +258,14 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
       prior_list[model_params[[i]]] = default_priors[i]
     }
   }
+
+  if ("sigma.sq" %in% names(priors)){
+    prior_list["sigma.sq"] <- priors["sigma.sq"]
+  }
+  else{
+    prior_list["sigma.sq"] <- "T(dt(mu = 0, tau = 10, df = 1), 0, )"
+  }
   #tpc_mcmc = nimbleMCMC(model = nimTPCmod_compiled, niter = 10000)
-  return(list(samples = samples, model = tpc_mcmc, data = data.nimble,
+  return(list(samples = samples, model = tpc_mcmc, data = data.nimble$data,
               modelType = model, priors = prior_list, uncomp_model = nimTPCmod))
 }
