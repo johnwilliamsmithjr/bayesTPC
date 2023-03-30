@@ -66,7 +66,7 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
     } else{
       samples = x$samples
     }
-    ipairs(samples[thinned,], ztransf = ztransf, ...)
+    IDPmisc::ipairs(samples[thinned,], ztransf = ztransf, ...)
   } else{
     N = nrow(x)
     thinned = seq(from = burn+1, to = N, by = thin)
@@ -75,7 +75,7 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
     } else{
       samples = x
     }
-    ipairs(samples[thinned,], ztransf = ztransf, ...)
+    IDPmisc::ipairs(samples[thinned,], ztransf = ztransf, ...)
   }
   return(invisible(NULL))
 }

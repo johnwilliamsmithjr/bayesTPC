@@ -199,18 +199,47 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
   model_constants <- model_info$constants[[1]]
 
   if (!(samplerType %in% c('RW', 'RW_block', 'AF_slice', 'slice'))) stop('Unsupported option for input samplerType. Currently only RW, RW_block, slice, and AF_slice are supported.')
-  if (model %in% c('binomial_glm_lin', 'binomial_glm_quad')){
+  if (model_info$density_function == "binomial"){
     if (is.null(unlist(data['n']))) stop("For a Binomial GLM, data list must have a variable called 'n'. Perhaps check spelling and capitalization?")
     #const.list$n = unlist(data['n'])
   }
 
+  inits.list <- vector('list',2)
+  #configure initial values
+  #might also be a helper function
+  if (!is.null(inits)){
+    if (length(inits) == 0) stop("inits list cannot be empty. Use 'inits = NULL' to sample initial values from the priors.")
+    if (!is.list(inits)) stop("Unexpected type for argument 'inits'. Initial values must be given as a list.")
+    if (is.null(names(inits))) stop("inits list must be named.")
 
-  #configure model
+    init_params <- vector('double', length(model_params))
+    for (i in 1:length(model_params)){
+      if (model_params[[i]] %in% names(inits)){
+        init_params[i] <- inits[[model_params[[i]]]]
+      }
+      else{
+        init_params[i] <- NA
+      }
+    }
+
+    inits.list[[1]] <- init_params
+    if ("sigma.sq" %in% names(inits)){
+      inits.list[[2]] <- inits[["sigma.sq"]]
+      names(inits.list) <- c("params", "sigma.sq")
+    }
+    else{
+      inits.list[[2]] <- NULL
+      names(inits.list) <- c("params")
+
+    }
+  }
+
+
+  #configure model, handles the density funciton, priors, and constants
   const.list <- configure_constants(data.nimble$N, model_constants, constant_list)
   modelStr = configure_model(model = model, priors = priors, ...)
 
-  #' The way NIMBLE does environmental management
-  #' makes me want to tear my hair out.
+  #create the model evaluation function
   model_function <- .model_eval(model)
   nimble_mod_function <-
     nimbleRcall(prototype = function(params = double(1),
@@ -223,7 +252,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
   assign('nimble_mod_function', nimble_mod_function, envir = .GlobalEnv)
   assign('model_function', model_function, envir = .GlobalEnv)
   nimTPCmod = nimbleModel(str2expression(modelStr), constants = const.list,
-                          data = data.nimble$data, inits = inits,
+                          data = data.nimble$data, inits = inits.list,
                           where = environment())
   #nimTPCmod = initializeModel(nimTPCmod)
   nimTPCmod_compiled = compileNimble(nimTPCmod)
