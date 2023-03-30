@@ -97,6 +97,42 @@ priors_string <- function(model,
   return(param_string)
 }
 
+configure_inits <- function(inits, model_params){
+  inits.list <- vector('list',2)
+
+  if (!is.null(inits)){
+    if (length(inits) == 0) stop("inits list cannot be empty. Use 'inits = NULL' to sample initial values from the priors.")
+    if (!is.list(inits)) stop("Unexpected type for argument 'inits'. Initial values must be given as a list.")
+    if (is.null(names(inits))) stop("inits list must be named.")
+
+    init_params <- vector('double', length(model_params))
+    for (i in 1:length(model_params)){
+      if (model_params[[i]] %in% names(inits)){
+        init_params[i] <- inits[[model_params[[i]]]]
+      }
+      else{
+        init_params[i] <- NA
+      }
+    }
+
+    inits.list[[1]] <- init_params
+    if ("sigma.sq" %in% names(inits)){
+      inits.list[[2]] <- inits[["sigma.sq"]]
+      names(inits.list) <- c("params", "sigma.sq")
+    }
+    else{
+      inits.list[[2]] <- NULL
+      names(inits.list) <- c("params")
+
+    }
+  }
+  else{
+    inits.list = NULL
+  }
+
+  return(inits.list)
+}
+
 configure_constants <- function(N, model_constants, constant_list){
   constants = vector('list', 0)
   const.list = vector('list', 0)
@@ -204,38 +240,10 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
     #const.list$n = unlist(data['n'])
   }
 
-  inits.list <- vector('list',2)
-  #configure initial values
-  #might also be a helper function
-  if (!is.null(inits)){
-    if (length(inits) == 0) stop("inits list cannot be empty. Use 'inits = NULL' to sample initial values from the priors.")
-    if (!is.list(inits)) stop("Unexpected type for argument 'inits'. Initial values must be given as a list.")
-    if (is.null(names(inits))) stop("inits list must be named.")
-
-    init_params <- vector('double', length(model_params))
-    for (i in 1:length(model_params)){
-      if (model_params[[i]] %in% names(inits)){
-        init_params[i] <- inits[[model_params[[i]]]]
-      }
-      else{
-        init_params[i] <- NA
-      }
-    }
-
-    inits.list[[1]] <- init_params
-    if ("sigma.sq" %in% names(inits)){
-      inits.list[[2]] <- inits[["sigma.sq"]]
-      names(inits.list) <- c("params", "sigma.sq")
-    }
-    else{
-      inits.list[[2]] <- NULL
-      names(inits.list) <- c("params")
-
-    }
-  }
 
 
   #configure model, handles the density funciton, priors, and constants
+  inits.list <- configure_inits(inits, model_params)
   const.list <- configure_constants(data.nimble$N, model_constants, constant_list)
   modelStr = configure_model(model = model, priors = priors, ...)
 
