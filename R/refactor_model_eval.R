@@ -90,19 +90,18 @@ model_evaluation_function <- function(model){
   const_exp <- str2expression(const_string)
 
   function_string <- paste0('
-model_function <- nimbleFunction(
+nimble_mod_function <- nimbleFunction(
     run = function(params = double(1),
                    Temp = double(0),
                    constants = double(1)){
   ', paste0(par_string, collapse = ""),
 paste0(const_string, collapse = ""),
-"return(", formula_string,")\n returnType(double(1)) \n}\n)",collapse = "")
+"return(", formula_string,")\n returnType(double(0))\n}\n)",collapse = "")
 
-  eval(str2expression(function_string))
-
-  return(model_function)
+  return(str2expression(function_string))
 }
 
+#not functioning
 .cpp_nimble <- function(model){
   model_info <-
     model_master_list[model_master_list$name == model,]

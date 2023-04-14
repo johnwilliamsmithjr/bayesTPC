@@ -333,12 +333,12 @@ cpp_b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
   modelStr = configure_model(model = model, priors = priors, ...)
 
   #create the model evaluation function
-  nimble_mod_function <- .direct_nimble("quadratic")
+  eval(.direct_nimble("quadratic"))
   assign('nimble_mod_function', nimble_mod_function, envir = .GlobalEnv)
   nimTPCmod = nimbleModel(str2expression(modelStr), constants = const.list,
                           data = data.nimble$data, inits = inits.list,
                           where = environment())
-  #nimTPCmod = initializeModel(nimTPCmod)
+
   nimTPCmod_compiled = compileNimble(nimTPCmod)
 
   mcmcConfig <- configureMCMC(nimTPCmod)
