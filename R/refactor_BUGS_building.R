@@ -133,7 +133,8 @@ configure_inits <- function(inits, model_params){
   return(inits.list)
 }
 
-configure_constants <- function(N, model_constants, constant_list){
+configure_constants <- function(model_info,N, model_constants, constant_list){
+  model <- model_info$name[[1]]
   constants = vector('list', 0)
   const.list = vector('list', 0)
   const.list$N = N
@@ -244,7 +245,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
 
   #configure model, handles the density funciton, priors, and constants
   inits.list <- configure_inits(inits, model_params)
-  const.list <- configure_constants(data.nimble$N, model_constants, constant_list)
+  const.list <- configure_constants(model_info,data.nimble$N, model_constants, constant_list)
   modelStr = configure_model(model = model, priors = priors, ...)
 
   #create the model evaluation function
@@ -308,7 +309,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
               modelType = model, priors = prior_list, uncomp_model = nimTPCmod))
 }
 
-cpp_b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
+dn_b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
                       niter = 10000, inits = NULL, burn = 0, constant_list = NULL, ...){
 
   #exception handling and variable setup
@@ -329,11 +330,11 @@ cpp_b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
 
   #configure model, handles the density funciton, priors, and constants
   inits.list <- configure_inits(inits, model_params)
-  const.list <- configure_constants(data.nimble$N, model_constants, constant_list)
+  const.list <- configure_constants(model_info,data.nimble$N, model_constants, constant_list)
   modelStr = configure_model(model = model, priors = priors, ...)
 
   #create the model evaluation function
-  eval(.direct_nimble("quadratic"))
+  eval(.direct_nimble(model))
   assign('nimble_mod_function', nimble_mod_function, envir = .GlobalEnv)
   nimTPCmod = nimbleModel(str2expression(modelStr), constants = const.list,
                           data = data.nimble$data, inits = inits.list,
