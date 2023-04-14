@@ -225,91 +225,6 @@ configure_model <- function(model, priors = NULL, constants = NULL,verbose = TRU
 }
 
 b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
-                  niter = 10000, inits = NULL, burn = 0, constant_list = NULL, ...){
-
-  #exception handling and variable setup
-  data.nimble = checkData(data)
-
-  model_info <-
-    model_master_list[model_master_list$name == model,]
-  model_params <- model_info$params[[1]]
-  model_constants <- model_info$constants[[1]]
-
-  if (!(samplerType %in% c('RW', 'RW_block', 'AF_slice', 'slice'))) stop('Unsupported option for input samplerType. Currently only RW, RW_block, slice, and AF_slice are supported.')
-  if (model_info$density_function == "binomial"){
-    if (is.null(unlist(data['n']))) stop("For a Binomial GLM, data list must have a variable called 'n'. Perhaps check spelling and capitalization?")
-    #const.list$n = unlist(data['n'])
-  }
-
-
-
-  #configure model, handles the density funciton, priors, and constants
-  inits.list <- configure_inits(inits, model_params)
-  const.list <- configure_constants(model_info,data.nimble$N, model_constants, constant_list)
-  modelStr = configure_model(model = model, priors = priors, ...)
-
-  #create the model evaluation function
-  model_function <- .model_eval(model)
-  nimble_mod_function <-
-    nimbleRcall(prototype = function(params = double(1),
-                                     Temp = double(0),
-                                     constants = double(1)){},
-                Rfun = 'model_function',
-                returnType = double(0),
-                where = environment())
-
-  assign('nimble_mod_function', nimble_mod_function, envir = .GlobalEnv)
-  assign('model_function', model_function, envir = .GlobalEnv)
-  nimTPCmod = nimbleModel(str2expression(modelStr), constants = const.list,
-                          data = data.nimble$data, inits = inits.list,
-                          where = environment())
-  #nimTPCmod = initializeModel(nimTPCmod)
-  nimTPCmod_compiled = compileNimble(nimTPCmod)
-
-  mcmcConfig <- configureMCMC(nimTPCmod)
-
-  # set correct sampler type
-  bugs_params <- c(paste0("params[",1:length(model_params),"]"), "sigma.sq")
-  if (samplerType == 'slice'){
-    for (i in bugs_params){
-      mcmcConfig$removeSamplers(i)
-      mcmcConfig$addSampler(i, type = samplerType)
-    }
-  }
-  else if (samplerType != 'RW'){
-    mcmcConfig$removeSamplers(bugs_params)
-    mcmcConfig$addSampler(bugs_params, type = samplerType)
-  }
-
-  mcmcConfig$enableWAIC = TRUE
-  mcmc <- buildMCMC(mcmcConfig)
-  tpc_mcmc <- compileNimble(mcmc, project = nimTPCmod)
-  tpc_mcmc$run(niter, ...)
-  samples = as.mcmc(as.matrix(tpc_mcmc$mvSamples))
-
-  default_priors <- model_info$default_priors[[1]]
-  prior_list = list()
-  for (i in 1:length(model_params)){ #probably doesnt work right
-    colnames(samples)[i] <- model_params[i]
-    if (model_params[i] %in% names(priors)){
-      prior_list[model_params[[i]]] = priors[model_params[[i]]]
-    } else{
-      prior_list[model_params[[i]]] = default_priors[i]
-    }
-  }
-
-  if ("sigma.sq" %in% names(priors)){
-    prior_list["sigma.sq"] <- priors["sigma.sq"]
-  }
-  else{
-    prior_list["sigma.sq"] <- "T(dt(mu = 0, tau = 10, df = 1), 0, )"
-  }
-  #tpc_mcmc = nimbleMCMC(model = nimTPCmod_compiled, niter = 10000)
-  return(list(samples = samples, model = tpc_mcmc, data = data.nimble$data,
-              modelType = model, priors = prior_list, uncomp_model = nimTPCmod))
-}
-
-dn_b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
                       niter = 10000, inits = NULL, burn = 0, constant_list = NULL, ...){
 
   #exception handling and variable setup
@@ -380,6 +295,8 @@ dn_b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
   else{
     prior_list["sigma.sq"] <- "T(dt(mu = 0, tau = 10, df = 1), 0, )"
   }
+
+  rm(nimble_mod_function, envir = .GlobalEnv)
   #tpc_mcmc = nimbleMCMC(model = nimTPCmod_compiled, niter = 10000)
   return(list(samples = samples, model = tpc_mcmc, data = data.nimble$data,
               modelType = model, priors = prior_list, uncomp_model = nimTPCmod))
