@@ -135,7 +135,7 @@ configure_inits <- function(inits, model_params){
 
 configure_constants <- function(model_info,N, model_constants, constant_list){
   model <- model_info$name[[1]]
-  constants = vector('list', 0)
+  constants = vector('double', 0)
   const.list = vector('list', 0)
   const.list$N = N
 
@@ -155,13 +155,13 @@ configure_constants <- function(model_info,N, model_constants, constant_list){
       sorted_constants <- sort(model_constants)
       for (i in 1:length(model_constants)){
         if (sorted_constants[i] %in% names(constant_list)){
-          constants[i] = constant_list[sorted_constants[i]]
+          constants[i] = constant_list[[sorted_constants[i]]]
         }
         else{
           warning("Constant '", sorted_constants[i],
                   "' not provided. Using default value '",
                   sorted_constants[i],"' = ",model_info$default_constants[[1]][i],".")
-          constants[i] = model_info$default_constants[[1]][i]
+          constants[i] = model_info$default_constants[[1]][[i]]
         }
 
       }
