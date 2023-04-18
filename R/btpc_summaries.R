@@ -51,7 +51,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
     stop('Argument plotOnly = TRUE requires argument plot to also be TRUE')
   }
 
-  if (is.null(Temp_interval)) Temp_interval = seq(from = min(TPC$data$data$Temp), to = max(TPC$data$data$Temp), length.out = 1000)
+  if (is.null(Temp_interval)) Temp_interval = seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
   tpc_fun = bayesTPC:::model_evaluation_function(TPC$modelType)
   max.ind = nrow(TPC$samples)
   tpc_evals = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, ...)
@@ -72,7 +72,6 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       plot(Temp_interval, upper_bounds, type = 'l', lty = 2, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(upper_bounds)))
       points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
       points(Temp_interval, medians, type = 'l', col = 'blue')
-      #points(TPC$data$data$Temp, TPC$data$data$Trait)
       if (plotOnly){
         return(invisible(NULL))
       } else{
@@ -209,7 +208,7 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
     stop('Argument plotOnly = TRUE requires argument plot to also be TRUE')
   }
 
-  if (is.null(Temp_interval)) Temp_interval = seq(from = min(TPC$data$data$Temp), to = max(TPC$data$data$Temp), length.out = 1000)
+  if (is.null(Temp_interval)) Temp_interval = seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
   tpc_fun = bayesTPC:::model_evaluation_function(TPC$modelType)
   max.ind = nrow(TPC$samples)
   if (!is.null(seed)) set.seed(seed)
@@ -235,11 +234,11 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       medians = rowMedians(post_pred_samples)
     }
     if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', lty = 3, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$data$Trait))))
+      plot(Temp_interval, upper_bounds, type = 'l', lty = 3, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$Trait))))
       points(Temp_interval, tpc_ev, col = 'red', type = 'l', lty = 2, lwd = 1.1)
       points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 3)
       points(Temp_interval, medians, type = 'l', col = 'blue')
-      points(TPC$data$data$Temp, TPC$data$data$Trait)
+      points(TPC$data$Temp, TPC$data$Trait)
       if (plotOnly){
         return(invisible(NULL))
       } else{
@@ -288,11 +287,11 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       means = rowMeans2(post_pred_samples)
     }
     if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 3, xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$data$Trait))))
+      plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 3, xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$Trait))))
       points(Temp_interval, tpc_ev, col = 'red', type = 'l', lty = 2, lwd = 1.1)
       points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 3)
       points(Temp_interval, means, type = 'l', col = 'blue')
-      points(TPC$data$data$Temp, TPC$data$data$Trait)
+      points(TPC$data$Temp, TPC$data$Trait)
 
       if (plotOnly){
         return(invisible(NULL))
