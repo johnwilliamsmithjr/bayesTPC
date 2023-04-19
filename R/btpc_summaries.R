@@ -215,7 +215,7 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   truncmeans = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, ...)
   ## checking logic here...
   post_pred_draw <- function(X){
-    return(rtruncnorm(n = length(X) - 1, mean = X[1:(length(X)-1)], sd = X[length(X)],
+    return(rtruncnorm(n = length(X) - 1, mean = X[1:(length(X)-1)], sd = sqrt(X[length(X)]),
                       a = 0))
   }
   post_pred_samples = apply(FUN = post_pred_draw, X = rbind(truncmeans, TPC$samples[(burn+1):max.ind,'sigma.sq']),
