@@ -13,7 +13,7 @@ checkParams <- function(model, params){
   #that calls the nimble function, probably
   if (is.null(names(params))) stop('Error in call to tpc evaluation function. param input must be named.')
   if (!all(sapply(params, is.numeric))) stop("All parameter values must be numeric.")
-  priorNames <- names(defaultPriors(model))
+  priorNames <- model_master_list[model_master_list$name == model,]$params[[1]]
   priorNames <- priorNames[priorNames != "sigma.sq"]
   if (!all(priorNames %in% names(params))){
     missingpriors <- paste(priorNames[!(priorNames %in% names(params))], collapse = " ")
