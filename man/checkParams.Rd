@@ -4,14 +4,12 @@
 \alias{checkParams}
 \title{Checks Prior data format}
 \usage{
-checkParams(model, params, posteriorPredictive)
+checkParams(model, params)
 }
 \arguments{
 \item{model}{character, the model type}
 
 \item{params}{named vector, contains the actual params from the function call}
-
-\item{posteriorPredictive}{logical, should posterior predictive be generated insread of evaluating the deterministic model. default = FALSE}
 }
 \value{
 list, input params coerced as a vector, if necessary
