@@ -229,7 +229,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
 
   #exception handling and variable setup
   data.nimble = checkData(data)
-
+  nimble_mod_function <- NULL
   model_info <-
     model_master_list[model_master_list$name == model,]
   model_params <- model_info$params[[1]]
@@ -296,8 +296,17 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
     prior_list["sigma.sq"] <- "T(dt(mu = 0, tau = 10, df = 1), 0, )"
   }
 
+  if (!is.null(model_constants)){
+    constants <- const.list$constants[1:(length(const.list$constants)-1)]
+    names(constants) <- model_constants
+  }
+  else{
+    constants <- NULL
+  }
+
+
   rm(nimble_mod_function, envir = .GlobalEnv)
   #tpc_mcmc = nimbleMCMC(model = nimTPCmod_compiled, niter = 10000)
   return(list(samples = samples, model = tpc_mcmc, data = data.nimble$data,
-              modelType = model, priors = prior_list, uncomp_model = nimTPCmod))
+              modelType = model, priors = prior_list, constants = constants, uncomp_model = nimTPCmod))
 }

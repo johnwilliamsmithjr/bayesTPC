@@ -54,7 +54,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   if (is.null(Temp_interval)) Temp_interval = seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
   tpc_fun = model_evaluation_function(TPC$modelType)
   max.ind = nrow(TPC$samples)
-  tpc_evals = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, ...)
+  tpc_evals = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval,constants = TPC$constants, MARGIN = 1, ...)
 
   if (centralSummary == 'median'){
     if (summaryType == 'quantile'){
@@ -212,7 +212,7 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   tpc_fun = model_evaluation_function(TPC$modelType)
   max.ind = nrow(TPC$samples)
   if (!is.null(seed)) set.seed(seed)
-  truncmeans = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, ...)
+  truncmeans = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval,constants = TPC$constants, MARGIN = 1, ...)
   ## checking logic here...
   post_pred_draw <- function(X){
     return(truncnorm::rtruncnorm(n = length(X) - 1, mean = X[1:(length(X)-1)], sd = sqrt(X[length(X)]),
@@ -220,7 +220,7 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   }
   post_pred_samples = apply(FUN = post_pred_draw, X = rbind(truncmeans, TPC$samples[(burn+1):max.ind,'sigma.sq']),
                             MARGIN = 2)
-  tpc_ev = matrixStats::rowMeans2(apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, ...))
+  tpc_ev = matrixStats::rowMeans2(truncmeans)
   if (centralSummary == 'median'){
     if (summaryType == 'quantile'){
       upper_bounds = matrixStats::rowQuantiles(post_pred_samples, probs = probs[2])
