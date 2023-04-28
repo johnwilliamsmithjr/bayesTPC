@@ -251,13 +251,13 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
   #create the model evaluation function
   eval(.direct_nimble(model))
   assign('nimble_mod_function', nimble_mod_function, envir = .GlobalEnv)
-  nimTPCmod = nimbleModel(str2expression(modelStr), constants = const.list,
+  nimTPCmod = nimble::nimbleModel(str2expression(modelStr), constants = const.list,
                           data = data.nimble$data, inits = inits.list,
                           where = environment())
 
-  nimTPCmod_compiled = compileNimble(nimTPCmod)
+  nimTPCmod_compiled = nimble::compileNimble(nimTPCmod)
 
-  mcmcConfig <- configureMCMC(nimTPCmod)
+  mcmcConfig <- nimble::configureMCMC(nimTPCmod)
 
   # set correct sampler type
   bugs_params <- c(paste0("params[",1:length(model_params),"]"), "sigma.sq")
@@ -273,10 +273,10 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
   }
 
   mcmcConfig$enableWAIC = TRUE
-  mcmc <- buildMCMC(mcmcConfig)
-  tpc_mcmc <- compileNimble(mcmc, project = nimTPCmod)
+  mcmc <- nimble::buildMCMC(mcmcConfig)
+  tpc_mcmc <- nimble::compileNimble(mcmc, project = nimTPCmod)
   tpc_mcmc$run(niter, ...)
-  samples = as.mcmc(as.matrix(tpc_mcmc$mvSamples))
+  samples = coda::as.mcmc(as.matrix(tpc_mcmc$mvSamples))
 
   default_priors <- model_info$default_priors[[1]]
   prior_list = list()

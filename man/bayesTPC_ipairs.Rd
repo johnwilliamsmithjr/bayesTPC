@@ -38,8 +38,4 @@ This is a wrapper to create trace plots using coda's `traceplot` function.
 \examples{
 ## need data to set up example here. placeholder for now
 ## set params and reference temperature set
-myfun = str2tpc_fun(model = 'gaussian')
-param_set = c(T.opt = 36, a = 6.5, rmax = 2.75)
-Temp_ref = seq(from = 5, to = 50, length.out = 1000)
-plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
 }

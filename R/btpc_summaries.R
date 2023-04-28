@@ -52,26 +52,26 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   }
 
   if (is.null(Temp_interval)) Temp_interval = seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
-  tpc_fun = bayesTPC:::model_evaluation_function(TPC$modelType)
+  tpc_fun = model_evaluation_function(TPC$modelType)
   max.ind = nrow(TPC$samples)
   tpc_evals = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, ...)
 
   if (centralSummary == 'median'){
     if (summaryType == 'quantile'){
-      upper_bounds = rowQuantiles(tpc_evals, probs = probs[2])
-      lower_bounds = rowQuantiles(tpc_evals, probs = probs[1])
-      medians = rowMedians(tpc_evals)
+      upper_bounds = matrixStats::rowQuantiles(tpc_evals, probs = probs[2])
+      lower_bounds = matrixStats::rowQuantiles(tpc_evals, probs = probs[1])
+      medians = matrixStats::rowMedians(tpc_evals)
     }
     if (summaryType == 'hdi'){
-      hdi_mat = apply(FUN = hdi, X = tpc_evals, MARGIN = 1, credMass = probs)
+      hdi_mat = apply(FUN = HDInterval::hdi, X = tpc_evals, MARGIN = 1, credMass = probs)
       upper_bounds = hdi_mat[2,]
       lower_bounds = hdi_mat[1,]
-      medians = rowMedians(tpc_evals)
+      medians = matrixStats::rowMedians(tpc_evals)
     }
     if (plot){
       plot(Temp_interval, upper_bounds, type = 'l', lty = 2, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(upper_bounds)))
-      points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
-      points(Temp_interval, medians, type = 'l', col = 'blue')
+      graphics::points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
+      graphics::points(Temp_interval, medians, type = 'l', col = 'blue')
       if (plotOnly){
         return(invisible(NULL))
       } else{
@@ -105,20 +105,20 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   }
   if (centralSummary == 'mean'){
     if (summaryType == 'quantile'){
-      upper_bounds = rowQuantiles(tpc_evals, probs = tail.probs[2])
-      lower_bounds = rowQuantiles(tpc_evals, probs = tail.probs[1])
-      means = rowMeans2(tpc_evals)
+      upper_bounds = matrixStats::rowQuantiles(tpc_evals, probs = probs[2])
+      lower_bounds = matrixStats::rowQuantiles(tpc_evals, probs = probs[1])
+      means = matrixStats::rowMeans2(tpc_evals)
     }
     if (summaryType == 'hdi'){
-      hdi_mat = apply(FUN = hdi, X = tpc_evals, MARGIN = 1, credMass = probs)
+      hdi_mat = apply(FUN = HDInterval::hdi, X = tpc_evals, MARGIN = 1, credMass = probs)
       upper_bounds = hdi_mat[2,]
       lower_bounds = hdi_mat[1,]
-      means = rowMeans2(tpc_evals)
+      means = matrixStats::rowMeans2(tpc_evals)
     }
     if (plot){
       plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 2, xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(upper_bounds)))
-      points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
-      points(Temp_interval, means, type = 'l', col = 'blue')
+      graphics::points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
+      graphics::points(Temp_interval, means, type = 'l', col = 'blue')
       if (plotOnly){
         return(invisible(NULL))
       } else{
@@ -209,36 +209,36 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   }
 
   if (is.null(Temp_interval)) Temp_interval = seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
-  tpc_fun = bayesTPC:::model_evaluation_function(TPC$modelType)
+  tpc_fun = model_evaluation_function(TPC$modelType)
   max.ind = nrow(TPC$samples)
   if (!is.null(seed)) set.seed(seed)
   truncmeans = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, ...)
   ## checking logic here...
   post_pred_draw <- function(X){
-    return(rtruncnorm(n = length(X) - 1, mean = X[1:(length(X)-1)], sd = sqrt(X[length(X)]),
+    return(truncnorm::rtruncnorm(n = length(X) - 1, mean = X[1:(length(X)-1)], sd = sqrt(X[length(X)]),
                       a = 0))
   }
   post_pred_samples = apply(FUN = post_pred_draw, X = rbind(truncmeans, TPC$samples[(burn+1):max.ind,'sigma.sq']),
                             MARGIN = 2)
-  tpc_ev = rowMeans2(apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, ...))
+  tpc_ev = matrixStats::rowMeans2(apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval, MARGIN = 1, ...))
   if (centralSummary == 'median'){
     if (summaryType == 'quantile'){
-      upper_bounds = rowQuantiles(post_pred_samples, probs = probs[2])
-      lower_bounds = rowQuantiles(post_pred_samples, probs = probs[1])
-      medians = rowMedians(post_pred_samples)
+      upper_bounds = matrixStats::rowQuantiles(post_pred_samples, probs = probs[2])
+      lower_bounds = matrixStats::rowQuantiles(post_pred_samples, probs = probs[1])
+      medians = matrixStats::rowMedians(post_pred_samples)
     }
     if (summaryType == 'hdi'){
-      hdi_mat = apply(FUN = hdi, X = post_pred_samples, MARGIN = 1, credMass = probs)
+      hdi_mat = apply(FUN = HDInterval::hdi, X = post_pred_samples, MARGIN = 1, credMass = probs)
       upper_bounds = hdi_mat[2,]
       lower_bounds = hdi_mat[1,]
-      medians = rowMedians(post_pred_samples)
+      medians = matrixStats::rowMedians(post_pred_samples)
     }
     if (plot){
       plot(Temp_interval, upper_bounds, type = 'l', lty = 3, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$Trait))))
-      points(Temp_interval, tpc_ev, col = 'red', type = 'l', lty = 2, lwd = 1.1)
-      points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 3)
-      points(Temp_interval, medians, type = 'l', col = 'blue')
-      points(TPC$data$Temp, TPC$data$Trait)
+      graphics::points(Temp_interval, tpc_ev, col = 'red', type = 'l', lty = 2, lwd = 1.1)
+      graphics::points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 3)
+      graphics::points(Temp_interval, medians, type = 'l', col = 'blue')
+      graphics::points(TPC$data$Temp, TPC$data$Trait)
       if (plotOnly){
         return(invisible(NULL))
       } else{
@@ -276,22 +276,22 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   }
   if (centralSummary == 'mean'){
     if (summaryType == 'quantile'){
-      upper_bounds = rowQuantiles(post_pred_samples, probs = tail.probs[2])
-      lower_bounds = rowQuantiles(post_pred_samples, probs = tail.probs[1])
-      means = rowMeans2(post_pred_samples)
+      upper_bounds = matrixStats::rowQuantiles(post_pred_samples, probs = probs[2])
+      lower_bounds = matrixStats::rowQuantiles(post_pred_samples, probs = probs[1])
+      means = matrixStats::rowMeans2(post_pred_samples)
     }
     if (summaryType == 'hdi'){
-      hdi_mat = apply(FUN = hdi, X = post_pred_samples, MARGIN = 1, credMass = probs)
+      hdi_mat = apply(FUN = HDInterval::hdi, X = post_pred_samples, MARGIN = 1, credMass = probs)
       upper_bounds = hdi_mat[2,]
       lower_bounds = hdi_mat[1,]
-      means = rowMeans2(post_pred_samples)
+      means = matrixStats::rowMeans2(post_pred_samples)
     }
     if (plot){
       plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 3, xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$Trait))))
-      points(Temp_interval, tpc_ev, col = 'red', type = 'l', lty = 2, lwd = 1.1)
-      points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 3)
-      points(Temp_interval, means, type = 'l', col = 'blue')
-      points(TPC$data$Temp, TPC$data$Trait)
+      graphics::points(Temp_interval, tpc_ev, col = 'red', type = 'l', lty = 2, lwd = 1.1)
+      graphics::points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 3)
+      graphics::points(Temp_interval, means, type = 'l', col = 'blue')
+      graphics::points(TPC$data$Temp, TPC$data$Trait)
 
       if (plotOnly){
         return(invisible(NULL))

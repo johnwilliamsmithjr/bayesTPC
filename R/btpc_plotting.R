@@ -21,16 +21,16 @@
 traceplot <- function(object, burn = 0, thin = 1, ...){
   if (is.list(object)) if (is.null(object$samples)) stop('Object of class list must have element "samples"')
   if (is.list(object)){
-    if (is.mcmc(object$samples)){
+    if (coda::is.mcmc(object$samples)){
       N = nrow(object$samples)
       thinned = seq(from = burn+1, to = N, by = thin)
-      coda::traceplot(x = as.mcmc(object$samples[thinned,]), ...)
+      coda::traceplot(x = coda::as.mcmc(object$samples[thinned,]), ...)
       return(invisible(NULL))
     }
   } else{
     N = nrow(object)
     thinned = seq(from = burn+1, to = N, by = thin)
-    coda::traceplot(x = as.mcmc(object[thinned,]), ...)
+    coda::traceplot(x = coda::as.mcmc(object[thinned,]), ...)
     return(invisible(NULL))
   }
 }
@@ -49,19 +49,15 @@ traceplot <- function(object, burn = 0, thin = 1, ...){
 #' @examples
 #' ## need data to set up example here. placeholder for now
 #' ## set params and reference temperature set
-#' myfun = str2tpc_fun(model = 'gaussian')
-#' param_set = c(T.opt = 36, a = 6.5, rmax = 2.75)
-#' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
-#' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
 
 bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
                             ztransf = function(x){x[x<1] <- 1; log2(x)}, ...){
   if (is.list(x)) if(is.null(x$samples)) stop('Expected list "x" to have an element called samples')
-  if (!(is.mcmc(x)) & !(is.matrix(x)) & !(is.list(x))) stop('Input "x" is expected as a list, matrix, or mcmc object. See ?bayesTPC.ipairs')
+  if (!(coda::is.mcmc(x)) & !(is.matrix(x)) & !(is.list(x))) stop('Input "x" is expected as a list, matrix, or mcmc object. See ?bayesTPC.ipairs')
   if (is.list(x)){
     N = nrow(x$samples)
     thinned = seq(from = burn+1, to = N, by = thin)
-    if (is.mcmc(x$samples)){
+    if (coda::is.mcmc(x$samples)){
       samples = as.matrix(x$samples)
     } else{
       samples = x$samples
@@ -70,7 +66,7 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
   } else{
     N = nrow(x)
     thinned = seq(from = burn+1, to = N, by = thin)
-    if (is.mcmc(x)){
+    if (coda::is.mcmc(x)){
       samples = as.matrix(x)
     } else{
       samples = x
@@ -105,8 +101,8 @@ ppo_plot <- function(bTPC_object, burn = 0){
     #print(strsplit(bTPC.object$priors[i], '~')[[1]][2])
     prior_exp = strsplit(strsplit(as.character(bTPC_object$priors[i]), '~')[[1]][2], '\\(')
     prior_exp = paste0(prior_exp[[1]][1], '(', 'sort(par_samples),', prior_exp[[1]][2])
-    plot(density(par_samples), type = 'l', col = 'red', lwd = 2, xlab = i,
+    plot(stats::density(par_samples), type = 'l', col = 'red', lwd = 2, xlab = i,
          main = paste0('Prior-Posterior Overlap for ', i))
-    points(sort(par_samples), eval(str2expression(prior_exp)), type = 'l', col = 'blue', lwd = 2, lty = 2)
+    graphics::points(sort(par_samples), eval(str2expression(prior_exp)), type = 'l', col = 'blue', lwd = 2, lty = 2)
   }
 }
