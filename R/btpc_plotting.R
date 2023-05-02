@@ -81,8 +81,9 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #' Create a prior-posterior overlap plot from output of the bTPC function
 #'
 #' @details This is a wrapper to create trace plots using coda's `traceplot` function.
-#' @param bTPC.object List, usually output from the `bTPC` function. `ppo_plot` expects this list to have entries "samples", of class `mcmc` or `numeric` and "priors", with class `list` and entries that match the corresponding model parameters
+#' @param model List, usually output from the `bTPC` function. `ppo_plot` expects this list to have entries "samples", of class `mcmc` or `numeric` and "priors", with class `list` and entries that match the corresponding model parameters
 #' @param burn Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot (default = 0)
+#' @param seq.length Integer, length of sequence used to evaluate prior density (default = 100)
 #' @return Returns invisible(NULL) and creates a prior posterior overlap plot
 #' @examples
 #' ## need data to set up example here. placeholder for now
@@ -92,17 +93,66 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
 #' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
 
-ppo_plot <- function(bTPC_object, burn = 0){
-  if (!is.list(bTPC_object)) stop('Expected input bTPC_object to be a list')
-  if (is.null(bTPC_object$samples)) stop('Expected input bTPC_object to have an entry called "samples"')
-  if (is.null(bTPC_object$priors)) stop('Expected input bTPC_object to have an entry called "priors"')
-  for (i in colnames(bTPC_object$samples)){
-    par_samples <- as.numeric(bTPC_object$samples[(burn+1):(nrow(bTPC_object$samples)),i])
-    #print(strsplit(bTPC.object$priors[i], '~')[[1]][2])
-    prior_exp = strsplit(strsplit(as.character(bTPC_object$priors[i]), '~')[[1]][2], '\\(')
-    prior_exp = paste0(prior_exp[[1]][1], '(', 'sort(par_samples),', prior_exp[[1]][2])
-    plot(stats::density(par_samples), type = 'l', col = 'red', lwd = 2, xlab = i,
-         main = paste0('Prior-Posterior Overlap for ', i))
-    graphics::points(sort(par_samples), eval(str2expression(prior_exp)), type = 'l', col = 'blue', lwd = 2, lty = 2)
+ppo_plot <- function(model, burn = 0, seq.length = 100){
+  ppo_parameters <- unlist(bayesTPC:::get_model_params(model$modelType))
+  ppo_parameters <- sort(ppo_parameters)
+  if ('sigma.sq' %in% colnames(model$samples)){
+    param_list <- c(ppo_parameters, 'sigma.sq')
+  } else{
+    param_list <- ppo_parameters
+  }
+
+  init_eval_fun <- function(x, name){
+    inits_vec <- rep(NA, length(param_list))
+    names(inits_vec) <- param_list
+    inits_vec[name] <- x
+    return(bayesTPC:::configure_inits(inits = as.list(inits_vec),
+                                      bayesTPC:::get_model_params(model$modelType)))
+  }
+
+  get_prior_eval <- function(x, name){
+    model$uncomp_model$setInits(x)
+    return(exp(model$uncomp_model$calculate(name)))
+  }
+
+  for (i in 1:length(param_list)){
+    if ('sigma.sq' %in% param_list & i != length(param_list)){
+      param_string <- paste0('params[', i, ']')
+    } else if ('sigma.sq' %in% param_list & i == length(param_list)){
+      param_string <- param_list[i]
+    } else{
+      param_string <- paste0('params[', i, ']')
+    }
+    seq_lower <- ifelse(
+      test = is.infinite(getBound(model$uncomp_model, param_string , 'lower')),
+      yes = .5 * min(model$samples[(burn+1):nrow(model$samples),param_list[i]]),
+      no = getBound(model$uncomp_model, param_string , 'lower')
+    )
+
+    seq_upper <- ifelse(
+      test = is.infinite(getBound(model$uncomp_model, param_string , 'upper')),
+      yes = 2 * max(model$samples[(burn+1):nrow(model$samples),param_list[i]]),
+      no = getBound(model$uncomp_model, param_string , 'upper')
+    )
+
+    eval_seq <- seq(from = seq_lower, to = seq_upper, length.out = seq.length)
+
+    init_sets <- apply(X = matrix(eval_seq, ncol = 1),
+                       MARGIN = 1,
+                       FUN = init_eval_fun,
+                       name = param_list[i])
+
+    prior_evals <- sapply(X = init_sets, FUN = get_prior_eval, name = param_string)
+
+    posterior_approx <- density(model$samples[(burn+1):nrow(model$samples),param_list[i]])
+
+    ylim_ppo <- c(0, 1.05*max(c(max(posterior_approx$y), max(prior_evals))))
+
+    plot(eval_seq, prior_evals, ylim = ylim_ppo, type = 'l', col = 'red',
+         ylab = 'Density', xlab = param_list[i], lwd = 2,
+         main = paste0('Prior-Posterior Overlap Plot for ', param_list[i]))
+    points(posterior_approx, type = 'l', col = 'blue', lwd = 2, lty = 2)
+    legend('topleft', legend = c('Prior', 'Posterior'), col = c('red', 'blue'),
+           lty = c(1,2), lwd = c(2,2))
   }
 }

@@ -293,7 +293,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
     prior_list["sigma.sq"] <- priors["sigma.sq"]
   }
   else{
-    prior_list["sigma.sq"] <- "T(dt(mu = 0, tau = 10, df = 1), 0, )"
+    prior_list["sigma.sq"] <- "T(dt(mu = 0, tau = 1/10, df = 1), 0, )"
   }
 
   if (!is.null(model_constants)){
