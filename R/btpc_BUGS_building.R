@@ -90,7 +90,7 @@ priors_string <- function(model,
   }
   else{
     param_string[num_params + 1] <-
-      'sigma.sq ~ T(dt(mu = 0, tau = 10, df = 1), 0, )'
+      'sigma.sq ~ T(dt(mu = 0, tau = 1/10, df = 1), 0, )'
   }
 
 
@@ -260,7 +260,12 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
   mcmcConfig <- nimble::configureMCMC(nimTPCmod)
 
   # set correct sampler type
-  bugs_params <- c(paste0("params[",1:length(model_params),"]"), "sigma.sq")
+  if (model_info$density_function[[1]] == "normal"){
+    bugs_params <- c(paste0("params[",1:length(model_params),"]"), "sigma.sq")
+  }
+  else if (model_info$density_function[[1]] == "binomial"){
+    bugs_params <- paste0("params[",1:length(model_params),"]")
+  }
   if (samplerType == 'slice'){
     for (i in bugs_params){
       mcmcConfig$removeSamplers(i)
@@ -274,7 +279,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
 
   mcmcConfig$enableWAIC = TRUE
   mcmc <- nimble::buildMCMC(mcmcConfig)
-  tpc_mcmc <- nimble::compileNimble(mcmc, project = nimTPCmod)
+  tpc_mcmc <- nimble::compileNimble(mcmc, project = nimTPCmod_compiled)
   tpc_mcmc$run(niter, ...)
   samples = coda::as.mcmc(as.matrix(tpc_mcmc$mvSamples))
 
