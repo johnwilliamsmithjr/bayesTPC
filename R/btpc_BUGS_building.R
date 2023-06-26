@@ -127,7 +127,7 @@ configure_inits <- function(inits, model_params){
     }
   }
   else{
-    inits.list = NULL
+    inits.list = list()
   }
 
   return(inits.list)
@@ -144,7 +144,7 @@ configure_constants <- function(model_info,N, model_constants, constant_list){
     if (is.null(constant_list)){
       warning(paste0("Constant list not found for model = '", model ,
                      "'. Setting default value for all constants.\n"))
-      constants = c(model_info$default_constants[[1]], NA)
+      constants = c(model_info$default_constants[[1]], -1)
       const.list$constants = constants
     }
     else{
@@ -168,13 +168,13 @@ configure_constants <- function(model_info,N, model_constants, constant_list){
 
       if (length(constant_list) == 1){
         #to ensure nimble sees this as a vector and not a scalar
-        constants[length(constant_list) + 1] = NA
+        constants[length(constant_list) + 1] = -1
         const.list$constants = constants
       }
     }
   }
   else{
-    constants[1:2] <- NA
+    constants[1:2] <- -1
     const.list$constants = constants
   }
 
@@ -225,7 +225,7 @@ configure_model <- function(model, priors = NULL, constants = NULL,verbose = TRU
 }
 
 b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
-                      niter = 10000, inits = NULL, burn = 0, constant_list = NULL, ...){
+                      niter = 10000, inits = NULL, burn = 0, constant_list = NULL, verbose = FALSE, ...){
 
   #exception handling and variable setup
   data.nimble = checkData(data)
@@ -257,7 +257,8 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
 
   nimTPCmod_compiled = nimble::compileNimble(nimTPCmod)
 
-  mcmcConfig <- nimble::configureMCMC(nimTPCmod)
+  #no printing because sampler hasn't changed yet, can be confusing
+  mcmcConfig <- nimble::configureMCMC(nimTPCmod, print = F)
 
   # set correct sampler type
   if (model_info$density_function[[1]] == "normal"){
@@ -276,6 +277,15 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
     mcmcConfig$removeSamplers(bugs_params)
     mcmcConfig$addSampler(bugs_params, type = samplerType)
   }
+
+  if (verbose){
+    #Manually Printing
+    cat("===== Monitors ===== \n")
+    mcmcConfig$printMonitors()
+    cat("===== Samplers ===== \n")
+    mcmcConfig$printSamplers(byType = T)
+  }
+
 
   mcmcConfig$enableWAIC = TRUE
   mcmc <- nimble::buildMCMC(mcmcConfig)

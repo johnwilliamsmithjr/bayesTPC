@@ -5,7 +5,6 @@ model_evaluation_function <- function(model){
   model_info <-
     model_master_list[model_master_list$name == model,]
 
-  #assume params and constants are sorted lexicographically
   sorted_pars <- sort(unlist(model_info$params))
   sorted_consts <- sort(unlist(model_info$constants))
   formula_string <- model_info$formula[[1]]
@@ -31,6 +30,7 @@ paste0(const_string, collapse = ""),
 }
 
 #functioning
+#internal, probably shouldn't export this
 .direct_nimble <- function(model){
   if (!(model %in% model_master_list[model_master_list$name == model,][[1]])){
     stop("Unsupported model, use get_models() to view implemented models.")
