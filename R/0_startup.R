@@ -1,4 +1,1 @@
-load("data/models.Rdata")
-
-#' @export
-
+utils::globalVariables("model_master_list")

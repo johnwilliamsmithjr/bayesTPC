@@ -14,19 +14,19 @@ configure_model(model, priors = NULL, constants = NULL, verbose = TRUE)
 \item{verbose}{logical, optional input. If verbose = TRUE, messages are printed when for priors that deviate from the defaultPriors(model) (see ?defaultPriors for additional information). Default = TRUE}
 }
 \value{
-character, character string specifying the default model formulation to be passed to `nimble`.
+character, character string specifying the default model formulation to be passed to \code{nimble}.
 }
 \description{
 Create model string for thermal performance curve model to be passed to nimble
 }
 \details{
-This function returns a character string of the full `nimble` model for a user-specified thermal performance curve and prior distributions
+This function returns a character string of the full \code{nimble} model for a user-specified thermal performance curve and prior distributions
 }
 \examples{
 ## Print default model for briere
-cat(defaultModel(model = 'briere'))
+cat(defaultModel(model = "briere"))
 
 ## Use custom prior for 'q' parameter in quadratic curve
-my_prior = list(q = 'q~beta(.5, .5)')
-cat(defaultModel(model = 'quadratic', priors = my_prior))
+my_prior <- list(q = "q~beta(.5, .5)")
+cat(defaultModel(model = "quadratic", priors = my_prior))
 }

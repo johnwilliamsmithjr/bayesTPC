@@ -7,27 +7,28 @@
 get_formula(model)
 }
 \arguments{
-\item{model}{A string specifying the model name. Use `get_models()` to view all options.}
+\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
 }
 \value{
-`get_formula` Returns the formula for the provided model as a string.
+\code{get_formula} Returns the formula for the provided model as a string.
 }
 \description{
 Returns the formula for a specified model.
 }
 \details{
-Since the model formulas are stored and returned as strings, one of `parse()`
- or its wrappers `str2lang()` and `str2expression()` can be used in conjunction with `eval()` for dynamic evaluation.
- However, it is better practice to use the output of `get_model_function()` for direct model evaluation.
+Since the model formulas are stored and returned as strings, one of \code{\link[=str2lang]{str2lang()}} or
+\code{\link[=str2expression]{str2expression()}} can be used in conjunction with \code{\link[=eval]{eval()}} for dynamic evaluation.
+However, it is better practice to use the output of \code{\link[=get_model_function]{get_model_function()}} for direct model evaluation.
 }
 \examples{
 get_formula("stinner")
 
 # If used to evaluate, variables must be set beforehand.
-q = .75
-T_max = 35
-T_min = 10
-Temps = c(15, 20, 25, 30)
+q <- .75
+T_max <- 35
+T_min <- 10
+Temps <- c(15, 20, 25, 30)
 ans <- eval(str2lang(get_formula("quadratic")))
+ans
 
 }

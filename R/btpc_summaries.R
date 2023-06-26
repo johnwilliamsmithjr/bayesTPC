@@ -18,135 +18,148 @@
 #' @examples
 #' ## need data to set up example here. placeholder for now
 #' ## set params and reference temperature set
-#' myfun = str2tpc_fun(model = 'gaussian')
-#' param_set = c(T.opt = 36, a = 6.5, rmax = 2.75)
-#' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
-#' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
-
-
+#' myfun <- str2tpc_fun(model = "gaussian")
+#' param_set <- c(T.opt = 36, a = 6.5, rmax = 2.75)
+#' Temp_ref <- seq(from = 5, to = 50, length.out = 1000)
+#' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = "l")
 bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
-                             summaryType = 'hdi', centralSummary = 'median',
+                             summaryType = "hdi", centralSummary = "median",
                              plot = TRUE, probs = c(.05, .95),
-                             burn = 0, plotOnly = FALSE, traitName = 'Trait', ...){
-  if (!(summaryType %in% c('hdi', 'quantile')) & summaryOnly) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
-  if (!(centralSummary %in% c('mean', 'median')) & summaryOnly) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
+                             burn = 0, plotOnly = FALSE, traitName = "Trait", ...) {
+  if (!(summaryType %in% c("hdi", "quantile")) & summaryOnly) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
+  if (!(centralSummary %in% c("mean", "median")) & summaryOnly) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
 
-  if (length(probs) == 2 & (probs[2] < probs[1])){
-    stop('Incorrect specification of tail probabilities for quantile method. Tail probs must be provided in the form c(lower, upper)')
+  if (length(probs) == 2 & (probs[2] < probs[1])) {
+    stop("Incorrect specification of tail probabilities for quantile method. Tail probs must be provided in the form c(lower, upper)")
   }
-  if (!(is.logical(summaryOnly))){
-    stop('Argument summaryOnly must be provided as a logical (= TRUE or = FALSE)')
+  if (!(is.logical(summaryOnly))) {
+    stop("Argument summaryOnly must be provided as a logical (= TRUE or = FALSE)")
   }
-  if ((length(probs) > 1) & summaryType == 'hdi'){
-    if (all(probs == c(.05,.95))){
-      probs = .9
+  if ((length(probs) > 1) & summaryType == "hdi") {
+    if (all(probs == c(.05, .95))) {
+      probs <- .9
       warning('Currently using summaryType = "hdi". Default credible interval mass is credMass = .9)')
-    } else{
+    } else {
       stop('For summaryType = "hdi", only one value is accepted for argument probs')
     }
-
   }
 
-  if (plot == FALSE & plotOnly == TRUE){
-    stop('Argument plotOnly = TRUE requires argument plot to also be TRUE')
+  if (plot == FALSE & plotOnly == TRUE) {
+    stop("Argument plotOnly = TRUE requires argument plot to also be TRUE")
   }
 
-  if (is.null(Temp_interval)) Temp_interval = seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
-  tpc_fun = model_evaluation_function(TPC$modelType)
-  max.ind = nrow(TPC$samples)
-  tpc_evals = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval,constants = TPC$constants, MARGIN = 1, ...)
+  if (is.null(Temp_interval)) Temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
+  tpc_fun <- .model_evaluation_function(TPC$modelType)
+  max.ind <- nrow(TPC$samples)
+  tpc_evals <- apply(tpc_fun, X = TPC$samples[(burn + 1):max.ind, ], Temp = Temp_interval, constants = TPC$constants, MARGIN = 1, ...)
 
-  if (centralSummary == 'median'){
-    if (summaryType == 'quantile'){
-      upper_bounds = matrixStats::rowQuantiles(tpc_evals, probs = probs[2])
-      lower_bounds = matrixStats::rowQuantiles(tpc_evals, probs = probs[1])
-      medians = matrixStats::rowMedians(tpc_evals)
+  if (centralSummary == "median") {
+    if (summaryType == "quantile") {
+      upper_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = probs[2])
+      lower_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = probs[1])
+      medians <- matrixStats::rowMedians(tpc_evals)
     }
-    if (summaryType == 'hdi'){
-      hdi_mat = apply(FUN = HDInterval::hdi, X = tpc_evals, MARGIN = 1, credMass = probs)
-      upper_bounds = hdi_mat[2,]
-      lower_bounds = hdi_mat[1,]
-      medians = matrixStats::rowMedians(tpc_evals)
+    if (summaryType == "hdi") {
+      hdi_mat <- apply(FUN = HDInterval::hdi, X = tpc_evals, MARGIN = 1, credMass = probs)
+      upper_bounds <- hdi_mat[2, ]
+      lower_bounds <- hdi_mat[1, ]
+      medians <- matrixStats::rowMedians(tpc_evals)
     }
-    if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', lty = 2, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(upper_bounds)))
-      graphics::points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
-      graphics::points(Temp_interval, medians, type = 'l', col = 'blue')
-      if (plotOnly){
+    if (plot) {
+      plot(Temp_interval, upper_bounds, type = "l", lty = 2, col = "blue", xlab = "Temperature (C)", ylab = traitName, ylim = c(0, max(upper_bounds)))
+      graphics::points(Temp_interval, lower_bounds, type = "l", col = "blue", lty = 2)
+      graphics::points(Temp_interval, medians, type = "l", col = "blue")
+      if (plotOnly) {
         return(invisible(NULL))
-      } else{
-        if (summaryOnly == FALSE){
-          return(list(TPC_vals = tpc_evals,
-                      Temp_interval = Temp_interval,
-                      Upper_bounds = upper_bounds,
-                      Lower_bounds = lower_bounds,
-                      Medians = medians))
-        } else{
-          return(list(Temp_interval = Temp_interval,
-                      Upper_bounds = upper_bounds,
-                      Lower_bounds = lower_bounds,
-                      Medians = medians))
+      } else {
+        if (summaryOnly == FALSE) {
+          return(list(
+            TPC_vals = tpc_evals,
+            Temp_interval = Temp_interval,
+            Upper_bounds = upper_bounds,
+            Lower_bounds = lower_bounds,
+            Medians = medians
+          ))
+        } else {
+          return(list(
+            Temp_interval = Temp_interval,
+            Upper_bounds = upper_bounds,
+            Lower_bounds = lower_bounds,
+            Medians = medians
+          ))
         }
       }
-    } else{
-      if (summaryOnly == FALSE){
-        return(list(TPC_vals = tpc_evals,
-                    Temp_interval = Temp_interval,
-                    Upper_bounds = upper_bounds,
-                    Lower_bounds = lower_bounds,
-                    Medians = medians))
-      } else{
-        return(list(Temp_interval = Temp_interval,
-                    Upper_bounds = upper_bounds,
-                    Lower_bounds = lower_bounds,
-                    Medians = medians))
+    } else {
+      if (summaryOnly == FALSE) {
+        return(list(
+          TPC_vals = tpc_evals,
+          Temp_interval = Temp_interval,
+          Upper_bounds = upper_bounds,
+          Lower_bounds = lower_bounds,
+          Medians = medians
+        ))
+      } else {
+        return(list(
+          Temp_interval = Temp_interval,
+          Upper_bounds = upper_bounds,
+          Lower_bounds = lower_bounds,
+          Medians = medians
+        ))
       }
     }
   }
-  if (centralSummary == 'mean'){
-    if (summaryType == 'quantile'){
-      upper_bounds = matrixStats::rowQuantiles(tpc_evals, probs = probs[2])
-      lower_bounds = matrixStats::rowQuantiles(tpc_evals, probs = probs[1])
-      means = matrixStats::rowMeans2(tpc_evals)
+  if (centralSummary == "mean") {
+    if (summaryType == "quantile") {
+      upper_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = probs[2])
+      lower_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = probs[1])
+      means <- matrixStats::rowMeans2(tpc_evals)
     }
-    if (summaryType == 'hdi'){
-      hdi_mat = apply(FUN = HDInterval::hdi, X = tpc_evals, MARGIN = 1, credMass = probs)
-      upper_bounds = hdi_mat[2,]
-      lower_bounds = hdi_mat[1,]
-      means = matrixStats::rowMeans2(tpc_evals)
+    if (summaryType == "hdi") {
+      hdi_mat <- apply(FUN = HDInterval::hdi, X = tpc_evals, MARGIN = 1, credMass = probs)
+      upper_bounds <- hdi_mat[2, ]
+      lower_bounds <- hdi_mat[1, ]
+      means <- matrixStats::rowMeans2(tpc_evals)
     }
-    if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 2, xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(upper_bounds)))
-      graphics::points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 2)
-      graphics::points(Temp_interval, means, type = 'l', col = 'blue')
-      if (plotOnly){
+    if (plot) {
+      plot(Temp_interval, upper_bounds, type = "l", col = "blue", lty = 2, xlab = "Temperature (C)", ylab = traitName, ylim = c(0, max(upper_bounds)))
+      graphics::points(Temp_interval, lower_bounds, type = "l", col = "blue", lty = 2)
+      graphics::points(Temp_interval, means, type = "l", col = "blue")
+      if (plotOnly) {
         return(invisible(NULL))
-      } else{
-        if (summaryOnly == FALSE){
-          return(list(TPC_vals = tpc_evals,
-                      Temp_interval = Temp_interval,
-                      Upper_bounds = upper_bounds,
-                      Lower_bounds = lower_bounds,
-                      Means = means))
-        } else{
-          return(list(Temp_interval = Temp_interval,
-                      Upper_bounds = upper_bounds,
-                      Lower_bounds = lower_bounds,
-                      Means = means))
+      } else {
+        if (summaryOnly == FALSE) {
+          return(list(
+            TPC_vals = tpc_evals,
+            Temp_interval = Temp_interval,
+            Upper_bounds = upper_bounds,
+            Lower_bounds = lower_bounds,
+            Means = means
+          ))
+        } else {
+          return(list(
+            Temp_interval = Temp_interval,
+            Upper_bounds = upper_bounds,
+            Lower_bounds = lower_bounds,
+            Means = means
+          ))
         }
       }
-    } else{
-      if (summaryOnly == FALSE){
-        return(list(TPC_vals = tpc_evals,
-                    Temp_interval = Temp_interval,
-                    Upper_bounds = upper_bounds,
-                    Lower_bounds = lower_bounds,
-                    Means = means))
-      } else{
-        return(list(Temp_interval = Temp_interval,
-                    Upper_bounds = upper_bounds,
-                    Lower_bounds = lower_bounds,
-                    Means = means))
+    } else {
+      if (summaryOnly == FALSE) {
+        return(list(
+          TPC_vals = tpc_evals,
+          Temp_interval = Temp_interval,
+          Upper_bounds = upper_bounds,
+          Lower_bounds = lower_bounds,
+          Means = means
+        ))
+      } else {
+        return(list(
+          Temp_interval = Temp_interval,
+          Upper_bounds = upper_bounds,
+          Lower_bounds = lower_bounds,
+          Means = means
+        ))
       }
     }
   }
@@ -173,158 +186,175 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
 #' @examples
 #' ## need data to set up example here. placeholder for now
 #' ## set params and reference temperature set
-#' myfun = str2tpc_fun(model = 'gaussian')
-#' param_set = c(T.opt = 36, a = 6.5, rmax = 2.75)
-#' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
-#' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
-
-
+#' myfun <- str2tpc_fun(model = "gaussian")
+#' param_set <- c(T.opt = 36, a = 6.5, rmax = 2.75)
+#' Temp_ref <- seq(from = 5, to = 50, length.out = 1000)
+#' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = "l")
 posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
-                             summaryType = 'hdi', centralSummary = 'median',
+                             summaryType = "hdi", centralSummary = "median",
                              plot = TRUE, probs = c(.05, .95),
-                             burn = 0, plotOnly = FALSE, traitName = 'Trait', seed = NULL, ...){
-  if (!(summaryType %in% c('hdi', 'quantile')) & summaryOnly) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
-  if (!(centralSummary %in% c('mean', 'median')) & summaryOnly) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
-  if (!(is.null(seed))){
+                             burn = 0, plotOnly = FALSE, traitName = "Trait", seed = NULL, ...) {
+  if (!(summaryType %in% c("hdi", "quantile")) & summaryOnly) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
+  if (!(centralSummary %in% c("mean", "median")) & summaryOnly) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
+  if (!(is.null(seed))) {
     if (!(is.integer(seed))) stop('Argument "seed" must be integer valued')
   }
-  if (length(probs) == 2 & (probs[2] < probs[1])){
-    stop('Incorrect specification of tail probabilities for quantile method. Tail probs must be provided in the form c(lower, upper)')
+  if (length(probs) == 2 & (probs[2] < probs[1])) {
+    stop("Incorrect specification of tail probabilities for quantile method. Tail probs must be provided in the form c(lower, upper)")
   }
-  if (!(is.logical(summaryOnly))){
-    stop('Argument summaryOnly must be provided as a logical (= TRUE or = FALSE)')
+  if (!(is.logical(summaryOnly))) {
+    stop("Argument summaryOnly must be provided as a logical (= TRUE or = FALSE)")
   }
-  if ((length(probs) > 1) & summaryType == 'hdi'){
-    if (all(probs == c(.05,.95))){
-      probs = .9
+  if ((length(probs) > 1) & summaryType == "hdi") {
+    if (all(probs == c(.05, .95))) {
+      probs <- .9
       warning('Currently using summaryType = "hdi". Default credible interval mass is credMass = .9)')
-    } else{
+    } else {
       stop('For summaryType = "hdi", only one value is accepted for argument probs')
     }
-
   }
 
-  if (plot == FALSE & plotOnly == TRUE){
-    stop('Argument plotOnly = TRUE requires argument plot to also be TRUE')
+  if (plot == FALSE & plotOnly == TRUE) {
+    stop("Argument plotOnly = TRUE requires argument plot to also be TRUE")
   }
 
-  if (is.null(Temp_interval)) Temp_interval = seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
-  tpc_fun = model_evaluation_function(TPC$modelType)
-  max.ind = nrow(TPC$samples)
+  if (is.null(Temp_interval)) Temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
+  tpc_fun <- .model_evaluation_function(TPC$modelType)
+  max.ind <- nrow(TPC$samples)
   if (!is.null(seed)) set.seed(seed)
-  truncmeans = apply(tpc_fun, X = TPC$samples[(burn+1):max.ind,], Temp = Temp_interval,constants = TPC$constants, MARGIN = 1, ...)
+  truncmeans <- apply(tpc_fun, X = TPC$samples[(burn + 1):max.ind, ], Temp = Temp_interval, constants = TPC$constants, MARGIN = 1, ...)
   ## checking logic here...
-  post_pred_draw <- function(X){
-    return(truncnorm::rtruncnorm(n = length(X) - 1, mean = X[1:(length(X)-1)], sd = sqrt(X[length(X)]),
-                      a = 0))
+  post_pred_draw <- function(X) {
+    return(truncnorm::rtruncnorm(
+      n = length(X) - 1, mean = X[1:(length(X) - 1)], sd = sqrt(X[length(X)]),
+      a = 0
+    ))
   }
-  post_pred_samples = apply(FUN = post_pred_draw, X = rbind(truncmeans, TPC$samples[(burn+1):max.ind,'sigma.sq']),
-                            MARGIN = 2)
-  tpc_ev = matrixStats::rowMeans2(truncmeans)
-  if (centralSummary == 'median'){
-    if (summaryType == 'quantile'){
-      upper_bounds = matrixStats::rowQuantiles(post_pred_samples, probs = probs[2])
-      lower_bounds = matrixStats::rowQuantiles(post_pred_samples, probs = probs[1])
-      medians = matrixStats::rowMedians(post_pred_samples)
+  post_pred_samples <- apply(
+    FUN = post_pred_draw, X = rbind(truncmeans, TPC$samples[(burn + 1):max.ind, "sigma.sq"]),
+    MARGIN = 2
+  )
+  tpc_ev <- matrixStats::rowMeans2(truncmeans)
+  if (centralSummary == "median") {
+    if (summaryType == "quantile") {
+      upper_bounds <- matrixStats::rowQuantiles(post_pred_samples, probs = probs[2])
+      lower_bounds <- matrixStats::rowQuantiles(post_pred_samples, probs = probs[1])
+      medians <- matrixStats::rowMedians(post_pred_samples)
     }
-    if (summaryType == 'hdi'){
-      hdi_mat = apply(FUN = HDInterval::hdi, X = post_pred_samples, MARGIN = 1, credMass = probs)
-      upper_bounds = hdi_mat[2,]
-      lower_bounds = hdi_mat[1,]
-      medians = matrixStats::rowMedians(post_pred_samples)
+    if (summaryType == "hdi") {
+      hdi_mat <- apply(FUN = HDInterval::hdi, X = post_pred_samples, MARGIN = 1, credMass = probs)
+      upper_bounds <- hdi_mat[2, ]
+      lower_bounds <- hdi_mat[1, ]
+      medians <- matrixStats::rowMedians(post_pred_samples)
     }
-    if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', lty = 3, col = 'blue', xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$Trait))))
-      graphics::points(Temp_interval, tpc_ev, col = 'red', type = 'l', lty = 2, lwd = 1.1)
-      graphics::points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 3)
-      graphics::points(Temp_interval, medians, type = 'l', col = 'blue')
+    if (plot) {
+      plot(Temp_interval, upper_bounds, type = "l", lty = 3, col = "blue", xlab = "Temperature (C)", ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$Trait))))
+      graphics::points(Temp_interval, tpc_ev, col = "red", type = "l", lty = 2, lwd = 1.1)
+      graphics::points(Temp_interval, lower_bounds, type = "l", col = "blue", lty = 3)
+      graphics::points(Temp_interval, medians, type = "l", col = "blue")
       graphics::points(TPC$data$Temp, TPC$data$Trait)
-      if (plotOnly){
+      if (plotOnly) {
         return(invisible(NULL))
-      } else{
-        if (summaryOnly == FALSE){
-          return(list(Posterior_predictive_samples = post_pred_samples,
-                      Temp_interval = Temp_interval,
-                      Upper_bounds = upper_bounds,
-                      Lower_bounds = lower_bounds,
-                      Medians = medians,
-                      TPC_mean = tpc_ev))
-        } else{
-          return(list(Temp_interval = Temp_interval,
-                      Upper_bounds = upper_bounds,
-                      Lower_bounds = lower_bounds,
-                      Medians = medians,
-                      TPC_mean = tpc_ev))
+      } else {
+        if (summaryOnly == FALSE) {
+          return(list(
+            Posterior_predictive_samples = post_pred_samples,
+            Temp_interval = Temp_interval,
+            Upper_bounds = upper_bounds,
+            Lower_bounds = lower_bounds,
+            Medians = medians,
+            TPC_mean = tpc_ev
+          ))
+        } else {
+          return(list(
+            Temp_interval = Temp_interval,
+            Upper_bounds = upper_bounds,
+            Lower_bounds = lower_bounds,
+            Medians = medians,
+            TPC_mean = tpc_ev
+          ))
         }
       }
-    } else{
-      if (summaryOnly == FALSE){
-        return(list(Posterior_predictive_samples = post_pred_samples,
-                    Temp_interval = Temp_interval,
-                    Upper_bounds = upper_bounds,
-                    Lower_bounds = lower_bounds,
-                    Medians = medians,
-                    TPC_mean = tpc_ev))
-      } else{
-        return(list(Temp_interval = Temp_interval,
-                    Upper_bounds = upper_bounds,
-                    Lower_bounds = lower_bounds,
-                    Medians = medians,
-                    TPC_mean = tpc_ev))
+    } else {
+      if (summaryOnly == FALSE) {
+        return(list(
+          Posterior_predictive_samples = post_pred_samples,
+          Temp_interval = Temp_interval,
+          Upper_bounds = upper_bounds,
+          Lower_bounds = lower_bounds,
+          Medians = medians,
+          TPC_mean = tpc_ev
+        ))
+      } else {
+        return(list(
+          Temp_interval = Temp_interval,
+          Upper_bounds = upper_bounds,
+          Lower_bounds = lower_bounds,
+          Medians = medians,
+          TPC_mean = tpc_ev
+        ))
       }
     }
   }
-  if (centralSummary == 'mean'){
-    if (summaryType == 'quantile'){
-      upper_bounds = matrixStats::rowQuantiles(post_pred_samples, probs = probs[2])
-      lower_bounds = matrixStats::rowQuantiles(post_pred_samples, probs = probs[1])
-      means = matrixStats::rowMeans2(post_pred_samples)
+  if (centralSummary == "mean") {
+    if (summaryType == "quantile") {
+      upper_bounds <- matrixStats::rowQuantiles(post_pred_samples, probs = probs[2])
+      lower_bounds <- matrixStats::rowQuantiles(post_pred_samples, probs = probs[1])
+      means <- matrixStats::rowMeans2(post_pred_samples)
     }
-    if (summaryType == 'hdi'){
-      hdi_mat = apply(FUN = HDInterval::hdi, X = post_pred_samples, MARGIN = 1, credMass = probs)
-      upper_bounds = hdi_mat[2,]
-      lower_bounds = hdi_mat[1,]
-      means = matrixStats::rowMeans2(post_pred_samples)
+    if (summaryType == "hdi") {
+      hdi_mat <- apply(FUN = HDInterval::hdi, X = post_pred_samples, MARGIN = 1, credMass = probs)
+      upper_bounds <- hdi_mat[2, ]
+      lower_bounds <- hdi_mat[1, ]
+      means <- matrixStats::rowMeans2(post_pred_samples)
     }
-    if (plot){
-      plot(Temp_interval, upper_bounds, type = 'l', col = 'blue', lty = 3, xlab = 'Temperature (C)', ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$Trait))))
-      graphics::points(Temp_interval, tpc_ev, col = 'red', type = 'l', lty = 2, lwd = 1.1)
-      graphics::points(Temp_interval, lower_bounds, type = 'l', col = 'blue', lty = 3)
-      graphics::points(Temp_interval, means, type = 'l', col = 'blue')
+    if (plot) {
+      plot(Temp_interval, upper_bounds, type = "l", col = "blue", lty = 3, xlab = "Temperature (C)", ylab = traitName, ylim = c(0, max(max(upper_bounds), max(TPC$data$Trait))))
+      graphics::points(Temp_interval, tpc_ev, col = "red", type = "l", lty = 2, lwd = 1.1)
+      graphics::points(Temp_interval, lower_bounds, type = "l", col = "blue", lty = 3)
+      graphics::points(Temp_interval, means, type = "l", col = "blue")
       graphics::points(TPC$data$Temp, TPC$data$Trait)
 
-      if (plotOnly){
+      if (plotOnly) {
         return(invisible(NULL))
-      } else{
-        if (summaryOnly == FALSE){
-          return(list(Posterior_predictive_samples = post_pred_samples,
-                      Temp_interval = Temp_interval,
-                      Upper_bounds = upper_bounds,
-                      Lower_bounds = lower_bounds,
-                      Means = means,
-                      TPC_mean = tpc_ev))
-        } else{
-          return(list(Temp_interval = Temp_interval,
-                      Upper_bounds = upper_bounds,
-                      Lower_bounds = lower_bounds,
-                      Means = means,
-                      TPC_mean = tpc_ev))
+      } else {
+        if (summaryOnly == FALSE) {
+          return(list(
+            Posterior_predictive_samples = post_pred_samples,
+            Temp_interval = Temp_interval,
+            Upper_bounds = upper_bounds,
+            Lower_bounds = lower_bounds,
+            Means = means,
+            TPC_mean = tpc_ev
+          ))
+        } else {
+          return(list(
+            Temp_interval = Temp_interval,
+            Upper_bounds = upper_bounds,
+            Lower_bounds = lower_bounds,
+            Means = means,
+            TPC_mean = tpc_ev
+          ))
         }
       }
-    } else{
-      if (summaryOnly == FALSE){
-        return(list(Posterior_predictive_samples = post_pred_samples,
-                    Temp_interval = Temp_interval,
-                    Upper_bounds = upper_bounds,
-                    Lower_bounds = lower_bounds,
-                    Means = means,
-                    TPC_mean = tpc_ev))
-      } else{
-        return(list(Temp_interval = Temp_interval,
-                    Upper_bounds = upper_bounds,
-                    Lower_bounds = lower_bounds,
-                    Means = means,
-                    TPC_mean = tpc_ev))
+    } else {
+      if (summaryOnly == FALSE) {
+        return(list(
+          Posterior_predictive_samples = post_pred_samples,
+          Temp_interval = Temp_interval,
+          Upper_bounds = upper_bounds,
+          Lower_bounds = lower_bounds,
+          Means = means,
+          TPC_mean = tpc_ev
+        ))
+      } else {
+        return(list(
+          Temp_interval = Temp_interval,
+          Upper_bounds = upper_bounds,
+          Lower_bounds = lower_bounds,
+          Means = means,
+          TPC_mean = tpc_ev
+        ))
       }
     }
   }

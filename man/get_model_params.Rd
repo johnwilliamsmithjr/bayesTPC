@@ -7,8 +7,19 @@
 get_model_params(model)
 }
 \arguments{
-\item{model}{A string specifying the model name. Use `get_models()` to view all options.}
+\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
+}
+\value{
+A character vector containing all required parameters for the model provided.
 }
 \description{
-TODO
+Returns the parameters for a specified model.
+}
+\details{
+\code{get_model_params} only returns the parameters changed during model training.
+Depending on the model chosen, there may be constants not included in the output. Use \code{\link[=get_model_constants]{get_model_constants()}} to obtain these if needed.
+}
+\examples{
+get_model_params("ratkowsky")
+
 }

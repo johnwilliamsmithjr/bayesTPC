@@ -10,16 +10,16 @@ checkData(data)
 \item{data}{list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve) and "Temp" (corresponding to the temperature in Celcius that the trait is being measured at).}
 }
 \value{
-list, with entries "data" (object of class "list", data to be passed to `nimble` model) and "N" (integer number of data points, to be passed `nimble` model as a constant)
+list, with entries "data" (object of class "list", data to be passed to \code{nimble} model) and "N" (integer number of data points, to be passed \code{nimble} model as a constant)
 }
 \description{
 Check if data is correctly formatted
 }
 \details{
-This function returns a list of data and constants to be passed to a `nimble` model to perform MCMC
+This function returns a list of data and constants to be passed to a \code{nimble} model to perform MCMC
 }
 \examples{
 ## generate data
-test_data = list(Temp = rep(c(10, 20, 30, 40), 5), Trait = rgamma(20, 5, rep(c(10, 20, 30, 40), 5)))
+test_data <- list(Temp = rep(c(10, 20, 30, 40), 5), Trait = rgamma(20, 5, rep(c(10, 20, 30, 40), 5)))
 checkData(test_data)
 }

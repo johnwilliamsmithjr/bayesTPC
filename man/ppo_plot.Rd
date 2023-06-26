@@ -7,7 +7,7 @@
 ppo_plot(model, burn = 0, seq.length = 100)
 }
 \arguments{
-\item{model}{List, usually output from the `bTPC` function. `ppo_plot` expects this list to have entries "samples", of class `mcmc` or `numeric` and "priors", with class `list` and entries that match the corresponding model parameters}
+\item{model}{List, usually output from the \code{bTPC} function. \code{ppo_plot} expects this list to have entries "samples", of class \code{mcmc} or \code{numeric} and "priors", with class \code{list} and entries that match the corresponding model parameters}
 
 \item{burn}{Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot (default = 0)}
 
@@ -20,13 +20,13 @@ Returns invisible(NULL) and creates a prior posterior overlap plot
 Create a prior-posterior overlap plot from output of the bTPC function
 }
 \details{
-This is a wrapper to create trace plots using coda's `traceplot` function.
+This is a wrapper to create trace plots using coda's \code{traceplot} function.
 }
 \examples{
 ## need data to set up example here. placeholder for now
 ## set params and reference temperature set
-myfun = str2tpc_fun(model = 'gaussian')
-param_set = c(T.opt = 36, a = 6.5, rmax = 2.75)
-Temp_ref = seq(from = 5, to = 50, length.out = 1000)
-plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
+myfun <- str2tpc_fun(model = "gaussian")
+param_set <- c(T.opt = 36, a = 6.5, rmax = 2.75)
+Temp_ref <- seq(from = 5, to = 50, length.out = 1000)
+plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = "l")
 }

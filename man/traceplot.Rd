@@ -7,7 +7,7 @@
 traceplot(object, burn = 0, thin = 1, ...)
 }
 \arguments{
-\item{object}{Either an object of class `mcmc` or `mcmc.list` OR an object of class `list` which contains an element called `samples` that is of class `mcmc` or `mcmc.list`}
+\item{object}{Either an object of class \code{mcmc} or \code{mcmc.list} OR an object of class \code{list} which contains an element called \code{samples} that is of class \code{mcmc} or \code{mcmc.list}}
 
 \item{burn}{Integer, number of samples to discard as burn-in before creating traceplot (default = 0)}
 
@@ -19,16 +19,16 @@ traceplot(object, burn = 0, thin = 1, ...)
 Returns invisible(NULL) and creates trace plots for MCMC parameters
 }
 \description{
-Wrapper for coda::traceplot() that can both directly accept samples of object type `mcmc` or `mcmc.list` as well as an object of class `list` with an element `samples` that is of class `mcmc` or `mcmc.list`
+Wrapper for coda::traceplot() that can both directly accept samples of object type \code{mcmc} or \code{mcmc.list} as well as an object of class \code{list} with an element \code{samples} that is of class \code{mcmc} or \code{mcmc.list}
 }
 \details{
-This is a wrapper to create trace plots using coda's `traceplot` function.
+This is a wrapper to create trace plots using coda's \code{traceplot} function.
 }
 \examples{
 ## need data to set up example here. placeholder for now
 ## set params and reference temperature set
-myfun = str2tpc_fun(model = 'gaussian')
-param_set = c(T.opt = 36, a = 6.5, rmax = 2.75)
-Temp_ref = seq(from = 5, to = 50, length.out = 1000)
-plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
+myfun <- str2tpc_fun(model = "gaussian")
+param_set <- c(T.opt = 36, a = 6.5, rmax = 2.75)
+Temp_ref <- seq(from = 5, to = 50, length.out = 1000)
+plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = "l")
 }

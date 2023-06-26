@@ -7,8 +7,19 @@
 get_default_priors(model)
 }
 \arguments{
-\item{model}{A string specifying the model name. Use `get_models()` to view all options.}
+\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
+}
+\value{
+A named list of all parameters and their default prior distribution.
 }
 \description{
-TODO
+Returns the default distributions for all parameters trained by \code{\link[=b_TPC]{b_TPC()}}.
+}
+\details{
+Prior distributions are written in the format required by NIMBLE's BUGS implementation.
+All available distributions and formatting are provided on the
+\href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
+}
+\examples{
+get_default_priors("briere")
 }

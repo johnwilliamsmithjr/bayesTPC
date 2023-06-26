@@ -7,7 +7,7 @@
 get_default_constants(model)
 }
 \arguments{
-\item{model}{A string specifying the model name. Use `get_models()` to view all options.}
+\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
 }
 \description{
 TODO
