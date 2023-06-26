@@ -228,7 +228,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
                       niter = 10000, inits = NULL, burn = 0, constant_list = NULL, verbose = FALSE, ...){
 
   #exception handling and variable setup
-  data.nimble = checkData(data)
+  data.nimble <- checkData(data)
   nimble_mod_function <- NULL
   model_info <-
     model_master_list[model_master_list$name == model,]
@@ -246,7 +246,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = 'RW',
   #configure model, handles the density funciton, priors, and constants
   inits.list <- configure_inits(inits, model_params)
   const.list <- configure_constants(model_info,data.nimble$N, model_constants, constant_list)
-  modelStr = configure_model(model = model, priors = priors, ...)
+  modelStr <- configure_model(model = model, priors = priors, ...)
 
   #create the model evaluation function
   eval(.direct_nimble(model))

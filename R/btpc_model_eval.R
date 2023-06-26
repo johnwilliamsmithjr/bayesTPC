@@ -1,4 +1,4 @@
-model_evaluation_function <- function(model){
+.model_evaluation_function <- function(model){
   if (!(model %in% model_master_list[model_master_list$name == model,][[1]])){
     stop("Unsupported model, use get_models() to view implemented models.")
   }

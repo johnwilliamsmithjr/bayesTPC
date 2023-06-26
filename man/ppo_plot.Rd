@@ -4,12 +4,14 @@
 \alias{ppo_plot}
 \title{Prior-Posterior Overlap Plot}
 \usage{
-ppo_plot(bTPC_object, burn = 0)
+ppo_plot(model, burn = 0, seq.length = 100)
 }
 \arguments{
+\item{model}{List, usually output from the `bTPC` function. `ppo_plot` expects this list to have entries "samples", of class `mcmc` or `numeric` and "priors", with class `list` and entries that match the corresponding model parameters}
+
 \item{burn}{Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot (default = 0)}
 
-\item{bTPC.object}{List, usually output from the `bTPC` function. `ppo_plot` expects this list to have entries "samples", of class `mcmc` or `numeric` and "priors", with class `list` and entries that match the corresponding model parameters}
+\item{seq.length}{Integer, length of sequence used to evaluate prior density (default = 100)}
 }
 \value{
 Returns invisible(NULL) and creates a prior posterior overlap plot

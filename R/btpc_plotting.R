@@ -94,7 +94,7 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
 
 ppo_plot <- function(model, burn = 0, seq.length = 100){
-  ppo_parameters <- unlist(bayesTPC:::get_model_params(model$modelType))
+  ppo_parameters <- unlist(get_model_params(model$modelType))
   ppo_parameters <- sort(ppo_parameters)
   if ('sigma.sq' %in% colnames(model$samples)){
     param_list <- c(ppo_parameters, 'sigma.sq')
@@ -106,8 +106,8 @@ ppo_plot <- function(model, burn = 0, seq.length = 100){
     inits_vec <- rep(NA, length(param_list))
     names(inits_vec) <- param_list
     inits_vec[name] <- x
-    return(bayesTPC:::configure_inits(inits = as.list(inits_vec),
-                                      bayesTPC:::get_model_params(model$modelType)))
+    return(configure_inits(inits = as.list(inits_vec),
+                                      get_model_params(model$modelType)))
   }
 
   get_prior_eval <- function(x, name){
@@ -126,13 +126,13 @@ ppo_plot <- function(model, burn = 0, seq.length = 100){
     seq_lower <- ifelse(
       test = is.infinite(getBound(model$uncomp_model, param_string , 'lower')),
       yes = .5 * min(model$samples[(burn+1):nrow(model$samples),param_list[i]]),
-      no = getBound(model$uncomp_model, param_string , 'lower')
+      no = nimble::getBound(model$uncomp_model, param_string , 'lower')
     )
 
     seq_upper <- ifelse(
       test = is.infinite(getBound(model$uncomp_model, param_string , 'upper')),
       yes = 2 * max(model$samples[(burn+1):nrow(model$samples),param_list[i]]),
-      no = getBound(model$uncomp_model, param_string , 'upper')
+      no = nimble::getBound(model$uncomp_model, param_string , 'upper')
     )
 
     eval_seq <- seq(from = seq_lower, to = seq_upper, length.out = seq.length)
@@ -144,15 +144,15 @@ ppo_plot <- function(model, burn = 0, seq.length = 100){
 
     prior_evals <- sapply(X = init_sets, FUN = get_prior_eval, name = param_string)
 
-    posterior_approx <- density(model$samples[(burn+1):nrow(model$samples),param_list[i]])
+    posterior_approx <- stats::density(model$samples[(burn+1):nrow(model$samples),param_list[i]])
 
     ylim_ppo <- c(0, 1.05*max(c(max(posterior_approx$y), max(prior_evals))))
 
     plot(eval_seq, prior_evals, ylim = ylim_ppo, type = 'l', col = 'red',
          ylab = 'Density', xlab = param_list[i], lwd = 2,
          main = paste0('Prior-Posterior Overlap Plot for ', param_list[i]))
-    points(posterior_approx, type = 'l', col = 'blue', lwd = 2, lty = 2)
-    legend('topleft', legend = c('Prior', 'Posterior'), col = c('red', 'blue'),
+    graphics::points(posterior_approx, type = 'l', col = 'blue', lwd = 2, lty = 2)
+    graphics::legend('topleft', legend = c('Prior', 'Posterior'), col = c('red', 'blue'),
            lty = c(1,2), lwd = c(2,2))
   }
 }
