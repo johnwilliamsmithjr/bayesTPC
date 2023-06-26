@@ -113,14 +113,17 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
 
 ppo_plot <- function(model, burn = 0, seq.length = 100){
+  ## extract model parameters and sort alphabetically
   ppo_parameters <- unlist(bayesTPC:::get_model_params(model$modelType))
   ppo_parameters <- sort(ppo_parameters)
+  ## if sigma.sq is in the mcmc sample list, add it as the
+  ## last entry of the param_list vector
   if ('sigma.sq' %in% colnames(model$samples)){
     param_list <- c(ppo_parameters, 'sigma.sq')
   } else{
     param_list <- ppo_parameters
   }
-
+  ## definition for internal function used during apply
   init_eval_fun <- function(x, name){
     inits_vec <- rep(NA, length(param_list))
     names(inits_vec) <- param_list
@@ -142,31 +145,37 @@ ppo_plot <- function(model, burn = 0, seq.length = 100){
     } else{
       param_string <- paste0('params[', i, ']')
     }
+    ## extract sequence lower bound to evaluate prior density on. if the bound of a particular
+    ## parameter is infinite, one half of the smallest observed posterior sample is used.
+    ## otherwise, the lower bound of the prior is used.
     seq_lower <- ifelse(
       test = is.infinite(getBound(model$uncomp_model, param_string , 'lower')),
       yes = .5 * min(model$samples[(burn+1):nrow(model$samples),param_list[i]]),
       no = getBound(model$uncomp_model, param_string , 'lower')
     )
-
+    ## extract sequence upper bound to evaluate prior density on. if the bound of a particular
+    ## parameter is infinite, twice the largest observed posterior sample is used.
+    ## otherwise, the upper bound of the prior is used.
     seq_upper <- ifelse(
       test = is.infinite(getBound(model$uncomp_model, param_string , 'upper')),
       yes = 2 * max(model$samples[(burn+1):nrow(model$samples),param_list[i]]),
       no = getBound(model$uncomp_model, param_string , 'upper')
     )
-
+    ## create evaluation sequence
     eval_seq <- seq(from = seq_lower, to = seq_upper, length.out = seq.length)
-
+    ## create initial sets
     init_sets <- apply(X = matrix(eval_seq, ncol = 1),
                        MARGIN = 1,
                        FUN = init_eval_fun,
                        name = param_list[i])
-
+    ## generate prior evaluations
     prior_evals <- sapply(X = init_sets, FUN = get_prior_eval, name = param_string)
-
+    ## create density of posterior MCMC samples
     posterior_approx <- density(model$samples[(burn+1):nrow(model$samples),param_list[i]])
 
+    ## create ylimits
     ylim_ppo <- c(0, 1.05*max(c(max(posterior_approx$y), max(prior_evals))))
-
+    ## generate plot
     plot(eval_seq, prior_evals, ylim = ylim_ppo, type = 'l', col = 'red',
          ylab = 'Density', xlab = param_list[i], lwd = 2,
          main = paste0('Prior-Posterior Overlap Plot for ', param_list[i]))
