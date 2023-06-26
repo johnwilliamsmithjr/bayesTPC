@@ -3,7 +3,7 @@
 #'
 #' Wrapper for coda::traceplot() that can both directly accept samples of object type `mcmc` or `mcmc.list` as well as an object of class `list` with an element `samples` that is of class `mcmc` or `mcmc.list`
 #'
-#' @details This is a wrapper to create trace plots using coda's `traceplot` function.
+#' @details This is a wrapper to create trace plots using coda's `traceplot()` function.
 #' @param object Either an object of class `mcmc` or `mcmc.list` OR an object of class `list` which contains an element called `samples` that is of class `mcmc` or `mcmc.list`
 #' @param burn Integer, number of samples to discard as burn-in before creating traceplot (default = 0)
 #' @param thin Integer, thinning interval used to generate traceplots (default = 1)
@@ -19,31 +19,39 @@
 
 
 traceplot <- function(object, burn = 0, thin = 1, ...){
+  ## checks to see if samples are contained in list object
   if (is.list(object)) if (is.null(object$samples)) stop('Object of class list must have element "samples"')
   if (is.list(object)){
     if (coda::is.mcmc(object$samples)){
+      ## if samples is an mcmc list, extract number of rows
       N = nrow(object$samples)
+      ## thin samples
       thinned = seq(from = burn+1, to = N, by = thin)
+      ## create traceplots
       coda::traceplot(x = coda::as.mcmc(object$samples[thinned,]), ...)
       return(invisible(NULL))
     }
-  } else{
+  } else{ ## if samples is not class coda mcmc list
+    ## extract number of rows
     N = nrow(object)
+    ## thin samples
     thinned = seq(from = burn+1, to = N, by = thin)
+    ## create traceplots
     coda::traceplot(x = coda::as.mcmc(object[thinned,]), ...)
+    ## return invisible NULL
     return(invisible(NULL))
   }
 }
 
-#' Wrapper for IDPmisc::ipairs()
+#' Wrapper for IDPmisc::ipairs() to create pairs plots of bTPC output
 #'
 #' Wrapper for IDPmisc() that can both directly accept samples of object type `mcmc` or `matrix` as well as an object of class `list` with an element `samples` that is of class `mcmc` or `matrix`
 #'
-#' @details This is a wrapper to create trace plots using coda's `traceplot` function.
+#' @details This is a wrapper to create pairs plots using IDPmisc's `ipairs()` function.
 #' @param object Either an object of class `mcmc` or `matrix` OR an object of class `list` which contains an element called `samples` that is of class `mcmc` or `matrix`
 #' @param burn Integer, number of samples to discard as burn-in before creating pairs plot (default = 0)
 #' @param thin Integer, thinning interval used to generate pairs plots (default = 1)
-#' @param ztransf Function, used to transform the counts per pixel in IDPmisc::ipairs.
+#' @param ztransf Function, used to transform the counts per pixel in IDPmisc::ipairs().
 #' @param ... additional graphical parameters to be passed as arguments to IDPmisc::ipairs(). For additional information, try ?IDPmisc::ipairs
 #' @return Returns invisible(NULL) and creates pairs plots for MCMC parameters
 #' @examples
@@ -52,27 +60,38 @@ traceplot <- function(object, burn = 0, thin = 1, ...){
 
 bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
                             ztransf = function(x){x[x<1] <- 1; log2(x)}, ...){
+  ## checks to see if list object contains entry called samples
   if (is.list(x)) if(is.null(x$samples)) stop('Expected list "x" to have an element called samples')
-  if (!(coda::is.mcmc(x)) & !(is.matrix(x)) & !(is.list(x))) stop('Input "x" is expected as a list, matrix, or mcmc object. See ?bayesTPC.ipairs')
+  ## checks that x is input in proper format
+  if (!(coda::is.mcmc(x)) & !(is.matrix(x)) & !(is.list(x))) stop('Input "x" is expected as a list, matrix, or mcmc object. See ?bayesTPC_ipairs')
   if (is.list(x)){
+    ## extract number of rows
     N = nrow(x$samples)
+    ## thin samples
     thinned = seq(from = burn+1, to = N, by = thin)
+    ## converts samples to matrix to pass to IDPmisc::ipairs()
     if (coda::is.mcmc(x$samples)){
       samples = as.matrix(x$samples)
     } else{
       samples = x$samples
     }
+    ## create pairs plot of thinned samples
     IDPmisc::ipairs(samples[thinned,], ztransf = ztransf, ...)
   } else{
+    ## extract number of rows
     N = nrow(x)
+    ## thin samples
     thinned = seq(from = burn+1, to = N, by = thin)
+    ## convert to matrix
     if (coda::is.mcmc(x)){
       samples = as.matrix(x)
     } else{
       samples = x
     }
+    ## create pairs plot
     IDPmisc::ipairs(samples[thinned,], ztransf = ztransf, ...)
   }
+  ## return invisible NULL
   return(invisible(NULL))
 }
 
@@ -80,11 +99,11 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #'
 #' Create a prior-posterior overlap plot from output of the bTPC function
 #'
-#' @details This is a wrapper to create trace plots using coda's `traceplot` function.
+#' @details Function to create a prior-posterior overlap plot. This is useful in determining the impact that the choice of prior distribution has on the analyses
 #' @param model List, usually output from the `bTPC` function. `ppo_plot` expects this list to have entries "samples", of class `mcmc` or `numeric` and "priors", with class `list` and entries that match the corresponding model parameters
 #' @param burn Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot (default = 0)
 #' @param seq.length Integer, length of sequence used to evaluate prior density (default = 100)
-#' @return Returns invisible(NULL) and creates a prior posterior overlap plot
+#' @return Returns invisible(NULL) and creates a prior posterior overlap plot, with the prior density shown using a red line and the posterior density shown using a blue dashed line.
 #' @examples
 #' ## need data to set up example here. placeholder for now
 #' ## set params and reference temperature set
