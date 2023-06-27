@@ -286,7 +286,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   mcmcConfig$enableWAIC <- TRUE
   mcmc <- nimble::buildMCMC(mcmcConfig)
   tpc_mcmc <- nimble::compileNimble(mcmc, project = nimTPCmod_compiled)
-  tpc_mcmc$run(niter, ...)
+  tpc_mcmc$run(niter, nburnin = burn, ...)
   samples <- coda::as.mcmc(as.matrix(tpc_mcmc$mvSamples))
 
   default_priors <- model_info$default_priors[[1]]
