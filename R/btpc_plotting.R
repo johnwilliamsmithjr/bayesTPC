@@ -115,7 +115,7 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 
 ppo_plot <- function(model, burn = 0, seq.length = 100){
   ## extract model parameters and sort alphabetically
-  ppo_parameters <- unlist(bayesTPC:::get_model_params(model$modelType))
+  ppo_parameters <- unlist(bayesTPC::get_model_params(model$modelType))
   ppo_parameters <- sort(ppo_parameters)
   ## if sigma.sq is in the mcmc sample list, add it as the
   ## last entry of the param_list vector
