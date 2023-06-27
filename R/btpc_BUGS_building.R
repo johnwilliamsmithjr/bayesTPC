@@ -1,4 +1,4 @@
-loop_string <- function(model) {
+.loop_string <- function(model) {
   model_info <-
     model_master_list[model_master_list$name == model, ]
   # TODO clean this, possible into helper functions
@@ -45,7 +45,7 @@ loop_string <- function(model) {
   return(model_string)
 }
 
-priors_string <- function(model,
+.priors_string <- function(model,
                           priors = NULL,
                           verbose = TRUE) {
   model_info <-
@@ -98,7 +98,7 @@ priors_string <- function(model,
   return(param_string)
 }
 
-configure_inits <- function(inits, model_params) {
+.configure_inits <- function(inits, model_params) {
   inits.list <- vector("list", 2)
 
   if (!is.null(inits)) {
@@ -130,7 +130,7 @@ configure_inits <- function(inits, model_params) {
   return(inits.list)
 }
 
-configure_constants <- function(model_info, N, model_constants, constant_list) {
+.configure_constants <- function(model_info, N, model_constants, constant_list) {
   model <- model_info$name[[1]]
   constants <- vector("double", 0)
   const.list <- vector("list", 0)
@@ -182,18 +182,20 @@ configure_constants <- function(model_info, N, model_constants, constant_list) {
 #'
 #' Create model string for thermal performance curve model to be passed to nimble
 #'
+#' @export
 #' @details This function returns a character string of the full `nimble` model for a user-specified thermal performance curve and prior distributions
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski","ratkowsky", "stinner", "binomial_glm_lin", "binomial_glm_quad".
+#' @param model A string specifying the model name. Use [get_model_names()] to view all options.
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL). Elements of the list should correspond to model parameters, and written using nimble logic. For parameters not specified in the list, default priors are used.
+#' @param constants list, optional input specifying model constants. If model requires constant values and none are provided, default values are used.
 #' @param verbose logical, optional input. If verbose = TRUE, messages are printed when for priors that deviate from the defaultPriors(model) (see ?defaultPriors for additional information). Default = TRUE
 #' @return character, character string specifying the default model formulation to be passed to `nimble`.
 #' @examples
 #' ## Print default model for briere
-#' cat(defaultModel(model = "briere"))
+#' cat(configure_model(model = "briere"))
 #'
 #' ## Use custom prior for 'q' parameter in quadratic curve
 #' my_prior <- list(q = "q~beta(.5, .5)")
-#' cat(defaultModel(model = "quadratic", priors = my_prior))
+#' cat(configure_model(model = "quadratic", priors = my_prior))
 configure_model <- function(model, priors = NULL, constants = NULL, verbose = TRUE) {
   model_info <-
     model_master_list[model_master_list$name == model, ]
@@ -206,14 +208,14 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
     }
   }
   ## check for proper names in prior list
-  # should move this error check to priors_string
+  # should move this error check to .priors_string
   param_names <- model_info$params[[1]]
   if (any(!(names(priors) %in% c(param_names, "sigma.sq")))) {
     stop("One or more priors do not have names that correspond to model parameters.")
   }
 
-  loop <- loop_string(model)
-  pri <- priors_string(model, priors, verbose)
+  loop <- .loop_string(model)
+  pri <- .priors_string(model, priors, verbose)
 
   pri_string <- paste0(pri, collapse = "\n    ")
 
@@ -240,8 +242,8 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
 
   # configure model, handles the density funciton, priors, and constants
-  inits.list <- configure_inits(inits, model_params)
-  const.list <- configure_constants(model_info, data.nimble$N, model_constants, constant_list)
+  inits.list <- .configure_inits(inits, model_params)
+  const.list <- .configure_constants(model_info, data.nimble$N, model_constants, constant_list)
   modelStr <- configure_model(model = model, priors = priors, ...)
 
   # create the model evaluation function
@@ -291,7 +293,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   default_priors <- model_info$default_priors[[1]]
   prior_list <- list()
-  for (i in 1:length(model_params)) { # probably doesnt work right
+  for (i in 1:length(model_params)) { # somehow works
     colnames(samples)[i] <- model_params[i]
     if (model_params[i] %in% names(priors)) {
       prior_list[model_params[[i]]] <- priors[model_params[[i]]]

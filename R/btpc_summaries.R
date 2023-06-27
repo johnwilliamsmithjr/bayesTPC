@@ -18,11 +18,6 @@
 #' @return return types vary by argument. For plotOnly = TRUE, invisible NULL is returned. For summaryOnly = TRUE, a list of summaries is returned. For summaryOnly = FALSE, a list is returned with summaries as well as the entire set of thermal performance curve evaluations
 #' @examples
 #' ## need data to set up example here. placeholder for now
-#' ## set params and reference temperature set
-#' myfun <- str2tpc_fun(model = "gaussian")
-#' param_set <- c(T.opt = 36, a = 6.5, rmax = 2.75)
-#' Temp_ref <- seq(from = 5, to = 50, length.out = 1000)
-#' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = "l")
 bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                              summaryType = "hdi", centralSummary = "median",
                              plot = TRUE, probs = c(.05, .95),
@@ -187,11 +182,6 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
 #' @return return types vary by argument. For plotOnly = TRUE, invisible NULL is returned. For summaryOnly = TRUE, a list of summaries is returned. For summaryOnly = FALSE, a list is returned with summaries as well as the entire set of thermal performance curve posterior predictive samples
 #' @examples
 #' ## need data to set up example here. placeholder for now
-#' ## set params and reference temperature set
-#' myfun <- str2tpc_fun(model = "gaussian")
-#' param_set <- c(T.opt = 36, a = 6.5, rmax = 2.75)
-#' Temp_ref <- seq(from = 5, to = 50, length.out = 1000)
-#' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = "l")
 posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                              summaryType = "hdi", centralSummary = "median",
                              plot = TRUE, probs = c(.05, .95),

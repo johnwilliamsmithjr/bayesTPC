@@ -7,8 +7,25 @@
 get_model_function(model)
 }
 \arguments{
-\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
+\item{model}{A string specifying the model name. Use \code{\link[=get_model_names]{get_model_names()}} to view all options.}
+}
+\value{
+\code{get_model_function} returns a function that evaluates the implemented formula of the specified model.
+The parameters of the specified model along with constants (if present) are used as the arguments to the returned function.
 }
 \description{
-TODO
+Builds and provides a function that evaluates an implemented model.
+}
+\details{
+This function provides a more accessible way to directly evaluate implemented models.
+Manual evaluation is available through \code{\link[=get_formula]{get_formula()}}.
+}
+\examples{
+
+stinner_function <- get_model_function("stinner")
+stinner_function
+
+#compare to example in get_formula()
+quadratic_function <- get_model_function("quadratic")
+quadratic_function(q = .75, T_max = 35, T_min = 10, Temp = c(15,20,25,30))
 }

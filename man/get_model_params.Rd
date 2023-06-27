@@ -7,7 +7,7 @@
 get_model_params(model)
 }
 \arguments{
-\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
+\item{model}{A string specifying the model name. Use \code{\link[=get_model_names]{get_model_names()}} to view all options.}
 }
 \value{
 A character vector containing all required parameters for the model provided.

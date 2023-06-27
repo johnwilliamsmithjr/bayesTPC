@@ -2,7 +2,7 @@
 % Please edit documentation in R/btpc_plotting.R
 \name{bayesTPC_ipairs}
 \alias{bayesTPC_ipairs}
-\title{Wrapper for IDPmisc::ipairs()}
+\title{Wrapper for IDPmisc::ipairs() to create pairs plots of bTPC output}
 \usage{
 bayesTPC_ipairs(
   x,
@@ -16,15 +16,15 @@ bayesTPC_ipairs(
 )
 }
 \arguments{
+\item{x}{Either an object of class \code{mcmc} or \code{matrix} OR an object of class \code{list} which contains an element called \code{samples} that is of class \code{mcmc} or \code{matrix}}
+
 \item{burn}{Integer, number of samples to discard as burn-in before creating pairs plot (default = 0)}
 
 \item{thin}{Integer, thinning interval used to generate pairs plots (default = 1)}
 
-\item{ztransf}{Function, used to transform the counts per pixel in IDPmisc::ipairs.}
+\item{ztransf}{Function, used to transform the counts per pixel in IDPmisc::ipairs().}
 
 \item{...}{additional graphical parameters to be passed as arguments to IDPmisc::ipairs(). For additional information, try ?IDPmisc::ipairs}
-
-\item{object}{Either an object of class \code{mcmc} or \code{matrix} OR an object of class \code{list} which contains an element called \code{samples} that is of class \code{mcmc} or \code{matrix}}
 }
 \value{
 Returns invisible(NULL) and creates pairs plots for MCMC parameters
@@ -33,9 +33,8 @@ Returns invisible(NULL) and creates pairs plots for MCMC parameters
 Wrapper for IDPmisc() that can both directly accept samples of object type \code{mcmc} or \code{matrix} as well as an object of class \code{list} with an element \code{samples} that is of class \code{mcmc} or \code{matrix}
 }
 \details{
-This is a wrapper to create trace plots using coda's \code{traceplot} function.
+This is a wrapper to create pairs plots using IDPmisc's \code{ipairs()} function.
 }
 \examples{
 ## need data to set up example here. placeholder for now
-## set params and reference temperature set
 }

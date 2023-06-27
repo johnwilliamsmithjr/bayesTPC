@@ -11,13 +11,6 @@
 #' @return Returns invisible(NULL) and creates trace plots for MCMC parameters
 #' @examples
 #' ## need data to set up example here. placeholder for now
-#' ## set params and reference temperature set
-#' myfun = str2tpc_fun(model = 'gaussian')
-#' param_set = c(T.opt = 36, a = 6.5, rmax = 2.75)
-#' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
-#' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
-
-
 traceplot <- function(object, burn = 0, thin = 1, ...){
   ## checks to see if samples are contained in list object
   if (is.list(object)) if (is.null(object$samples)) stop('Object of class list must have element "samples"')
@@ -49,7 +42,7 @@ traceplot <- function(object, burn = 0, thin = 1, ...){
 #'
 #' @export
 #' @details This is a wrapper to create pairs plots using IDPmisc's `ipairs()` function.
-#' @param object Either an object of class `mcmc` or `matrix` OR an object of class `list` which contains an element called `samples` that is of class `mcmc` or `matrix`
+#' @param x Either an object of class `mcmc` or `matrix` OR an object of class `list` which contains an element called `samples` that is of class `mcmc` or `matrix`
 #' @param burn Integer, number of samples to discard as burn-in before creating pairs plot (default = 0)
 #' @param thin Integer, thinning interval used to generate pairs plots (default = 1)
 #' @param ztransf Function, used to transform the counts per pixel in IDPmisc::ipairs().
@@ -57,7 +50,6 @@ traceplot <- function(object, burn = 0, thin = 1, ...){
 #' @return Returns invisible(NULL) and creates pairs plots for MCMC parameters
 #' @examples
 #' ## need data to set up example here. placeholder for now
-#' ## set params and reference temperature set
 bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
                             ztransf = function(x){x[x<1] <- 1; log2(x)}, ...){
   ## checks to see if list object contains entry called samples
@@ -107,15 +99,9 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #' @return Returns invisible(NULL) and creates a prior posterior overlap plot, with the prior density shown using a red line and the posterior density shown using a blue dashed line.
 #' @examples
 #' ## need data to set up example here. placeholder for now
-#' ## set params and reference temperature set
-#' myfun = str2tpc_fun(model = 'gaussian')
-#' param_set = c(T.opt = 36, a = 6.5, rmax = 2.75)
-#' Temp_ref = seq(from = 5, to = 50, length.out = 1000)
-#' plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = 'l')
-
 ppo_plot <- function(model, burn = 0, seq.length = 100){
   ## extract model parameters and sort alphabetically
-  ppo_parameters <- unlist(bayesTPC::get_model_params(model$modelType))
+  ppo_parameters <- unlist(get_model_params(model$modelType))
   ppo_parameters <- sort(ppo_parameters)
   ## if sigma.sq is in the mcmc sample list, add it as the
   ## last entry of the param_list vector
@@ -129,7 +115,7 @@ ppo_plot <- function(model, burn = 0, seq.length = 100){
     inits_vec <- rep(NA, length(param_list))
     names(inits_vec) <- param_list
     inits_vec[name] <- x
-    return(configure_inits(
+    return(.configure_inits(
       inits = as.list(inits_vec),
       get_model_params(model$modelType)
     ))
@@ -175,7 +161,7 @@ ppo_plot <- function(model, burn = 0, seq.length = 100){
     ## generate prior evaluations
     prior_evals <- sapply(X = init_sets, FUN = get_prior_eval, name = param_string)
     ## create density of posterior MCMC samples
-    posterior_approx <- density(model$samples[(burn+1):nrow(model$samples),param_list[i]])
+    posterior_approx <- stats::density(model$samples[(burn+1):nrow(model$samples),param_list[i]])
 
     ## create ylimits
     ylim_ppo <- c(0, 1.05*max(c(max(posterior_approx$y), max(prior_evals))))
@@ -183,8 +169,8 @@ ppo_plot <- function(model, burn = 0, seq.length = 100){
     plot(eval_seq, prior_evals, ylim = ylim_ppo, type = 'l', col = 'red',
          ylab = 'Density', xlab = param_list[i], lwd = 2,
          main = paste0('Prior-Posterior Overlap Plot for ', param_list[i]))
-    points(posterior_approx, type = 'l', col = 'blue', lwd = 2, lty = 2)
-    legend('topleft', legend = c('Prior', 'Posterior'), col = c('red', 'blue'),
+    graphics::points(posterior_approx, type = 'l', col = 'blue', lwd = 2, lty = 2)
+    graphics::legend('topleft', legend = c('Prior', 'Posterior'), col = c('red', 'blue'),
            lty = c(1,2), lwd = c(2,2))
   }
 }

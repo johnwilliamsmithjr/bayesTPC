@@ -11,7 +11,7 @@ checkParams <- function(model, params) {
   # having an external function call in our model evaluation
   # might cause issues, but we can use an error handling wrapper
   # that calls the nimble function, probably
-  if (is.null(names(params))) stop("Error in call to tpc evaluation function. param input must be named.")
+  if (is.null(names(params))) stop("Error in call to tpc evaluation function. 'param' input must be named.")
   if (!all(sapply(params, is.numeric))) stop("All parameter values must be numeric.")
   priorNames <- model_master_list[model_master_list$name == model, ]$params[[1]]
   priorNames <- priorNames[priorNames != "sigma.sq"]
@@ -39,6 +39,7 @@ checkParams <- function(model, params) {
 #'
 #' Check if data is correctly formatted
 #'
+#' @export
 #' @details This function returns a list of data and constants to be passed to a `nimble` model to perform MCMC
 #' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve) and "Temp" (corresponding to the temperature in Celcius that the trait is being measured at).
 #' @return list, with entries "data" (object of class "list", data to be passed to `nimble` model) and "N" (integer number of data points, to be passed `nimble` model as a constant)

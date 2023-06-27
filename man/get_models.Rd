@@ -6,6 +6,13 @@
 \usage{
 get_models()
 }
+\value{
+\code{get_models()} returns a data frame with two columns containing the names and formulas for all implemented models in \code{bayesTPC}.
+}
 \description{
-TODO
+Returns all implemented models and their respective formulas.
+}
+\examples{
+
+get_models()
 }

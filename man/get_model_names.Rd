@@ -6,6 +6,13 @@
 \usage{
 get_model_names()
 }
+\value{
+\code{get_model_names()} returns a character vector of all implemented models in \code{bayesTPC}.
+}
 \description{
-TODO
+Returns the names of all implemented models in \code{bayesTPC}.
+}
+\examples{
+
+get_model_names()
 }

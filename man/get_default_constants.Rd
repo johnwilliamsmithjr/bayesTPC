@@ -7,8 +7,25 @@
 get_default_constants(model)
 }
 \arguments{
-\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
+\item{model}{A string specifying the model name. Use \code{\link[=get_model_names]{get_model_names()}} to view all options.}
+}
+\value{
+If the specified model has constants, \code{get_default_constants} returns a named numeric vector
+of all default constant values used when none are provided. Otherwise, only outputs a message and returns nothing.
 }
 \description{
-TODO
+Returns the default values for all constants of a specified model.
+These are used if no constant values are provided to \code{\link[=b_TPC]{b_TPC()}}.
+}
+\details{
+Using this function is only necessary if the model being fit has constant values.
+Currently, the only implemented model with constants is 'pawar-shsch'.
+}
+\examples{
+
+#' # Model without constants
+get_default_constants("gaussian")
+
+# Model with constants
+get_default_constants("pawar-shsch")
 }

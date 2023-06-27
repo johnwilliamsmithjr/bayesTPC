@@ -14,19 +14,14 @@ ppo_plot(model, burn = 0, seq.length = 100)
 \item{seq.length}{Integer, length of sequence used to evaluate prior density (default = 100)}
 }
 \value{
-Returns invisible(NULL) and creates a prior posterior overlap plot
+Returns invisible(NULL) and creates a prior posterior overlap plot, with the prior density shown using a red line and the posterior density shown using a blue dashed line.
 }
 \description{
 Create a prior-posterior overlap plot from output of the bTPC function
 }
 \details{
-This is a wrapper to create trace plots using coda's \code{traceplot} function.
+Function to create a prior-posterior overlap plot. This is useful in determining the impact that the choice of prior distribution has on the analyses
 }
 \examples{
 ## need data to set up example here. placeholder for now
-## set params and reference temperature set
-myfun <- str2tpc_fun(model = "gaussian")
-param_set <- c(T.opt = 36, a = 6.5, rmax = 2.75)
-Temp_ref <- seq(from = 5, to = 50, length.out = 1000)
-plot(Temp_ref, myfun(params = param_set, Temp = Temp_ref), type = "l")
 }

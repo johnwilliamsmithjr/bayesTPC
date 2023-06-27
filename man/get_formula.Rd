@@ -7,10 +7,10 @@
 get_formula(model)
 }
 \arguments{
-\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
+\item{model}{A string specifying the model name. Use \code{\link[=get_model_names]{get_model_names()}} to view all options.}
 }
 \value{
-\code{get_formula} Returns the formula for the provided model as a string.
+\code{get_formula} returns the formula for the provided model as a string.
 }
 \description{
 Returns the formula for a specified model.
@@ -27,7 +27,7 @@ get_formula("stinner")
 q <- .75
 T_max <- 35
 T_min <- 10
-Temps <- c(15, 20, 25, 30)
+Temp <- c(15, 20, 25, 30)
 ans <- eval(str2lang(get_formula("quadratic")))
 ans
 
