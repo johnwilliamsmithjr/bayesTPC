@@ -2,6 +2,7 @@
 #'
 #' Wrapper for coda::traceplot() that can both directly accept samples of object type `mcmc` or `mcmc.list` as well as an object of class `list` with an element `samples` that is of class `mcmc` or `mcmc.list`
 #'
+#' @export
 #' @details This is a wrapper to create trace plots using coda's `traceplot()` function.
 #' @param object Either an object of class `mcmc` or `mcmc.list` OR an object of class `list` which contains an element called `samples` that is of class `mcmc` or `mcmc.list`
 #' @param burn Integer, number of samples to discard as burn-in before creating traceplot (default = 0)
@@ -46,6 +47,7 @@ traceplot <- function(object, burn = 0, thin = 1, ...){
 #'
 #' Wrapper for IDPmisc() that can both directly accept samples of object type `mcmc` or `matrix` as well as an object of class `list` with an element `samples` that is of class `mcmc` or `matrix`
 #'
+#' @export
 #' @details This is a wrapper to create pairs plots using IDPmisc's `ipairs()` function.
 #' @param object Either an object of class `mcmc` or `matrix` OR an object of class `list` which contains an element called `samples` that is of class `mcmc` or `matrix`
 #' @param burn Integer, number of samples to discard as burn-in before creating pairs plot (default = 0)
@@ -97,6 +99,7 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #'
 #' Create a prior-posterior overlap plot from output of the bTPC function
 #'
+#' @export
 #' @details Function to create a prior-posterior overlap plot. This is useful in determining the impact that the choice of prior distribution has on the analyses
 #' @param model List, usually output from the `bTPC` function. `ppo_plot` expects this list to have entries "samples", of class `mcmc` or `numeric` and "priors", with class `list` and entries that match the corresponding model parameters
 #' @param burn Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot (default = 0)

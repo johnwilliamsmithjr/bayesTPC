@@ -2,6 +2,7 @@
 #'
 #' Provide thermal performance curve summaries using output from `bTPC`'s nimble MCMC
 #'
+#' @export
 #' @details This function returns various summaries of the output of the thermal performance curve model, generarted using MCMC samples from the object returned by `bTPC`
 #' @param TPC list, object output from performing MCMC using the `bTPC` function.
 #' @param Temp_interval vector, reference values to use to compute values of the thermal performance curve. If no vector is provided, Temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1000 equally spaced points
@@ -169,6 +170,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
 #'
 #' Provide thermal performance curve posterior predictive summaries using output from `bTPC`'s nimble MCMC
 #'
+#' @export
 #' @details This function returns various summaries of the output of the thermal performance curve posterior predictive model samples, generarted using MCMC samples from the object returned by `bTPC`
 #' @param TPC list, object output from performing MCMC using the `bTPC` function.
 #' @param Temp_interval vector, reference values to use to compute values of the thermal performance curve. If no vector is provided, Temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1000 equally spaced points
