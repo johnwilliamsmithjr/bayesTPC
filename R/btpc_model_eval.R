@@ -31,8 +31,11 @@
   return(eval(str2expression(function_string)))
 }
 
-# functioning
-# internal, probably shouldn't export this
+# in the future i want to remove this layer of complexity from the package bc
+# 1. to remove global environment assignment in b_TPC()
+# 2. in the spirit of "canned models", a simpler architecture will make it easier for
+# (maybe more intermediate users) to obtain usable models using functions like configure_model()
+# definitely not a priority, but something to think about later.
 .direct_nimble <- function(model) {
   if (!(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
     stop("Unsupported model, use get_models() to view implemented models.")

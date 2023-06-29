@@ -7,6 +7,7 @@
 #'  Since the model formulas are stored and returned as strings, one of [str2lang()] or
 #'   [str2expression()] can be used in conjunction with [eval()] for dynamic evaluation.
 #'  However, it is better practice to use the output of [get_model_function()] for direct model evaluation.
+#'  This function is better used to investigate specifics of a model before using it.
 #' @param model A string specifying the model name. Use [get_model_names()] to view all options.
 #' @returns `get_formula` returns the formula for the provided model as a string.
 #' @examples
@@ -91,10 +92,9 @@ get_model_constants <- function(model) {
   }
   consts <- model_master_list[model_master_list$name == model, ]$constants[[1]]
 
-  if (!is.null(consts)){
+  if (!is.null(consts)) {
     return(consts)
-  }
-  else{
+  } else {
     simpleMessage("Specified model has no associated constants.")
   }
 }
@@ -172,9 +172,9 @@ get_model_names <- function() {
 #' stinner_function <- get_model_function("stinner")
 #' stinner_function
 #'
-#' #compare to example in get_formula()
+#' # compare to example in get_formula()
 #' quadratic_function <- get_model_function("quadratic")
-#' quadratic_function(q = .75, T_max = 35, T_min = 10, Temp = c(15,20,25,30))
+#' quadratic_function(q = .75, T_max = 35, T_min = 10, Temp = c(15, 20, 25, 30))
 get_model_function <- function(model) {
   if (!(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
     stop("Unsupported model, use get_models() to view implemented models.")
@@ -187,12 +187,11 @@ get_model_function <- function(model) {
   formula_string <- model_info$formula[[1]]
 
   params_string <- paste0(sorted_pars, ", ", collapse = "")
-  if (is.null(sorted_consts)){
-    function_string <- paste0("function(", params_string, "Temp){return(",formula_string,")}")
-  }
-  else{
+  if (is.null(sorted_consts)) {
+    function_string <- paste0("function(", params_string, "Temp){return(", formula_string, ")}")
+  } else {
     constant_string <- paste0(sorted_consts, ", ", collapse = "")
-    function_string <- paste0("function(", params_string,constant_string, "Temp){return(",formula_string,")}")
+    function_string <- paste0("function(", params_string, constant_string, "Temp){return(", formula_string, ")}")
   }
   return(eval(str2lang(function_string)))
 }

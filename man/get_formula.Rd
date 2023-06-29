@@ -19,6 +19,7 @@ Returns the formula for a specified model.
 Since the model formulas are stored and returned as strings, one of \code{\link[=str2lang]{str2lang()}} or
 \code{\link[=str2expression]{str2expression()}} can be used in conjunction with \code{\link[=eval]{eval()}} for dynamic evaluation.
 However, it is better practice to use the output of \code{\link[=get_model_function]{get_model_function()}} for direct model evaluation.
+This function is better used to investigate specifics of a model before using it.
 }
 \examples{
 get_formula("stinner")

@@ -15,7 +15,7 @@ check_params(model, params)
 list, input params coerced as a vector, if necessary
 }
 \description{
-//This documentation may not be necessary.
+//This function may not be needed.
 Check if data is correctly formatted. For interal use.
 }
 \details{

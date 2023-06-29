@@ -7,20 +7,20 @@
 ppo_plot(model, burn = 0, seq.length = 100)
 }
 \arguments{
-\item{model}{List, usually output from the \code{bTPC} function. \code{ppo_plot} expects this list to have entries "samples", of class \code{mcmc} or \code{numeric} and "priors", with class \code{list} and entries that match the corresponding model parameters}
+\item{model}{List, usually output from \code{b_TPC()}. \code{ppo_plot} expects this list to have entries "samples", of class \code{mcmc} or \code{numeric} and "priors", with class \code{list} and entries that match the corresponding model parameters.}
 
-\item{burn}{Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot (default = 0)}
+\item{burn}{Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot. Default is 0.}
 
-\item{seq.length}{Integer, length of sequence used to evaluate prior density (default = 100)}
+\item{seq.length}{Integer, length of sequence used to evaluate prior density. Default is 100.}
 }
 \value{
 Returns invisible(NULL) and creates a prior posterior overlap plot, with the prior density shown using a red line and the posterior density shown using a blue dashed line.
 }
 \description{
-Create a prior-posterior overlap plot from output of the bTPC function
+Create a prior-posterior overlap plot from output of \code{\link[=b_TPC]{b_TPC()}}.
 }
 \details{
-Function to create a prior-posterior overlap plot. This is useful in determining the impact that the choice of prior distribution has on the analyses
+Function to create a prior-posterior overlap plot. This is useful in determining the impact that the choice of prior distribution has on the analyses.
 }
 \examples{
 ## need data to set up example here. placeholder for now

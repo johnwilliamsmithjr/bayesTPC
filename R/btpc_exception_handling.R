@@ -1,6 +1,6 @@
 #' Checks Prior data format
 #'
-#' //This documentation may not be necessary.
+#' //This function may not be needed.
 #' Check if data is correctly formatted. For interal use.
 #'
 #' @details Helper function to help error correction.
@@ -46,8 +46,10 @@ check_params <- function(model, params) {
 #' @return list, with entries "data" (object of class "list", data to be passed to `nimble` model) and "N" (integer number of data points, to be passed `nimble` model as a constant)
 #' @examples
 #' ## generate data
-#' test_data <- list(Temp = rep(c(10, 20, 30, 40), 5),
-#'                   Trait = rgamma(20, 5, rep(c(10, 20, 30, 40), 5)))
+#' test_data <- list(
+#'   Temp = rep(c(10, 20, 30, 40), 5),
+#'   Trait = rgamma(20, 5, rep(c(10, 20, 30, 40), 5))
+#' )
 #' check_data(test_data)
 check_data <- function(data) {
   ## data checks to make sure there are values for Temp and Trait

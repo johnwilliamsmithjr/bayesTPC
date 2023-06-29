@@ -7,19 +7,19 @@
 traceplot(object, burn = 0, thin = 1, ...)
 }
 \arguments{
-\item{object}{Either an object of class \code{mcmc} or \code{mcmc.list} OR an object of class \code{list} which contains an element called \code{samples} that is of class \code{mcmc} or \code{mcmc.list}}
+\item{object}{Either an object of class \code{mcmc} or \code{mcmc.list} OR an object of class \code{list} which contains an element called \code{samples} that is of class \code{mcmc} or \code{mcmc.list}.}
 
-\item{burn}{Integer, number of samples to discard as burn-in before creating traceplot (default = 0)}
+\item{burn}{Integer, number of samples to discard as burn-in before creating traceplot. Default is 0.}
 
-\item{thin}{Integer, thinning interval used to generate traceplots (default = 1)}
+\item{thin}{Integer, thinning interval used to generate traceplots.  Default is 1.}
 
-\item{...}{additional graphical parameters to be passed as arguments to coda::traceplot}
+\item{...}{additional graphical parameters to be passed as arguments to coda::traceplot.}
 }
 \value{
-Returns invisible(NULL) and creates trace plots for MCMC parameters
+Returns invisible(NULL) and creates trace plots for MCMC parameter.s
 }
 \description{
-Wrapper for coda::traceplot() that can both directly accept samples of object type \code{mcmc} or \code{mcmc.list} as well as an object of class \code{list} with an element \code{samples} that is of class \code{mcmc} or \code{mcmc.list}
+Wrapper for coda::traceplot() that can both directly accept samples of object type \code{mcmc} or \code{mcmc.list} as well as an object of class \code{list} with an element \code{samples} that is of class \code{mcmc} or \code{mcmc.list}.
 }
 \details{
 This is a wrapper to create trace plots using coda's \code{traceplot()} function.

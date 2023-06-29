@@ -46,8 +46,8 @@
 }
 
 .priors_string <- function(model,
-                          priors = NULL,
-                          verbose = TRUE) {
+                           priors = NULL,
+                           verbose = TRUE) {
   model_info <-
     model_master_list[model_master_list$name == model, ]
   num_params <- length(model_info$params[[1]])
@@ -180,14 +180,17 @@
 
 #' Create model string
 #'
-#' Create model string for thermal performance curve model to be passed to nimble
+#' Create model string for thermal performance curve model to be passed to nimble.
 #'
 #' @export
-#' @details This function returns a character string of the full `nimble` model for a user-specified thermal performance curve and prior distributions
+#' @details This function returns a character string of the full `nimble` model for a user-specified thermal performance curve and prior distributions.
 #' @param model A string specifying the model name. Use [get_model_names()] to view all options.
-#' @param priors list, optional input specifying prior distributions for parameters (default = NULL). Elements of the list should correspond to model parameters, and written using nimble logic. For parameters not specified in the list, default priors are used.
-#' @param constants list, optional input specifying model constants. If model requires constant values and none are provided, default values are used.
-#' @param verbose logical, optional input. If verbose = TRUE, messages are printed when for priors that deviate from the defaultPriors(model) (see ?defaultPriors for additional information). Default = TRUE
+#' @param priors list, optional input specifying prior distributions for parameters (default = NULL).
+#'  Elements of the list should correspond to model parameters, and written using nimble logic.
+#'  For parameters not specified in the list, default priors are used.
+#' @param constants list, optional input specifying model constants.
+#'  If model requires constant values and none are provided, default values are used.
+#' @param verbose optional logical. If verbose = TRUE, messages are printed when user-end priors are used, rather than the default values. Default is TRUE.
 #' @return character, character string specifying the default model formulation to be passed to `nimble`.
 #' @examples
 #' ## Print default model for briere
@@ -230,7 +233,7 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
 #' @export
 #' @details placeholder
 #' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve)
-#'  and "Temp" (corresponding to the temperature in Celcius that the trait is being measured at).
+#'  and "Temp" (corresponding to the temperature in Celsius that the trait is being measured at).
 #' @param model A string specifying the model name. Use [get_model_names()] to view all options.
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL).
 #'  Elements of the list should correspond to model parameters,
@@ -239,29 +242,33 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
 #'  Currently, supported options are:
 #'  * Random Walk Metropolis ('RW')
 #'  * Blocked Random Walk Metropolis ('RW_block')
-#'  * Automated Factor Slice Sampling (AF_slice')
+#'  * Automated Factor Slice Sampling ('AF_slice')
 #'  * Slice sampling ('slice')
 #' @param niter integer, number of MCMC iterations to perform (default is niter = 10000).
 #' @param inits optional list, initial parameter values to be provided to nimble MCMC.
-#' @param burn optional integer, number of initial MCMC iterations to be discarded as burn-in. Default is burn = 0
+#' @param burn optional integer, number of initial MCMC iterations to be discarded as burn-in. Default is burn = 0.
 #' @param constant_list optional list, constants to be provided to model. If constants are needed and not provided, constant values are used.
 #'  Currently only used for model = 'pawar-shsch'.
-#' @param verbose logical, determines whether to print additional information, Default = TRUE.
+#' @param verbose logical, determines whether to print additional information, Default is TRUE.
 #' @param ... Additional parameters to be passed to nimble during MCMC configuration and sampling.
 #' @return `b_TPC` returns a list containing entries:
-#'  * `samples` - `mcmc.list` containing posterior samples of parameters for corresponding model
-#'  * `mcmc` -  `nimbleModel` object corresponding to model being fit
-#'  * `data` -  `list` containing trait and temperature data and number of observations (N)
+#'  * `samples` - `mcmc.list` containing posterior samples of parameters for corresponding model.
+#'  * `mcmc` -  `nimbleModel` object corresponding to model being fit.
+#'  * `data` -  `list` containing trait and temperature data and number of observations (N).
 #'  * `model_type` -  `character` containing the type of thermal performance curve being fit.
 #'  * `constants` - A named vector containing the constant values used, if the model includes constants. Otherwise, returns NULL.
 #'  * `uncomp_model` - Uncompiled version of the NIMBLE model. For internal use.
 #' @examples
-#' #placeholder
+#' # placeholder
 b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
                   niter = 10000, inits = NULL, burn = 0, constant_list = NULL, verbose = TRUE, ...) {
   # exception handling and variable setup
+  if (!(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
+    stop("Unsupported model, use get_models() to view implemented models.")
+  }
+
   data.nimble <- check_data(data)
-  nimble_mod_function <- NULL
+  nimble_mod_function <- NULL # binding the name for nimble_mod_function into this function so R stops yelling at me.
   model_info <-
     model_master_list[model_master_list$name == model, ]
   model_params <- model_info$params[[1]]
@@ -281,8 +288,13 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   modelStr <- configure_model(model = model, priors = priors, ...)
 
   # create the model evaluation function
+  # has to be assigned to .GlobalEnv because of parallelization.
+  # TODO look for better solution in future. Even though it's cleaned, I don't like assigning to user environment.
   eval(.direct_nimble(model))
   assign("nimble_mod_function", nimble_mod_function, envir = .GlobalEnv)
+
+  # create uncompiled nimble model
+  # TODO get verbose to interact with this.
   nimTPCmod <- nimble::nimbleModel(str2expression(modelStr),
     constants = const.list,
     data = data.nimble$data, inits = inits.list,
@@ -300,7 +312,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   } else if (model_info$density_function[[1]] == "binomial") {
     bugs_params <- paste0("params[", 1:length(model_params), "]")
   }
-  if (samplerType == "slice") {
+  if (samplerType == "slice") { # TODO make this less weird. There was a reason it was set up this way i just cannot remember.
     for (i in bugs_params) {
       mcmcConfig$removeSamplers(i)
       mcmcConfig$addSampler(i, type = samplerType)
@@ -311,7 +323,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   }
 
   if (verbose) {
-    # Manually Printing
+    # Manually Printing, see mcmcConfig
     cat("===== Monitors ===== \n")
     mcmcConfig$printMonitors()
     cat("===== Samplers ===== \n")
@@ -351,7 +363,6 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
 
   rm(nimble_mod_function, envir = .GlobalEnv)
-  # tpc_mcmc = nimbleMCMC(model = nimTPCmod_compiled, niter = 10000)
   return(list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
     model_type = model, priors = prior_list, constants = constants, uncomp_model = nimTPCmod

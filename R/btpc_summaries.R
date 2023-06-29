@@ -1,21 +1,26 @@
 #' Provide thermal performance curve summaries
 #'
-#' Provide thermal performance curve summaries using output from `bTPC`'s nimble MCMC
+#' Provide thermal performance curve summaries using output from [b_TPC()]'s nimble MCMC.
 #'
 #' @export
-#' @details This function returns various summaries of the output of the thermal performance curve model, generarted using MCMC samples from the object returned by `bTPC`
-#' @param TPC list, object output from performing MCMC using the `bTPC` function.
-#' @param Temp_interval vector, reference values to use to compute values of the thermal performance curve. If no vector is provided, Temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1000 equally spaced points
-#' @param summaryOnly logical, should the function return only summaries, or the entire matrix of thermal performance curve evaluations AND the summaries? default = TRUE
-#' @param summaryType character, type of summary used. Currently supported options are "quantile" and "hdi" (default option). Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
-#' @param centralSummary character, central summary measure used. Currently supported options are "median" (default) and "mean". Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
-#' @param plot logical, should a plot be created? default = TRUE
-#' @param probs numeric, represents either the quantiles to be used during summarization (in the form c(lower, upper)) or the credible mass used to compute the highest density intervals
-#' @param burn numeric, initial number of iterations to be discarded as burn-in (default = 0)
-#' @param plotOnly logical, should a plot be generated without returning a list of summaries? if plotOnly = TRUE, an invisible NULL is returned and only plot is generated. Default = FALSE
-#' @param traitName string, name of Trait to be used as y-axis if a plot is generated. default = "Trait"
-#' @param ... additional parameters to be passed as arguments
-#' @return return types vary by argument. For plotOnly = TRUE, invisible NULL is returned. For summaryOnly = TRUE, a list of summaries is returned. For summaryOnly = FALSE, a list is returned with summaries as well as the entire set of thermal performance curve evaluations
+#' @details This function returns various summaries of the output of the thermal performance curve model, generated using MCMC samples from the object returned by `b_TPC()`.
+#' @param TPC list, object output from performing MCMC using the `b_TPC()` function.
+#' @param Temp_interval vector, reference values to use to compute values of the thermal performance curve.
+#'  If no vector is provided, Temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1000 equally spaced points.
+#' @param summaryOnly logical, should the function return only summaries, or the entire matrix of thermal performance curve evaluations AND the summaries? Default is TRUE.
+#' @param summaryType character, type of summary used. Currently supported options are "quantile" and "hdi" (default option).
+#'  Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
+#' @param centralSummary character, central summary measure used. Currently supported options are "median" (default) and "mean".
+#'  Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
+#' @param plot logical, should a plot be created? Default is TRUE.
+#' @param probs numeric, represents either the quantiles to be used during summarization (in the form c(lower, upper)) or the credible mass used to compute the highest density intervals.
+#' @param burn numeric, initial number of iterations to be discarded as burn-in. Default is 0.
+#' @param plotOnly logical, should a plot be generated without returning a list of summaries?
+#'  If plotOnly = TRUE, an invisible NULL is returned and only plot is generated. Default is FALSE.
+#' @param traitName string, name of Trait to be used as y-axis if a plot is generated. Default is "Trait".
+#' @param ... additional parameters to be passed as arguments.
+#' @return return types vary by argument. For plotOnly = TRUE, invisible NULL is returned.
+#'  For summaryOnly = TRUE, a list of summaries is returned. For summaryOnly = FALSE, a list is returned with summaries as well as the entire set of thermal performance curve evaluations.
 #' @examples
 #' ## need data to set up example here. placeholder for now
 bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
@@ -163,23 +168,27 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
 
 #' Provide thermal performance curve posterior predictive summaries
 #'
-#' Provide thermal performance curve posterior predictive summaries using output from `bTPC`'s nimble MCMC
+#' Provide thermal performance curve posterior predictive summaries using output from [b_TPC()]'s nimble MCMC.
 #'
 #' @export
-#' @details This function returns various summaries of the output of the thermal performance curve posterior predictive model samples, generarted using MCMC samples from the object returned by `bTPC`
+#' @details This function returns various summaries of the output of the thermal performance curve posterior predictive model samples, generated using MCMC samples from the object returned by `b_TPC()`.
 #' @param TPC list, object output from performing MCMC using the `bTPC` function.
-#' @param Temp_interval vector, reference values to use to compute values of the thermal performance curve. If no vector is provided, Temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1000 equally spaced points
-#' @param summaryOnly logical, should the function return only summaries, or the entire matrix of thermal performance curve posterior predictive samples AND the summaries? default = TRUE
-#' @param summaryType character, type of summary used. Currently supported options are "quantile" and "hdi" (default option). Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
-#' @param centralSummary character, central summary measure used. Currently supported options are "median" (default) and "mean". Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
-#' @param plot logical, should a plot be created? default = TRUE
-#' @param probs numeric, represents either the quantiles to be used during summarization (in the form c(lower, upper)) or the credible mass used to compute the highest density intervals
-#' @param burn numeric, initial number of iterations to be discarded as burn-in (default = 0)
-#' @param plotOnly logical, should a plot be generated without returning a list of summaries? if plotOnly = TRUE, an invisible NULL is returned and only plot is generated. Default = FALSE
-#' @param traitName string, name of Trait to be used as y-axis if a plot is generated. default = "Trait"
-#' @param seed integer, seed value to be used. Useful for ensuring that results are reproducible. default = NULL
-#' @param ... additional parameters to be passed as arguments
-#' @return return types vary by argument. For plotOnly = TRUE, invisible NULL is returned. For summaryOnly = TRUE, a list of summaries is returned. For summaryOnly = FALSE, a list is returned with summaries as well as the entire set of thermal performance curve posterior predictive samples
+#' @param Temp_interval vector, reference values to use to compute values of the thermal performance curve.
+#'  If no vector is provided, Temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1,000 equally spaced points.
+#' @param summaryOnly logical, should the function return only summaries, or the entire matrix of thermal performance curve posterior predictive samples AND the summaries? Default is TRUE.
+#' @param summaryType character, type of summary used. Currently supported options are "quantile" and "hdi" (default option).
+#'  Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
+#' @param centralSummary character, central summary measure used. Currently supported options are "median" (default) and "mean".
+#'  Users that wish to use alternatives may consider summaryOnly = FALSE, and using their desired method on the raw TPC evaluations.
+#' @param plot logical, should a plot be created? Default is TRUE.
+#' @param probs numeric, represents either the quantiles to be used during summarization (in the form c(lower, upper)) or the credible mass used to compute the highest density intervals.
+#' @param burn numeric, initial number of iterations to be discarded as burn-in. Default is 0.
+#' @param plotOnly logical, should a plot be generated without returning a list of summaries? if plotOnly = TRUE, an invisible NULL is returned and only plot is generated. Default is FALSE.
+#' @param traitName string, name of Trait to be used as y-axis if a plot is generated. Default is "Trait".
+#' @param seed integer, seed value to be used. Useful for ensuring that results are reproducible. Default is NULL.
+#' @param ... additional parameters to be passed as arguments.
+#' @return return types vary by argument. For plotOnly = TRUE, invisible NULL is returned. For summaryOnly = TRUE, a list of summaries is returned.
+#'  For summaryOnly = FALSE, a list is returned with summaries as well as the entire set of thermal performance curve posterior predictive samples.
 #' @examples
 #' ## need data to set up example here. placeholder for now
 posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,

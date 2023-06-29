@@ -9,20 +9,23 @@ configure_model(model, priors = NULL, constants = NULL, verbose = TRUE)
 \arguments{
 \item{model}{A string specifying the model name. Use \code{\link[=get_model_names]{get_model_names()}} to view all options.}
 
-\item{priors}{list, optional input specifying prior distributions for parameters (default = NULL). Elements of the list should correspond to model parameters, and written using nimble logic. For parameters not specified in the list, default priors are used.}
+\item{priors}{list, optional input specifying prior distributions for parameters (default = NULL).
+Elements of the list should correspond to model parameters, and written using nimble logic.
+For parameters not specified in the list, default priors are used.}
 
-\item{constants}{list, optional input specifying model constants. If model requires constant values and none are provided, default values are used.}
+\item{constants}{list, optional input specifying model constants.
+If model requires constant values and none are provided, default values are used.}
 
-\item{verbose}{logical, optional input. If verbose = TRUE, messages are printed when for priors that deviate from the defaultPriors(model) (see ?defaultPriors for additional information). Default = TRUE}
+\item{verbose}{optional logical. If verbose = TRUE, messages are printed when user-end priors are used, rather than the default values. Default is TRUE.}
 }
 \value{
 character, character string specifying the default model formulation to be passed to \code{nimble}.
 }
 \description{
-Create model string for thermal performance curve model to be passed to nimble
+Create model string for thermal performance curve model to be passed to nimble.
 }
 \details{
-This function returns a character string of the full \code{nimble} model for a user-specified thermal performance curve and prior distributions
+This function returns a character string of the full \code{nimble} model for a user-specified thermal performance curve and prior distributions.
 }
 \examples{
 ## Print default model for briere

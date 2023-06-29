@@ -19,7 +19,7 @@ b_TPC(
 }
 \arguments{
 \item{data}{list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve)
-and "Temp" (corresponding to the temperature in Celcius that the trait is being measured at).}
+and "Temp" (corresponding to the temperature in Celsius that the trait is being measured at).}
 
 \item{model}{A string specifying the model name. Use \code{\link[=get_model_names]{get_model_names()}} to view all options.}
 
@@ -32,7 +32,7 @@ Currently, supported options are:
 \itemize{
 \item Random Walk Metropolis ('RW')
 \item Blocked Random Walk Metropolis ('RW_block')
-\item Automated Factor Slice Sampling (AF_slice')
+\item Automated Factor Slice Sampling ('AF_slice')
 \item Slice sampling ('slice')
 }}
 
@@ -40,21 +40,21 @@ Currently, supported options are:
 
 \item{inits}{optional list, initial parameter values to be provided to nimble MCMC.}
 
-\item{burn}{optional integer, number of initial MCMC iterations to be discarded as burn-in. Default is burn = 0}
+\item{burn}{optional integer, number of initial MCMC iterations to be discarded as burn-in. Default is burn = 0.}
 
 \item{constant_list}{optional list, constants to be provided to model. If constants are needed and not provided, constant values are used.
 Currently only used for model = 'pawar-shsch'.}
 
-\item{verbose}{logical, determines whether to print additional information, Default = TRUE.}
+\item{verbose}{logical, determines whether to print additional information, Default is TRUE.}
 
 \item{...}{Additional parameters to be passed to nimble during MCMC configuration and sampling.}
 }
 \value{
 \code{b_TPC} returns a list containing entries:
 \itemize{
-\item \code{samples} - \code{mcmc.list} containing posterior samples of parameters for corresponding model
-\item \code{mcmc} -  \code{nimbleModel} object corresponding to model being fit
-\item \code{data} -  \code{list} containing trait and temperature data and number of observations (N)
+\item \code{samples} - \code{mcmc.list} containing posterior samples of parameters for corresponding model.
+\item \code{mcmc} -  \code{nimbleModel} object corresponding to model being fit.
+\item \code{data} -  \code{list} containing trait and temperature data and number of observations (N).
 \item \code{model_type} -  \code{character} containing the type of thermal performance curve being fit.
 \item \code{constants} - A named vector containing the constant values used, if the model includes constants. Otherwise, returns NULL.
 \item \code{uncomp_model} - Uncompiled version of the NIMBLE model. For internal use.

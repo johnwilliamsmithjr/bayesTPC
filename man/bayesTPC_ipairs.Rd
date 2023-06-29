@@ -16,21 +16,22 @@ bayesTPC_ipairs(
 )
 }
 \arguments{
-\item{x}{Either an object of class \code{mcmc} or \code{matrix} OR an object of class \code{list} which contains an element called \code{samples} that is of class \code{mcmc} or \code{matrix}}
+\item{x}{Either an object of class \code{mcmc} or \code{matrix} OR an object of class \code{list} which contains an element called \code{samples} that is of class \code{mcmc} or \code{matrix}.}
 
-\item{burn}{Integer, number of samples to discard as burn-in before creating pairs plot (default = 0)}
+\item{burn}{Integer, number of samples to discard as burn-in before creating pairs plot. Default is 0.}
 
-\item{thin}{Integer, thinning interval used to generate pairs plots (default = 1)}
+\item{thin}{Integer, thinning interval used to generate pairs plots. Default is 1.}
 
-\item{ztransf}{Function, used to transform the counts per pixel in IDPmisc::ipairs().}
+\item{ztransf}{Function, used to transform the counts per pixel in \code{\link[IDPmisc:ipairs]{IDPmisc::ipairs()}}.}
 
-\item{...}{additional graphical parameters to be passed as arguments to IDPmisc::ipairs(). For additional information, try ?IDPmisc::ipairs}
+\item{...}{additional graphical parameters to be passed as arguments to \code{\link[IDPmisc:ipairs]{IDPmisc::ipairs()}}.
+For additional information, try \code{?IDPmisc::ipairs}.}
 }
 \value{
-Returns invisible(NULL) and creates pairs plots for MCMC parameters
+Returns invisible(NULL) and creates pairs plots for MCMC parameters.
 }
 \description{
-Wrapper for IDPmisc() that can both directly accept samples of object type \code{mcmc} or \code{matrix} as well as an object of class \code{list} with an element \code{samples} that is of class \code{mcmc} or \code{matrix}
+Wrapper for IDPmisc() that can both directly accept samples of object type \code{mcmc} or \code{matrix} as well as an object of class \code{list} with an element \code{samples} that is of class \code{mcmc} or \code{matrix}.
 }
 \details{
 This is a wrapper to create pairs plots using IDPmisc's \code{ipairs()} function.
