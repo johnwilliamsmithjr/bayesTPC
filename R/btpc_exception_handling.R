@@ -1,13 +1,14 @@
 #' Checks Prior data format
 #'
-#' Check if data is correctly formatted
+#' //This documentation may not be necessary.
+#' Check if data is correctly formatted. For interal use.
 #'
-#' @details TODO
+#' @details Helper function to help error correction.
 #' @param model character, the model type
 #' @param params named vector, contains the actual params from the function call
 #' @return list, input params coerced as a vector, if necessary
 
-checkParams <- function(model, params) {
+check_params <- function(model, params) {
   # having an external function call in our model evaluation
   # might cause issues, but we can use an error handling wrapper
   # that calls the nimble function, probably
@@ -45,9 +46,10 @@ checkParams <- function(model, params) {
 #' @return list, with entries "data" (object of class "list", data to be passed to `nimble` model) and "N" (integer number of data points, to be passed `nimble` model as a constant)
 #' @examples
 #' ## generate data
-#' test_data <- list(Temp = rep(c(10, 20, 30, 40), 5), Trait = rgamma(20, 5, rep(c(10, 20, 30, 40), 5)))
-#' checkData(test_data)
-checkData <- function(data) {
+#' test_data <- list(Temp = rep(c(10, 20, 30, 40), 5),
+#'                   Trait = rgamma(20, 5, rep(c(10, 20, 30, 40), 5)))
+#' check_data(test_data)
+check_data <- function(data) {
   ## data checks to make sure there are values for Temp and Trait
   if (!is.list(data)) stop("Unexpected class for argument 'data'. Data must be input as a list.")
   if (is.null(unlist(data["Temp"]))) stop("Data list must have a variable called 'Temp'. Perhaps check spelling and capitalization?")

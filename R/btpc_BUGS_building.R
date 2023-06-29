@@ -225,30 +225,42 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
 
 #' Perform MCMC
 #'
-#' Generate `nimble` model, perform sampling using MCMC
+#' Generates NIMBLE model, and performs MCMC.
 #'
-#' @details This function returns a list, containing entries: `samples` - object of class `mcmc.list` containing posterior samples of parameters for corresponding model; `model` - object of class `nimbleModel` containing `nimble` model object corresponding to model being fit; `data` - object of class `list` containing trait and temperature data and number of observations (N); `modelType` - object of class `character` containing the type of thermal performance curve being fit, `uncomp_model` - uncompiled model used during prior evaluation.
 #' @export
-#' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve) and "Temp" (corresponding to the temperature in Celcius that the trait is being measured at).
-#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky", "binomial_glm_lin", "binomial_glm_quad", and "stinner".
-#' @param priors list, optional input specifying prior distributions for parameters (default = NULL). Elements of the list should correspond to model parameters, and written using nimble logic. For parameters not specified in the list, default priors are used.
-#' @param samplerType character string, specifying the sampling method used during the MCMC. Currently, supported options are Random Walk Metropolis (samplerType = 'RW'), Blocked Random Walk Metropolis (samplerType = 'RW_block'), Automated Factor Slice Sampling (samplerType = 'AF_slice'), and Slice sampling (samplerType = 'slice')
-#' @param niter integer, number of MCMC iterations to perform (default is niter = 10000)
-#' @param inits optional list, initial parameter values to be provided to nimble MCMC
+#' @details placeholder
+#' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve)
+#'  and "Temp" (corresponding to the temperature in Celcius that the trait is being measured at).
+#' @param model A string specifying the model name. Use [get_model_names()] to view all options.
+#' @param priors list, optional input specifying prior distributions for parameters (default = NULL).
+#'  Elements of the list should correspond to model parameters,
+#'  and written using NIMBLE logic. For parameters not specified in the list, default priors are used.
+#' @param samplerType character string, specifying the sampling method used during the MCMC.
+#'  Currently, supported options are:
+#'  * Random Walk Metropolis ('RW')
+#'  * Blocked Random Walk Metropolis ('RW_block')
+#'  * Automated Factor Slice Sampling (AF_slice')
+#'  * Slice sampling ('slice')
+#' @param niter integer, number of MCMC iterations to perform (default is niter = 10000).
+#' @param inits optional list, initial parameter values to be provided to nimble MCMC.
 #' @param burn optional integer, number of initial MCMC iterations to be discarded as burn-in. Default is burn = 0
-#' @param constant_list optional list, constants to be provided to model. Currently only used for model = 'pawar-shsch'
-#' @param verbose logical, should sampling progress be output?
-#' @param ... Additional parameters to be passed to nimble during MCMC configuration and sampling
-#' @return list, with entries "data" (object of class "list", data to be passed to `nimble` model) and "N" (integer number of data points, to be passed `nimble` model as a constant)
+#' @param constant_list optional list, constants to be provided to model. If constants are needed and not provided, constant values are used.
+#'  Currently only used for model = 'pawar-shsch'.
+#' @param verbose logical, determines whether to print additional information, Default = TRUE.
+#' @param ... Additional parameters to be passed to nimble during MCMC configuration and sampling.
+#' @return `b_TPC` returns a list containing entries:
+#'  * `samples` - `mcmc.list` containing posterior samples of parameters for corresponding model
+#'  * `mcmc` -  `nimbleModel` object corresponding to model being fit
+#'  * `data` -  `list` containing trait and temperature data and number of observations (N)
+#'  * `model_type` -  `character` containing the type of thermal performance curve being fit.
+#'  * `constants` - A named vector containing the constant values used, if the model includes constants. Otherwise, returns NULL.
+#'  * `uncomp_model` - Uncompiled version of the NIMBLE model. For internal use.
 #' @examples
-#' ## generate data
-#' test_data = list(Temp = rep(c(10, 20, 30, 40), 5), Trait = rgamma(20, 5, rep(c(10, 20, 30, 40), 5)))
-#' checkData(test_data)
-
+#' #placeholder
 b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
-                  niter = 10000, inits = NULL, burn = 0, constant_list = NULL, verbose = FALSE, ...) {
+                  niter = 10000, inits = NULL, burn = 0, constant_list = NULL, verbose = TRUE, ...) {
   # exception handling and variable setup
-  data.nimble <- checkData(data)
+  data.nimble <- check_data(data)
   nimble_mod_function <- NULL
   model_info <-
     model_master_list[model_master_list$name == model, ]
@@ -341,7 +353,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   rm(nimble_mod_function, envir = .GlobalEnv)
   # tpc_mcmc = nimbleMCMC(model = nimTPCmod_compiled, niter = 10000)
   return(list(
-    samples = samples, model = tpc_mcmc, data = data.nimble$data,
-    modelType = model, priors = prior_list, constants = constants, uncomp_model = nimTPCmod
+    samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
+    model_type = model, priors = prior_list, constants = constants, uncomp_model = nimTPCmod
   ))
 }
