@@ -223,6 +223,28 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
   return(nimble_string)
 }
 
+#' Perform MCMC
+#'
+#' Generate `nimble` model, perform sampling using MCMC
+#'
+#' @details This function returns a list, containing entries: `samples` - object of class `mcmc.list` containing posterior samples of parameters for corresponding model; `model` - object of class `nimbleModel` containing `nimble` model object corresponding to model being fit; `data` - object of class `list` containing trait and temperature data and number of observations (N); `modelType` - object of class `character` containing the type of thermal performance curve being fit, `uncomp_model` - uncompiled model used during prior evaluation.
+#' @export
+#' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve) and "Temp" (corresponding to the temperature in Celcius that the trait is being measured at).
+#' @param model character, name of thermal performance curve model. Currently, supported options include "quadratic", "briere", "gaussian", "weibull", "pawar-shsch", "lactin2", "kamykowski", "ratkowsky", "binomial_glm_lin", "binomial_glm_quad", and "stinner".
+#' @param priors list, optional input specifying prior distributions for parameters (default = NULL). Elements of the list should correspond to model parameters, and written using nimble logic. For parameters not specified in the list, default priors are used.
+#' @param samplerType character string, specifying the sampling method used during the MCMC. Currently, supported options are Random Walk Metropolis (samplerType = 'RW'), Blocked Random Walk Metropolis (samplerType = 'RW_block'), Automated Factor Slice Sampling (samplerType = 'AF_slice'), and Slice sampling (samplerType = 'slice')
+#' @param niter integer, number of MCMC iterations to perform (default is niter = 10000)
+#' @param inits optional list, initial parameter values to be provided to nimble MCMC
+#' @param burn optional integer, number of initial MCMC iterations to be discarded as burn-in. Default is burn = 0
+#' @param constant_list optional list, constants to be provided to model. Currently only used for model = 'pawar-shsch'
+#' @param verbose logical, should sampling progress be output?
+#' @param ... Additional parameters to be passed to nimble during MCMC configuration and sampling
+#' @return list, with entries "data" (object of class "list", data to be passed to `nimble` model) and "N" (integer number of data points, to be passed `nimble` model as a constant)
+#' @examples
+#' ## generate data
+#' test_data = list(Temp = rep(c(10, 20, 30, 40), 5), Trait = rgamma(20, 5, rep(c(10, 20, 30, 40), 5)))
+#' checkData(test_data)
+
 b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
                   niter = 10000, inits = NULL, burn = 0, constant_list = NULL, verbose = FALSE, ...) {
   # exception handling and variable setup
