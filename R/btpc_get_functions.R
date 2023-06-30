@@ -22,7 +22,7 @@
 #' ans
 #'
 get_formula <- function(model) {
-  if (!(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
+  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
     stop("Unsupported model, use get_models() to view implemented models.")
   }
   return(model_master_list[model_master_list$name == model, ]$formula[[1]])
@@ -41,7 +41,7 @@ get_formula <- function(model) {
 #' get_model_params("ratkowsky")
 #'
 get_model_params <- function(model) {
-  if (!(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
+  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
     stop("Unsupported model, use get_models() to view implemented models.")
   }
   return(unlist(model_master_list[model_master_list$name == model, ]$params[[1]]))
@@ -61,7 +61,7 @@ get_model_params <- function(model) {
 #' @examples
 #' get_default_priors("briere")
 get_default_priors <- function(model) {
-  if (!(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
+  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
     stop("Unsupported model, use get_models() to view implemented models.")
   }
   dp <- model_master_list[model_master_list$name == model, ]$default_priors[[1]]
@@ -87,7 +87,7 @@ get_default_priors <- function(model) {
 #' # Model with constants
 #' get_model_constants("pawar-shsch")
 get_model_constants <- function(model) {
-  if (!(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
+  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
     stop("Unsupported model, use get_models() to view implemented models.")
   }
   consts <- model_master_list[model_master_list$name == model, ]$constants[[1]]
@@ -118,7 +118,7 @@ get_model_constants <- function(model) {
 #' # Model with constants
 #' get_default_constants("pawar-shsch")
 get_default_constants <- function(model) {
-  if (!(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
+  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
     stop("Unsupported model, use get_models() to view implemented models.")
   }
   if (is.null(model_master_list[model_master_list$name == model, ]$constants[[1]])) {
@@ -176,7 +176,7 @@ get_model_names <- function() {
 #' quadratic_function <- get_model_function("quadratic")
 #' quadratic_function(q = .75, T_max = 35, T_min = 10, Temp = c(15, 20, 25, 30))
 get_model_function <- function(model) {
-  if (!(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
+  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
     stop("Unsupported model, use get_models() to view implemented models.")
   }
   model_info <-

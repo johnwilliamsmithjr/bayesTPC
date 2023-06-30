@@ -50,7 +50,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   }
 
   if (is.null(Temp_interval)) Temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
-  tpc_fun <- .model_evaluation_function(TPC$modelType)
+  tpc_fun <- .model_evaluation_function(TPC$model_type)
   max.ind <- nrow(TPC$samples)
   tpc_evals <- apply(tpc_fun, X = TPC$samples[(burn + 1):max.ind, ], Temp = Temp_interval, constants = TPC$constants, MARGIN = 1, ...)
 
@@ -220,7 +220,7 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   }
 
   if (is.null(Temp_interval)) Temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
-  tpc_fun <- .model_evaluation_function(TPC$modelType)
+  tpc_fun <- .model_evaluation_function(TPC$model_type)
   max.ind <- nrow(TPC$samples)
   if (!is.null(seed)) set.seed(seed)
   truncmeans <- apply(tpc_fun, X = TPC$samples[(burn + 1):max.ind, ], Temp = Temp_interval, constants = TPC$constants, MARGIN = 1, ...)

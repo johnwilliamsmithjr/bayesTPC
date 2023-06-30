@@ -105,7 +105,7 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #' ## need data to set up example here. placeholder for now
 ppo_plot <- function(model, burn = 0, seq.length = 100) {
   ## extract model parameters and sort alphabetically
-  ppo_parameters <- unlist(get_model_params(model$modelType))
+  ppo_parameters <- unlist(get_model_params(model$model_type))
   ppo_parameters <- sort(ppo_parameters)
   ## if sigma.sq is in the mcmc sample list, add it as the
   ## last entry of the param_list vector
@@ -121,7 +121,7 @@ ppo_plot <- function(model, burn = 0, seq.length = 100) {
     inits_vec[name] <- x
     return(.configure_inits(
       inits = as.list(inits_vec),
-      get_model_params(model$modelType)
+      get_model_params(model$model_type)
     ))
   }
 

@@ -322,7 +322,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     mcmcConfig$addSampler(bugs_params, type = samplerType)
   }
 
-  if (verbose) {
+  if (verbose) { #weird output if not using RW sampler
     # Manually Printing, see mcmcConfig
     cat("===== Monitors ===== \n")
     mcmcConfig$printMonitors()
