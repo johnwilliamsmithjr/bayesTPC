@@ -61,7 +61,7 @@
   }
 
   function_string <- paste0("
-nimble_mod_function <- nimbleFunction(
+nimble_mod_function <- nimble::nimbleFunction(
     run = function(params = double(1),
                    Temp = double(0),
                    constants = double(1)){

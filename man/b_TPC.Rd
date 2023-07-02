@@ -25,7 +25,8 @@ and "Temp" (corresponding to the temperature in Celsius that the trait is being 
 
 \item{priors}{list, optional input specifying prior distributions for parameters (default = NULL).
 Elements of the list should correspond to model parameters,
-and written using NIMBLE logic. For parameters not specified in the list, default priors are used.}
+and written using NIMBLE logic. For parameters not specified in the list, default priors are used.
+Use \code{\link[=get_default_priors]{get_default_priors()}} to view default values.}
 
 \item{samplerType}{character string, specifying the sampling method used during the MCMC.
 Currently, supported options are:
@@ -67,5 +68,32 @@ Generates NIMBLE model, and performs MCMC.
 placeholder
 }
 \examples{
-# placeholder
+library(nimble)
+# simulate data
+N <- 16
+q <- .75
+T_min <- 10
+T_max <- 35
+sd_trait <- 2
+Temps <- rep(c(15, 20, 25, 30), N / 4)
+Traits <- rep(0, N)
+for (i in 1:N) {
+  while (Traits[i] <= 0) {
+    Traits[i] <- rnorm(
+      1,
+      -1 * q * (Temps[i] - T_max) * (Temps[i] - T_min) * (Temps[i] > T_min) * (Temps[i] < T_max), 2
+    )
+  }
+}
+trait_list <- list(Trait = Traits, Temp = Temps)
+
+# create model
+\dontrun{
+quadratic_model <- b_TPC(data = trait_list, model = "quadratic")
+quadratic_model <- b_TPC(
+  data = trait_list, model = "quadratic", niter = 8000,
+  inits = list(T_min = 15, T_max = 30),
+  priors = list(q = "dunif(0, .5)", sigma.sq = "dexp(1)")
+)
+}
 }

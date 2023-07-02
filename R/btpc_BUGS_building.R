@@ -243,6 +243,7 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL).
 #'  Elements of the list should correspond to model parameters,
 #'  and written using NIMBLE logic. For parameters not specified in the list, default priors are used.
+#'  Use [get_default_priors()] to view default values.
 #' @param samplerType character string, specifying the sampling method used during the MCMC.
 #'  Currently, supported options are:
 #'  * Random Walk Metropolis ('RW')
@@ -264,7 +265,34 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
 #'  * `constants` - A named vector containing the constant values used, if the model includes constants. Otherwise, returns NULL.
 #'  * `uncomp_model` - Uncompiled version of the NIMBLE model. For internal use.
 #' @examples
-#' # placeholder
+#' library(nimble)
+#' # simulate data
+#' N <- 16
+#' q <- .75
+#' T_min <- 10
+#' T_max <- 35
+#' sd_trait <- 2
+#' Temps <- rep(c(15, 20, 25, 30), N / 4)
+#' Traits <- rep(0, N)
+#' for (i in 1:N) {
+#'   while (Traits[i] <= 0) {
+#'     Traits[i] <- rnorm(
+#'       1,
+#'       -1 * q * (Temps[i] - T_max) * (Temps[i] - T_min) * (Temps[i] > T_min) * (Temps[i] < T_max), 2
+#'     )
+#'   }
+#' }
+#' trait_list <- list(Trait = Traits, Temp = Temps)
+#'
+#' # create model
+#' \dontrun{
+#' quadratic_model <- b_TPC(data = trait_list, model = "quadratic")
+#' quadratic_model <- b_TPC(
+#'   data = trait_list, model = "quadratic", niter = 8000,
+#'   inits = list(T_min = 15, T_max = 30),
+#'   priors = list(q = "dunif(0, .5)", sigma.sq = "dexp(1)")
+#' )
+#' }
 b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
                   niter = 10000, inits = NULL, burn = 0, constant_list = NULL, verbose = TRUE, ...) {
   # exception handling and variable setup
@@ -368,7 +396,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   }
 
   # remove random objects from global environment
-  rm(list = setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
+  rm(list = base::setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
   return(list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
     model_type = model, priors = prior_list, constants = constants, uncomp_model = nimTPCmod
