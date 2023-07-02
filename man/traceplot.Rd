@@ -16,7 +16,7 @@ traceplot(object, burn = 0, thin = 1, ...)
 \item{...}{additional graphical parameters to be passed as arguments to coda::traceplot.}
 }
 \value{
-Returns invisible(NULL) and creates trace plots for MCMC parameter.s
+Returns invisible(NULL) and creates trace plots for MCMC parameters.
 }
 \description{
 Wrapper for coda::traceplot() that can both directly accept samples of object type \code{mcmc} or \code{mcmc.list} as well as an object of class \code{list} with an element \code{samples} that is of class \code{mcmc} or \code{mcmc.list}.

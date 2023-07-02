@@ -200,6 +200,10 @@
 #' my_prior <- list(q = "q~beta(.5, .5)")
 #' cat(configure_model(model = "quadratic", priors = my_prior))
 configure_model <- function(model, priors = NULL, constants = NULL, verbose = TRUE) {
+  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
+    stop("Unsupported model, use get_models() to view implemented models.")
+  }
+
   model_info <-
     model_master_list[model_master_list$name == model, ]
   num_params <- length(model_info[[2]][[1]])
@@ -225,6 +229,7 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
   nimble_string <- paste0(loop, "    ", pri_string, "\n}")
   return(nimble_string)
 }
+
 
 #' Perform MCMC
 #'
@@ -263,10 +268,11 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
 b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
                   niter = 10000, inits = NULL, burn = 0, constant_list = NULL, verbose = TRUE, ...) {
   # exception handling and variable setup
-  if (!(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
+  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
     stop("Unsupported model, use get_models() to view implemented models.")
   }
 
+  original_environmental_objects <- force(ls(envir = .GlobalEnv))
   data.nimble <- check_data(data)
   nimble_mod_function <- NULL # binding the name for nimble_mod_function into this function so R stops yelling at me.
   model_info <-
@@ -322,7 +328,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     mcmcConfig$addSampler(bugs_params, type = samplerType)
   }
 
-  if (verbose) { #weird output if not using RW sampler
+  if (verbose) { # weird output if not using RW sampler
     # Manually Printing, see mcmcConfig
     cat("===== Monitors ===== \n")
     mcmcConfig$printMonitors()
@@ -361,8 +367,8 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     constants <- NULL
   }
 
-
-  rm(nimble_mod_function, envir = .GlobalEnv)
+  # remove random objects from global environment
+  rm(list = setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
   return(list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
     model_type = model, priors = prior_list, constants = constants, uncomp_model = nimTPCmod

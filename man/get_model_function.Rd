@@ -25,7 +25,7 @@ Manual evaluation is available through \code{\link[=get_formula]{get_formula()}}
 stinner_function <- get_model_function("stinner")
 stinner_function
 
-#compare to example in get_formula()
+# compare to example in get_formula()
 quadratic_function <- get_model_function("quadratic")
-quadratic_function(q = .75, T_max = 35, T_min = 10, Temp = c(15,20,25,30))
+quadratic_function(q = .75, T_max = 35, T_min = 10, Temp = c(15, 20, 25, 30))
 }

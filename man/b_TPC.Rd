@@ -67,5 +67,5 @@ Generates NIMBLE model, and performs MCMC.
 placeholder
 }
 \examples{
-#placeholder
+# placeholder
 }

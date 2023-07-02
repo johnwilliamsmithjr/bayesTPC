@@ -20,7 +20,9 @@ This function returns a list of data and constants to be passed to a \code{nimbl
 }
 \examples{
 ## generate data
-test_data <- list(Temp = rep(c(10, 20, 30, 40), 5),
-                  Trait = rgamma(20, 5, rep(c(10, 20, 30, 40), 5)))
+test_data <- list(
+  Temp = rep(c(10, 20, 30, 40), 5),
+  Trait = rgamma(20, 5, rep(c(10, 20, 30, 40), 5))
+)
 check_data(test_data)
 }
