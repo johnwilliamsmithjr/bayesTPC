@@ -10,8 +10,3 @@ NULL
 #' @name longevity_tpc
 NULL
 
-#' model_master_list
-#'
-#' dataframe used for internal processing
-#' @name model_master_list
-NULL

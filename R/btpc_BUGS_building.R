@@ -271,7 +271,6 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
 #' q <- .75
 #' T_min <- 10
 #' T_max <- 35
-#' sd_trait <- 2
 #' Temps <- rep(c(15, 20, 25, 30), N / 4)
 #' Traits <- rep(0, N)
 #' for (i in 1:N) {
