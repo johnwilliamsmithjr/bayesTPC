@@ -10,6 +10,7 @@
 #'  This function is better used to investigate specifics of a model before using it.
 #' @param model A string specifying the model name. Use [get_model_names()] to view all options.
 #' @returns `get_formula` returns the formula for the provided model as a string.
+#' @seealso [get_model_function()]
 #' @examples
 #' get_formula("stinner")
 #'

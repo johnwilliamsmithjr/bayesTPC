@@ -1,12 +1,12 @@
 #' fecundity_tpc
 #'
-#' placeholder
+#' Unused dataset.
 #' @name fecundity_tpc
 NULL
 
 #' longevity_tpc
 #'
-#' placeholder
+#' Unused dataset.
 #' @name longevity_tpc
 NULL
 

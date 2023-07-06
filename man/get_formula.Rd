@@ -33,3 +33,6 @@ ans <- eval(str2lang(get_formula("quadratic")))
 ans
 
 }
+\seealso{
+\code{\link[=get_model_function]{get_model_function()}}
+}

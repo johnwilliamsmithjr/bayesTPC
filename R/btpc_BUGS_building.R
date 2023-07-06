@@ -1,7 +1,7 @@
 .loop_string <- function(model) {
   model_info <-
     model_master_list[model_master_list$name == model, ]
-  # TODO clean this, possible into helper functions
+  # TODO clean this, maybe using a generic function
   if (is.null(model_info$constants[[1]]) | length(model_info$constants[[1]]) <= 1) {
     if (model_info$density_function == "normal") {
       model_string <- paste0(
@@ -236,7 +236,10 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
 #' Generates NIMBLE model, and performs MCMC.
 #'
 #' @export
-#' @details placeholder
+#' @details Behind the scenes, this function configures the necessary components to generate a BUGS model using NIMBLE.
+#' The default priors and constant values are chosen to be as flexible as possible.
+#'
+#' Both the model specification and the MCMC object are compiled by NIMBLE. Progress is printed for clarity's sake.
 #' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve)
 #'  and "Temp" (corresponding to the temperature in Celsius that the trait is being measured at).
 #' @param model A string specifying the model name. Use [get_model_names()] to view all options.
@@ -328,6 +331,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   # create uncompiled nimble model
   # TODO get verbose to interact with this.
+  cat("Creating NIMBLE model.")
   nimTPCmod <- nimble::nimbleModel(str2expression(modelStr),
     constants = const.list,
     data = data.nimble$data, inits = inits.list,
@@ -363,7 +367,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     mcmcConfig$printSamplers(byType = T)
   }
 
-
+  cat("Running MCMC.")
   mcmcConfig$enableWAIC <- TRUE
   mcmc <- nimble::buildMCMC(mcmcConfig)
   tpc_mcmc <- nimble::compileNimble(mcmc, project = nimTPCmod_compiled)

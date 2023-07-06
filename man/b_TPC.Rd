@@ -65,7 +65,10 @@ Currently only used for model = 'pawar-shsch'.}
 Generates NIMBLE model, and performs MCMC.
 }
 \details{
-placeholder
+Behind the scenes, this function configures the necessary components to generate a BUGS model using NIMBLE.
+The default priors and constant values are chosen to be as flexible as possible.
+
+Both the model specification and the MCMC object are compiled by NIMBLE. Progress is printed for clarity's sake.
 }
 \examples{
 library(nimble)
