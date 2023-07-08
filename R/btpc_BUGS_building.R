@@ -1,181 +1,91 @@
-.loop_string <- function(model) {
-  model_info <-
-    model_master_list[model_master_list$name == model, ]
-  # TODO clean this, maybe using a generic function
-  if (is.null(model_info$constants[[1]]) | length(model_info$constants[[1]]) <= 1) {
-    if (model_info$density_function == "normal") {
-      model_string <- paste0(
-        "{\n    for (i in 1:N){\n            ",
-        "Trait[i] ~ T(dnorm(mean = nimble_mod_function(params[1:",
-        length(model_info[[2]][[1]]),
-        "], Temp[i], constants[1:2]), var = sigma.sq), 0, )\n    }\n"
-      )
-    } else if (model_info$density_function == "binomial") {
-      model_string <- paste0(
-        "{\n    for (i in 1:N){\n            ",
-        "Trait[i] ~ dbinom(p[i], n[i])\n            ",
-        "logit(p[i]) <- nimble_mod_function(params[1:",
-        length(model_info[[2]][[1]]),
-        "], Temp[i], constants[1:2])\n    }\n"
-      )
-    } else {
-      stop("Unexpected density Function in model specification")
-    }
-  } else {
-    if (model_info$density_function == "normal") {
-      model_string <- paste0(
-        "{\n    for (i in 1:N){\n            ",
-        "Trait[i] ~ T(dnorm(mean = nimble_mod_function(params[1:",
-        length(model_info[[2]][[1]]),
-        "], Temp[i], constants[1:", length(model_info[[5]][[1]]),
-        "]), var = sigma.sq), 0, )\n    }\n"
-      )
-    } else if (model_info$density_function == "binomial") {
-      model_string <- paste0(
-        "{\n    for (i in 1:N){\n            ",
-        "Trait[i] ~ dbinom(p[i], n[i])\n            ",
-        "logit(p[i]) <- nimble_mod_function(params[1:",
-        length(model_info[[2]][[1]]),
-        "], Temp[i], constants[1:", length(model_info[[5]][[1]]), "])\n    }\n"
-      )
-    } else {
-      stop("Unexpected density Function in model specification")
-    }
-  }
+.loop_string <- function(model){
+  UseMethod(".loop_string")
+}
+
+#' @export
+.loop_string.btpc_binomial_model <- function(model){
+  model_string <- paste0(
+    "{\n    for (i in 1:N){\n            ",
+    "Trait[i] ~ dbinom(p[i], n[i])\n            ",
+    "logit(p[i]) <- ", gsub("Temp", "Temp[i]", attr(model, "formula")),
+    "\n    }\n")
+
   return(model_string)
 }
 
-.priors_string <- function(model,
-                           priors = NULL,
-                           verbose = TRUE) {
-  model_info <-
-    model_master_list[model_master_list$name == model, ]
-  num_params <- length(model_info$params[[1]])
-
-  if (!is.null(priors)) {
-    if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
-    if (is.null(names(priors))) {
-      stop("Prior list cannot be empty. To use default priors use priors = NULL.")
-    }
-  }
-
-  ## check for proper names in lists
-  param_names <- model_info$params[[1]]
-
-
-  param_string <- vector("character", num_params + 1)
-  for (i in 1:num_params) {
-    if (param_names[i] %in% names(priors)) {
-      if (verbose) {
-        simpleMessage(paste0(
-          "Not using default prior for parameter '",
-          param_names[i],
-          "'. To suppress these messages use verbose = FALSE\n"
-        ))
-      }
-      param_string[i] <- paste0(
-        "params[", i, "] ~ ", priors[[param_names[[i]]]]
-      )
-    } else {
-      param_string[i] <- paste0(
-        "params[", i, "] ~ ", model_info$default_priors[[1]][i]
-      )
-    }
-  }
-
-  if ("sigma.sq" %in% names(priors)) {
-    if (verbose) {
-      simpleMessage(paste0("Not using default prior for parameter 'sigma.sq'. To suppress these messages use verbose = FALSE\n"))
-    }
-    param_string[num_params + 1] <-
-      paste0("sigma.sq ~ ", priors["sigma.sq"])
-  } else {
-    param_string[num_params + 1] <-
-      "sigma.sq ~ T(dt(mu = 0, tau = 1/10, df = 1), 0, )"
-  }
-
-
-  return(param_string)
+#' @export
+.loop_string.btpc_normal_model <- function(model){
+  model_string <- paste0(
+    "{\n    for (i in 1:N){\n            ",
+    "Trait[i] ~ T(dnorm(mean = ",
+    gsub("Temp", "Temp[i]", attr(model, "formula")),
+    ", var = sigma.sq), 0, )\n    }\n")
+}
+#' @export
+.loop_string.default <- function(model){
+  stop("Misconfigured Model Specification.")
 }
 
-.configure_inits <- function(inits, model_params) {
-  inits.list <- vector("list", 2)
+
+
+.priors_string <- function(model){
+  UseMethod(".priors_string")
+}
+
+#' @export
+.priors_string.btpc_binomial_model <- function(model){
+  priors <- attr(model, "parameters")
+  num_params <- length(priors)
+
+  priors_vec <- paste0(names(priors), " ~ ", priors)
+  priors_string <- paste0("    ",paste0(priors_vec, collapse = "\n    "))
+  return(priors_string)
+}
+
+#' @export
+.priors_string.btpc_normal_model <- function(model){
+  priors <- attr(model, "parameters")
+  sig <- attr(model, "sigma.sq")
+  num_params <- length(priors)
+
+  priors_vec <- paste0(names(priors), " ~ ", priors)
+  priors_string <- paste0("    ",paste0(priors_vec, collapse = "\n    "),"\n    sigma.sq ~ ", sig)
+
+
+}
+
+#' @export
+.priors_string.default <- function(model){
+  stop("Misconfigured Model Specification.")
+}
+
+.check_inits <- function(inits) {
 
   if (!is.null(inits)) {
     if (length(inits) == 0) stop("inits list cannot be empty. Use 'inits = NULL' to sample initial values from the priors.")
     if (!is.list(inits)) stop("Unexpected type for argument 'inits'. Initial values must be given as a list.")
-    if (is.null(names(inits))) stop("inits list must be named.")
+    if (is.null(names(inits))) stop("'inits' list must be named.")
 
-    init_params <- vector("double", length(model_params))
-    for (i in 1:length(model_params)) {
-      if (model_params[[i]] %in% names(inits)) {
-        init_params[i] <- inits[[model_params[[i]]]]
-      } else {
-        init_params[i] <- NA
-      }
-    }
-
-    inits.list[[1]] <- init_params
-    if ("sigma.sq" %in% names(inits)) {
-      inits.list[[2]] <- inits[["sigma.sq"]]
-      names(inits.list) <- c("params", "sigma.sq")
-    } else {
-      inits.list[[2]] <- NULL
-      names(inits.list) <- c("params")
-    }
-  } else {
-    inits.list <- list()
+    return(inits)
+  }
+  else {
+    return(list())
   }
 
-  return(inits.list)
 }
 
-.configure_constants <- function(model_info, N, model_constants, constant_list) {
-  model <- model_info$name[[1]]
-  constants <- vector("double", 0)
+.configure_constants <- function(model, N) {
+  constants <- attr(model, "constants")
   const.list <- vector("list", 0)
   const.list$N <- N
 
-  if (length(model_constants) > 0) {
-    # possibly turn this into a helper function
-    if (is.null(constant_list)) {
-      warning(paste0(
-        "Constant list not found for model = '", model,
-        "'. Setting default value for all constants.\n"
-      ))
-      constants <- c(model_info$default_constants[[1]], -1)
-      const.list$constants <- constants
-    } else {
-      if (!is.list(constant_list)) {
-        stop("If constants are provided, they must be formatted as a list\n")
-      }
-
-      sorted_constants <- sort(model_constants)
-      for (i in 1:length(model_constants)) {
-        if (sorted_constants[i] %in% names(constant_list)) {
-          constants[i] <- constant_list[[sorted_constants[i]]]
-        } else {
-          warning(
-            "Constant '", sorted_constants[i],
-            "' not provided. Using default value '",
-            sorted_constants[i], "' = ", model_info$default_constants[[1]][i], "."
-          )
-          constants[i] <- model_info$default_constants[[1]][[i]]
-        }
-      }
-
-      if (length(constant_list) == 1) {
-        # to ensure nimble sees this as a vector and not a scalar
-        constants[length(constant_list) + 1] <- -1
-        const.list$constants <- constants
-      }
-    }
-  } else {
-    constants[1:2] <- -1
-    const.list$constants <- constants
+  if (length(constants) == 0){
+    return(const.list)
   }
-
-  return(const.list)
+  else {
+    str2expression(paste0("const.list$", names(constants), " <- ", constants)) |> eval()
+    return(const.list)
+  }
 }
 
 #' Create model string
@@ -184,7 +94,7 @@
 #'
 #' @export
 #' @details This function returns a character string of the full `nimble` model for a user-specified thermal performance curve and prior distributions.
-#' @param model A string specifying the model name. Use [get_model_names()] to view all options.
+#' @param model A string specifying the model name. Use [get_models()] to view all options.
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL).
 #'  Elements of the list should correspond to model parameters, and written using nimble logic.
 #'  For parameters not specified in the list, default priors are used.
@@ -199,34 +109,48 @@
 #' ## Use custom prior for 'q' parameter in quadratic curve
 #' my_prior <- list(q = "q~beta(.5, .5)")
 #' cat(configure_model(model = "quadratic", priors = my_prior))
-configure_model <- function(model, priors = NULL, constants = NULL, verbose = TRUE) {
-  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
-    stop("Unsupported model, use get_models() to view implemented models.")
+configure_model <- function(model, priors = NULL, constants = NULL, verbose = T) {
+  if(!("btpc_model" %in% class(model))){
+    if (!(model %in% model_list)){
+      stop("Unsupported model, use get_models() to view implemented models.")
+    }
+    model <- model_list[[model]]
   }
 
-  model_info <-
-    model_master_list[model_master_list$name == model, ]
-  num_params <- length(model_info[[2]][[1]])
-
-  if (!is.null(priors)) {
+  #change priors if necessary
+  if (!is.null(priors)){
     if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
     if (is.null(names(priors))) {
-      stop("Prior list cannot be empty. To use default priors use priors = NULL.")
+      stop("Prior list cannot be empty. To use default priors, use priors = NULL.")
     }
-  }
-  ## check for proper names in prior list
-  # should move this error check to .priors_string
-  param_names <- model_info$params[[1]]
-  if (any(!(names(priors) %in% c(param_names, "sigma.sq")))) {
-    stop("One or more priors do not have names that correspond to model parameters.")
+    if (verbose){
+      warning("At least one user-defined prior being used.")
+    }
+    model <- change_priors(model, unlist(priors))
   }
 
-  loop <- .loop_string(model)
-  pri <- .priors_string(model, priors, verbose)
+  #change constants if necessary
+  if (!is.null(constants)){
+    if (!is.list(constants)) stop("Unexpected type for argument 'constants'. Contantss must be given as a list.")
+    if (is.null(names(constants))) {
+      stop("Constant list cannot be empty. To use default constants, use constants = NULL.")
+    }
 
-  pri_string <- paste0(pri, collapse = "\n    ")
+    model <- change_constants(model, unlist(constants))
+  }
 
-  nimble_string <- paste0(loop, "    ", pri_string, "\n}")
+  if ("btpc_model" %in% class(model)){
+    loop <- .loop_string(model)
+    pri <- .priors_string(model)
+  }
+  else {
+    model <- model_list[[model]]
+    loop <- .loop_string(model)
+    pri <- .priors_string(model)
+  }
+
+
+  nimble_string <- paste0(loop, pri, "\n}")
   return(nimble_string)
 }
 
@@ -242,7 +166,7 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
 #' Both the model specification and the MCMC object are compiled by NIMBLE. Progress is printed for clarity's sake.
 #' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve)
 #'  and "Temp" (corresponding to the temperature in Celsius that the trait is being measured at).
-#' @param model A string specifying the model name. Use [get_model_names()] to view all options.
+#' @param model A string specifying the model name. Use [get_models()] to view all options.
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL).
 #'  Elements of the list should correspond to model parameters,
 #'  and written using NIMBLE logic. For parameters not specified in the list, default priors are used.
@@ -256,7 +180,7 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
 #' @param niter integer, number of MCMC iterations to perform (default is niter = 10000).
 #' @param inits optional list, initial parameter values to be provided to nimble MCMC.
 #' @param burn optional integer, number of initial MCMC iterations to be discarded as burn-in. Default is burn = 0.
-#' @param constant_list optional list, constants to be provided to model. If constants are needed and not provided, constant values are used.
+#' @param constants optional list, constants to be provided to model. If constants are needed and not provided, constant values are used.
 #'  Currently only used for model = 'pawar-shsch'.
 #' @param verbose logical, determines whether to print additional information, Default is TRUE.
 #' @param ... Additional parameters to be passed to nimble during MCMC configuration and sampling.
@@ -296,46 +220,61 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = TR
 #' )
 #' }
 b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
-                  niter = 10000, inits = NULL, burn = 0, constant_list = NULL, verbose = TRUE, ...) {
+                  niter = 10000, inits = NULL, burn = 0, constants = NULL, verbose = TRUE, ...) {
   # exception handling and variable setup
-  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
+  if (is.null(model) || ((!(model %in% model_list)) && !("btpc_model" %in% class(model)))) {
     stop("Unsupported model, use get_models() to view implemented models.")
   }
 
   original_environmental_objects <- force(ls(envir = .GlobalEnv))
   data.nimble <- check_data(data)
-  nimble_mod_function <- NULL # binding the name for nimble_mod_function into this function so R stops yelling at me.
-  model_info <-
-    model_master_list[model_master_list$name == model, ]
-  model_params <- model_info$params[[1]]
-  model_constants <- model_info$constants[[1]]
 
   if (!(samplerType %in% c("RW", "RW_block", "AF_slice", "slice"))) stop("Unsupported option for input samplerType. Currently only RW, RW_block, slice, and AF_slice are supported.")
-  if (model_info$density_function == "binomial") {
+  if ("btpc_binomial_model" %in% class(model)) {
     if (is.null(unlist(data["n"]))) stop("For a Binomial GLM, data list must have a variable called 'n'. Perhaps check spelling and capitalization?")
     # const.list$n = unlist(data['n'])
   }
 
+  #create model specification
+  if (!("btpc_model" %in% class(model))){
+    model <- model_list[[model]]
+  }
 
+  #change priors if necessary
+  if (!is.null(priors)){
+    if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
+    if (is.null(names(priors))) {
+      stop("Prior list cannot be empty. To use default priors, use priors = NULL.")
+    }
+
+    model <- change_priors(model, unlist(priors))
+  }
+
+  #change constants if necessary
+  if (!is.null(constants)){
+    if (!is.list(constants)) stop("Unexpected type for argument 'constants'. Contantss must be given as a list.")
+    if (is.null(names(constants))) {
+      stop("Constant list cannot be empty. To use default constants, use constants = NULL.")
+    }
+
+    model <- change_constants(model, unlist(constants))
+  }
 
   # configure model, handles the density funciton, priors, and constants
-  inits.list <- .configure_inits(inits, model_params)
-  const.list <- .configure_constants(model_info, data.nimble$N, model_constants, constant_list)
-  modelStr <- configure_model(model = model, priors = priors, ...)
+  inits.list <- .check_inits(inits)
+  const.list <- .configure_constants(model, data.nimble$N)
+  modelStr <- configure_model(model)
 
-  # create the model evaluation function
-  # has to be assigned to .GlobalEnv because of parallelization.
-  # TODO look for better solution in future. Even though it's cleaned, I don't like assigning to user environment.
-  eval(.direct_nimble(model))
-  assign("nimble_mod_function", nimble_mod_function, envir = .GlobalEnv)
+
 
   # create uncompiled nimble model
   # TODO get verbose to interact with this.
-  cat("Creating NIMBLE model.")
+  cat("Creating NIMBLE model:\n")
   nimTPCmod <- nimble::nimbleModel(str2expression(modelStr),
     constants = const.list,
     data = data.nimble$data, inits = inits.list,
-    where = environment()
+    where = environment(),
+    calculate = T
   )
 
   nimTPCmod_compiled <- nimble::compileNimble(nimTPCmod)
@@ -344,10 +283,10 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   mcmcConfig <- nimble::configureMCMC(nimTPCmod, print = F)
 
   # set correct sampler type
-  if (model_info$density_function[[1]] == "normal") {
-    bugs_params <- c(paste0("params[", 1:length(model_params), "]"), "sigma.sq")
-  } else if (model_info$density_function[[1]] == "binomial") {
-    bugs_params <- paste0("params[", 1:length(model_params), "]")
+  if ("btpc_normal_model" %in% class(model)) {
+    bugs_params <- c(names(attr(model, "parameters")), "sigma.sq")
+  } else if ("btpc_binomial_model" %in% class(model)) {
+    bugs_params <- names(attr(model, "parameters"))
   }
   if (samplerType == "slice") { # TODO make this less weird. There was a reason it was set up this way i just cannot remember.
     for (i in bugs_params) {
@@ -367,41 +306,24 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     mcmcConfig$printSamplers(byType = T)
   }
 
-  cat("Running MCMC.")
+  cat("\nRunning MCMC:\n")
   mcmcConfig$enableWAIC <- TRUE
   mcmc <- nimble::buildMCMC(mcmcConfig)
   tpc_mcmc <- nimble::compileNimble(mcmc, project = nimTPCmod_compiled)
   tpc_mcmc$run(niter, nburnin = burn, ...)
   samples <- coda::as.mcmc(as.matrix(tpc_mcmc$mvSamples))
 
-  default_priors <- model_info$default_priors[[1]]
-  prior_list <- list()
-  for (i in 1:length(model_params)) { # somehow works
-    colnames(samples)[i] <- model_params[i]
-    if (model_params[i] %in% names(priors)) {
-      prior_list[model_params[[i]]] <- priors[model_params[[i]]]
-    } else {
-      prior_list[model_params[[i]]] <- default_priors[i]
-    }
+  prior_out <- attr(model, "parameters")
+
+  if ("btpc_normal_model" %in% class(model)) {
+    prior_out["sigma.sq"] <- attr(model, "sigma.sq")
   }
 
-  if ("sigma.sq" %in% names(priors)) {
-    prior_list["sigma.sq"] <- priors["sigma.sq"]
-  } else {
-    prior_list["sigma.sq"] <- "T(dt(mu = 0, tau = 1/10, df = 1), 0, )"
-  }
-
-  if (!is.null(model_constants)) {
-    constants <- const.list$constants[1:(length(const.list$constants) - 1)]
-    names(constants) <- model_constants
-  } else {
-    constants <- NULL
-  }
 
   # remove random objects from global environment
   rm(list = base::setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
   return(list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
-    model_type = model, priors = prior_list, constants = constants, uncomp_model = nimTPCmod
+    model_type = c(model), priors = prior_out, constants = attr(model, "constants"), uncomp_model = nimTPCmod
   ))
 }

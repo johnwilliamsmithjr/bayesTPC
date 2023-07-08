@@ -41,6 +41,9 @@ validate_btpc_model <- function(x){
  #TODO add check if model already exists in master_list, once master_list is created
  #could the master_list be stored as an environment? or is that too overcomplicated?
 
+ if (name %in% model_list){
+   stop("Model must have unique name. To remove all user-defined models, restart your R session.")
+ }
  #parameters
  if (length(parameters) == 0){
    stop("Model specification must have parameters.")
@@ -91,23 +94,25 @@ validate_btpc_model <- function(x){
 
 new_btpc_normal_model <- function(name = character(),
                                   parameters = character(), #names are parameters, values are priors
-                                  formula = expression(),
-                                  constants = double(), #names are constant names, values are default values
-                                  ...){
+                                  formula = character(),
+                                  constants = double(),
+                                  sigma.sq = character(),
+                                  ...){  #names are constant names, values are default values
 
   new_btpc_model(name = name,
                  parameters = parameters,
                  formula = formula,
                  constants = constants,
+                 sigma.sq = sigma.sq,
                  class = "btpc_normal_model",
                  ...)
 }
 
 new_btpc_binomial_model <- function(name = character(),
                                     parameters = character(), #names are parameters, values are priors
-                                    formula = expression(),
-                                    constants = double(), #names are constant names, values are default values
-                                    ...){
+                                    formula = character(),
+                                    constants = double(),
+                                    ...){ #names are constant names, values are default values
 
   new_btpc_model(name = name,
                  parameters = parameters,
@@ -118,10 +123,10 @@ new_btpc_binomial_model <- function(name = character(),
 }
 
 specify_normal_model <- function(name = character(),
-                         parameters = character(), #names are parameters, values are priors
-                         formula = expression(),
-                         constants = double(), #names are constant names, values are default values
-                         ...){
+                                 parameters = character(), #names are parameters, values are priors
+                                 formula = expression(),
+                                 constants = double(), #names are constant names, values are default values
+                                 ...){
   x <- new_btpc_normal_model(name, parameters, formula, constants, ...)
   validate_btpc_model(x)
   return(x)
@@ -135,4 +140,44 @@ specify_binomial_model <- function(name = character(),
   x <- new_btpc_binomial_model(name, parameters, formula, constants, ...)
   validate_btpc_model(x)
   return(x)
+}
+
+
+change_priors <- function(model, priors){
+  if (!("btpc_model" %in% class(model))){
+    stop("Invalid type for model.")
+  }
+  if (!is.character(priors)){
+    stop("Invalid type for new priors.")
+  }
+  params_to_change <- names(priors)
+  current_priors <- attr(model, "parameters")
+  if (!all(params_to_change %in% names(current_priors))){
+    stop("Attempting to change prior of non-existent parameter.")
+  }
+  current_priors[params_to_change] <- unlist(priors)
+  attr(model, "parameters") <- current_priors
+  return(model)
+}
+
+change_constants <- function(model, constants){
+  if (!("btpc_model" %in% class(model))){
+    stop("Invalid type for model.")
+  }
+  if (!is.double(constants)){
+    stop("Invalid type for new constants.")
+  }
+
+  constants_to_change <- names(constants)
+  current_constants <- attr(model, "constants")
+
+  if (length(current_constants) == 0){
+    stop("Attempting to change constants for a model without constants.")
+  }
+  if (!all(constants_to_change %in% names(current_constants))){
+    stop("Attempting to change non-existent constant.")
+  }
+  current_constants[constants_to_change] <- unlist(constants)
+  attr(model, "constants") <- current_constants
+  return(model)
 }

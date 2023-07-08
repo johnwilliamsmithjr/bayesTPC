@@ -4,10 +4,10 @@
 \alias{configure_model}
 \title{Create model string}
 \usage{
-configure_model(model, priors = NULL, constants = NULL, verbose = TRUE)
+configure_model(model, priors = NULL, constants = NULL, verbose = T)
 }
 \arguments{
-\item{model}{A string specifying the model name. Use \code{\link[=get_model_names]{get_model_names()}} to view all options.}
+\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
 
 \item{priors}{list, optional input specifying prior distributions for parameters (default = NULL).
 Elements of the list should correspond to model parameters, and written using nimble logic.

@@ -12,7 +12,7 @@ b_TPC(
   niter = 10000,
   inits = NULL,
   burn = 0,
-  constant_list = NULL,
+  constants = NULL,
   verbose = TRUE,
   ...
 )
@@ -21,7 +21,7 @@ b_TPC(
 \item{data}{list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve)
 and "Temp" (corresponding to the temperature in Celsius that the trait is being measured at).}
 
-\item{model}{A string specifying the model name. Use \code{\link[=get_model_names]{get_model_names()}} to view all options.}
+\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
 
 \item{priors}{list, optional input specifying prior distributions for parameters (default = NULL).
 Elements of the list should correspond to model parameters,
@@ -43,7 +43,7 @@ Currently, supported options are:
 
 \item{burn}{optional integer, number of initial MCMC iterations to be discarded as burn-in. Default is burn = 0.}
 
-\item{constant_list}{optional list, constants to be provided to model. If constants are needed and not provided, constant values are used.
+\item{constants}{optional list, constants to be provided to model. If constants are needed and not provided, constant values are used.
 Currently only used for model = 'pawar-shsch'.}
 
 \item{verbose}{logical, determines whether to print additional information, Default is TRUE.}

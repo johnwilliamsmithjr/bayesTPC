@@ -3,13 +3,10 @@
 #' Returns the formula for a specified model.
 #'
 #' @export
-#' @details
-#'  Since the model formulas are stored and returned as strings, one of [str2lang()] or
-#'   [str2expression()] can be used in conjunction with [eval()] for dynamic evaluation.
-#'  However, it is better practice to use the output of [get_model_function()] for direct model evaluation.
-#'  This function is better used to investigate specifics of a model before using it.
-#' @param model A string specifying the model name. Use [get_model_names()] to view all options.
-#' @returns `get_formula` returns the formula for the provided model as a string.
+#' @details This function is best used to investigate specifics of a model before using it.
+#'  It can be used to evaluate models, but it is better practice to use the output of [get_model_function()] for direct model evaluation.
+#' @param model A string specifying the model name. Use [get_models()] to view all options.
+#' @returns `get_formula` returns the formula for the provided model as an expression.
 #' @seealso [get_model_function()]
 #' @examples
 #' get_formula("stinner")
@@ -19,14 +16,17 @@
 #' T_max <- 35
 #' T_min <- 10
 #' Temp <- c(15, 20, 25, 30)
-#' ans <- eval(str2lang(get_formula("quadratic")))
+#' ans <- eval(get_formula("quadratic"))
 #' ans
 #'
 get_formula <- function(model) {
-  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
-    stop("Unsupported model, use get_models() to view implemented models.")
+  if(!("btpc_model" %in% class(model))){
+    if (!(model %in% model_list)){
+      stop("Unsupported model, use get_models() to view implemented models.")
+    }
+    model <- model_list[[model]]
   }
-  return(model_master_list[model_master_list$name == model, ]$formula[[1]])
+  return(attr(model, "formula"))
 }
 
 #' Get Model Parameters
@@ -42,10 +42,13 @@ get_formula <- function(model) {
 #' get_model_params("ratkowsky")
 #'
 get_model_params <- function(model) {
-  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
-    stop("Unsupported model, use get_models() to view implemented models.")
+  if(!("btpc_model" %in% class(model))){
+    if (!(model %in% model_list)){
+      stop("Unsupported model, use get_models() to view implemented models.")
+    }
+    model <- model_list[[model]]
   }
-  return(unlist(model_master_list[model_master_list$name == model, ]$params[[1]]))
+  return(names(attr(model, "parameters")))
 }
 
 #' Get Default Prior Distributions
@@ -62,12 +65,13 @@ get_model_params <- function(model) {
 #' @examples
 #' get_default_priors("briere")
 get_default_priors <- function(model) {
-  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
-    stop("Unsupported model, use get_models() to view implemented models.")
+  if(!("btpc_model" %in% class(model))){
+    if (!(model %in% model_list)){
+      stop("Unsupported model, use get_models() to view implemented models.")
+    }
+    model <- model_list[[model]]
   }
-  dp <- model_master_list[model_master_list$name == model, ]$default_priors[[1]]
-  names(dp) <- model_master_list[model_master_list$name == model, ]$params[[1]]
-  return(dp)
+  return(attr(model, "parameters"))
 }
 
 #' Get Model Constants
@@ -86,14 +90,17 @@ get_default_priors <- function(model) {
 #' get_model_constants("gaussian")
 #'
 #' # Model with constants
-#' get_model_constants("pawar-shsch")
+#' get_model_constants("pawar_shsch")
 get_model_constants <- function(model) {
-  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
-    stop("Unsupported model, use get_models() to view implemented models.")
+  if(!("btpc_model" %in% class(model))){
+    if (!(model %in% model_list)){
+      stop("Unsupported model, use get_models() to view implemented models.")
+    }
+    model <- model_list[[model]]
   }
-  consts <- model_master_list[model_master_list$name == model, ]$constants[[1]]
+  consts <- names(attr(model, "constants"))
 
-  if (!is.null(consts)) {
+  if (length(consts) > 0) {
     return(consts)
   } else {
     simpleMessage("Specified model has no associated constants.")
@@ -117,18 +124,20 @@ get_model_constants <- function(model) {
 #' get_default_constants("gaussian")
 #'
 #' # Model with constants
-#' get_default_constants("pawar-shsch")
+#' get_default_constants("pawar_shsch")
 get_default_constants <- function(model) {
-  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
-    stop("Unsupported model, use get_models() to view implemented models.")
+  if(!("btpc_model" %in% class(model))){
+    if (!(model %in% model_list)){
+      stop("Unsupported model, use get_models() to view implemented models.")
+    }
+    model <- model_list[[model]]
   }
-  if (is.null(model_master_list[model_master_list$name == model, ]$constants[[1]])) {
-    simpleMessage("Specified model has no associated constants.")
-    return(NULL)
+  consts <- attr(model, "constants")
+
+  if (length(consts) > 0) {
+    return(consts)
   } else {
-    dc <- model_master_list[model_master_list$name == model, ]$default_constants[[1]]
-    names(dc) <- model_master_list[model_master_list$name == model, ]$constants[[1]]
-    return(dc)
+    simpleMessage("Specified model has no associated constants.")
   }
 }
 
@@ -137,12 +146,12 @@ get_default_constants <- function(model) {
 #' Returns all implemented models and their respective formulas.
 #'
 #' @export
-#' @returns `get_models()` returns a data frame with two columns containing the names and formulas for all implemented models in `bayesTPC`.
+#' @returns `get_formulas()` returns a named list containing all models and their respective formulas as expressions.
 #' @examples
 #'
 #' get_models()
-get_models <- function() {
-  return(model_master_list[, c("name", "formula")])
+get_formulas <- function() {
+  return(lapply(model_list, get_formula))
 }
 
 #' Get Model Names
@@ -150,12 +159,14 @@ get_models <- function() {
 #' Returns the names of all implemented models in `bayesTPC`.
 #'
 #' @export
-#' @returns `get_model_names()` returns a character vector of all implemented models in `bayesTPC`.
+#' @returns `get_models()` returns a character vector of all implemented models in `bayesTPC`.
 #' @examples
 #'
-#' get_model_names()
-get_model_names <- function() {
-  return(unlist(model_master_list[, c("name")]))
+#' get_models()
+get_models <- function() {
+  nm <- vapply(model_list, c, character(1))
+  names(nm) <- NULL
+  return(nm)
 }
 
 #' Get Model as a Function
@@ -177,15 +188,16 @@ get_model_names <- function() {
 #' quadratic_function <- get_model_function("quadratic")
 #' quadratic_function(q = .75, T_max = 35, T_min = 10, Temp = c(15, 20, 25, 30))
 get_model_function <- function(model) {
-  if (is.null(model) || !(model %in% model_master_list[model_master_list$name == model, ][[1]])) {
-    stop("Unsupported model, use get_models() to view implemented models.")
+  if(!("btpc_model" %in% class(model))){
+    if (!(model %in% model_list)){
+      stop("Unsupported model, use get_models() to view implemented models.")
+    }
+    model <- model_list[[model]]
   }
-  model_info <-
-    model_master_list[model_master_list$name == model, ]
 
-  sorted_pars <- sort(unlist(model_info$params))
-  sorted_consts <- sort(unlist(model_info$constants))
-  formula_string <- model_info$formula[[1]]
+  sorted_pars <- sort(names(attr(model, "parameters")))
+  sorted_consts <- sort(names(attr(model, "constants")))
+  formula_string <- as.character(attr(model, "formula"))
 
   params_string <- paste0(sorted_pars, ", ", collapse = "")
   if (is.null(sorted_consts)) {

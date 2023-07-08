@@ -105,8 +105,7 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #' ## need data to set up example here. placeholder for now
 ppo_plot <- function(model, burn = 0, seq.length = 100) {
   ## extract model parameters and sort alphabetically
-  ppo_parameters <- unlist(get_model_params(model$model_type))
-  ppo_parameters <- sort(ppo_parameters)
+  ppo_parameters <- sort(names(model$priors)[names(model$priors) != "sigma.sq"])
   ## if sigma.sq is in the mcmc sample list, add it as the
   ## last entry of the param_list vector
   if ("sigma.sq" %in% colnames(model$samples)) {
@@ -114,30 +113,16 @@ ppo_plot <- function(model, burn = 0, seq.length = 100) {
   } else {
     param_list <- ppo_parameters
   }
-  ## definition for internal function used during apply
-  init_eval_fun <- function(x, name) {
-    inits_vec <- rep(NA, length(param_list))
-    names(inits_vec) <- param_list
-    inits_vec[name] <- x
-    return(.configure_inits(
-      inits = as.list(inits_vec),
-      get_model_params(model$model_type)
-    ))
-  }
 
   get_prior_eval <- function(x, name) {
-    model$uncomp_model$setInits(x)
+    init_list <- list()
+    init_list[name] <- x
+    model$uncomp_model$setInits(init_list)
     return(exp(model$uncomp_model$calculate(name)))
   }
 
   for (i in 1:length(param_list)) {
-    if ("sigma.sq" %in% param_list & i != length(param_list)) {
-      param_string <- paste0("params[", i, "]")
-    } else if ("sigma.sq" %in% param_list & i == length(param_list)) {
-      param_string <- param_list[i]
-    } else {
-      param_string <- paste0("params[", i, "]")
-    }
+    param_string <- param_list[i]
     ## extract sequence lower bound to evaluate prior density on. if the bound of a particular
     ## parameter is infinite, one half of the smallest observed posterior sample is used.
     ## otherwise, the lower bound of the prior is used.
@@ -157,15 +142,9 @@ ppo_plot <- function(model, burn = 0, seq.length = 100) {
     ## create evaluation sequence
     eval_seq <- seq(from = seq_lower, to = seq_upper, length.out = seq.length)
 
-    ## create initial sets
-    init_sets <- apply(
-      X = matrix(eval_seq, ncol = 1),
-      MARGIN = 1,
-      FUN = init_eval_fun,
-      name = param_list[i]
-    )
+
     ## generate prior evaluations
-    prior_evals <- sapply(X = init_sets, FUN = get_prior_eval, name = param_string)
+    prior_evals <- sapply(X = eval_seq, FUN = get_prior_eval, name = param_string)
     ## create density of posterior MCMC samples
     posterior_approx <- stats::density(model$samples[(burn + 1):nrow(model$samples), param_list[i]])
 

@@ -7,7 +7,7 @@
 get_default_constants(model)
 }
 \arguments{
-\item{model}{A string specifying the model name. Use \code{\link[=get_model_names]{get_model_names()}} to view all options.}
+\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
 }
 \value{
 If the specified model has constants, \code{get_default_constants} returns a named numeric vector
@@ -27,5 +27,5 @@ Currently, the only implemented model with constants is 'pawar-shsch'.
 get_default_constants("gaussian")
 
 # Model with constants
-get_default_constants("pawar-shsch")
+get_default_constants("pawar_shsch")
 }

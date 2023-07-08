@@ -50,9 +50,18 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   }
 
   if (is.null(Temp_interval)) Temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
-  tpc_fun <- .model_evaluation_function(TPC$model_type)
+  tpc_fun <- get_model_function(TPC$model_type)
   max.ind <- nrow(TPC$samples)
-  tpc_evals <- apply(tpc_fun, X = TPC$samples[(burn + 1):max.ind, ], Temp = Temp_interval, constants = TPC$constants, MARGIN = 1, ...)
+
+  #assign constants
+  MA <- list(Temp = Temp_interval)
+  if (length(TPC$constants) > 0){
+    for (i in 1:length(TPC$constants)){
+      MA[names(TPC$constants)[i]] <- TPC$constants[i]
+    }
+  }
+  tpc_evals <- .mapply(FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq" ]),
+                       MoreArgs = MA) |> simplify2array()
 
   if (centralSummary == "median") {
     if (summaryType == "quantile") {
@@ -220,10 +229,21 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   }
 
   if (is.null(Temp_interval)) Temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
-  tpc_fun <- .model_evaluation_function(TPC$model_type)
+  tpc_fun <- get_model_function(TPC$model_type)
   max.ind <- nrow(TPC$samples)
+
+  #assign constants
+  MA <- list(Temp = Temp_interval)
+  if (length(TPC$constants) > 0){
+    for (i in 1:length(TPC$constants)){
+      MA[names(TPC$constants)[i]] <- TPC$constants[i]
+    }
+  }
+
+
   if (!is.null(seed)) set.seed(seed)
-  truncmeans <- apply(tpc_fun, X = TPC$samples[(burn + 1):max.ind, ], Temp = Temp_interval, constants = TPC$constants, MARGIN = 1, ...)
+  truncmeans <- .mapply(FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq" ]),
+                        MoreArgs = MA) |> simplify2array()
   ## checking logic here...
   post_pred_draw <- function(X) {
     return(truncnorm::rtruncnorm(

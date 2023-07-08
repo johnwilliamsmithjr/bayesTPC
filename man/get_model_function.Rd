@@ -7,7 +7,7 @@
 get_model_function(model)
 }
 \arguments{
-\item{model}{A string specifying the model name. Use \code{\link[=get_model_names]{get_model_names()}} to view all options.}
+\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
 }
 \value{
 \code{get_model_function} returns a function that evaluates the implemented formula of the specified model.

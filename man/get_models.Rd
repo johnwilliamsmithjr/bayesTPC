@@ -2,15 +2,15 @@
 % Please edit documentation in R/btpc_get_functions.R
 \name{get_models}
 \alias{get_models}
-\title{Get Models and Formulas}
+\title{Get Model Names}
 \usage{
 get_models()
 }
 \value{
-\code{get_models()} returns a data frame with two columns containing the names and formulas for all implemented models in \code{bayesTPC}.
+\code{get_models()} returns a character vector of all implemented models in \code{bayesTPC}.
 }
 \description{
-Returns all implemented models and their respective formulas.
+Returns the names of all implemented models in \code{bayesTPC}.
 }
 \examples{
 
