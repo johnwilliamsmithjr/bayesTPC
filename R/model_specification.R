@@ -2,7 +2,7 @@
 #highest level class, lacks density function and constant support
 new_btpc_model <- function(name = character(),
                            parameters = character(), #names are parameters, values are priors
-                           formula = character(),
+                           formula = expression(),
                            constants = double(), #names are constant names, values are default values
                            class = character(), #for subclassing support
                            ...){
@@ -10,7 +10,7 @@ new_btpc_model <- function(name = character(),
   #forcing explicit types
   stopifnot(is.character(name))
   stopifnot(is.character(parameters))
-  stopifnot(is.character(formula)) #might store the formula as an expression
+  stopifnot(is.expression(formula)) #might store the formula as an expression
   stopifnot(is.double(constants))
   stopifnot(is.character(class))
 
@@ -75,7 +75,7 @@ validate_btpc_model <- function(x){
  if(length(formula) == 0){
    stop("Model specification must have a formula.")
  }
- formula_vars <- formula |> str2lang() |> all.vars() #extract all variables from formula
+ formula_vars <- formula  |> all.vars() #extract all variables from formula
  if (!"Temp" %in% formula_vars){
    stop("Model specification formula must contain variable 'Temp'.")
  }
@@ -91,8 +91,9 @@ validate_btpc_model <- function(x){
 
 new_btpc_normal_model <- function(name = character(),
                                   parameters = character(), #names are parameters, values are priors
-                                  formula = character(),
-                                  constants = double()){  #names are constant names, values are default values
+                                  formula = expression(),
+                                  constants = double(), #names are constant names, values are default values
+                                  ...){
 
   new_btpc_model(name = name,
                  parameters = parameters,
@@ -104,8 +105,9 @@ new_btpc_normal_model <- function(name = character(),
 
 new_btpc_binomial_model <- function(name = character(),
                                     parameters = character(), #names are parameters, values are priors
-                                    formula = character(),
-                                    constants = double()){ #names are constant names, values are default values
+                                    formula = expression(),
+                                    constants = double(), #names are constant names, values are default values
+                                    ...){
 
   new_btpc_model(name = name,
                  parameters = parameters,
@@ -113,4 +115,24 @@ new_btpc_binomial_model <- function(name = character(),
                  constants = constants,
                  class = "btpc_binomial_model",
                  ...)
+}
+
+specify_normal_model <- function(name = character(),
+                         parameters = character(), #names are parameters, values are priors
+                         formula = expression(),
+                         constants = double(), #names are constant names, values are default values
+                         ...){
+  x <- new_btpc_normal_model(name, parameters, formula, constants, ...)
+  validate_btpc_model(x)
+  return(x)
+}
+
+specify_binomial_model <- function(name = character(),
+                                   parameters = character(), #names are parameters, values are priors
+                                   formula = expression(),
+                                   constants = double(), #names are constant names, values are default values
+                                   ...){
+  x <- new_btpc_binomial_model(name, parameters, formula, constants, ...)
+  validate_btpc_model(x)
+  return(x)
 }
