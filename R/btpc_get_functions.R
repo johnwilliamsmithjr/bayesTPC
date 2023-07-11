@@ -5,7 +5,9 @@
 #' @export
 #' @details This function is best used to investigate specifics of a model before using it.
 #'  It can be used to evaluate models, but it is better practice to use the output of [get_model_function()] for direct model evaluation.
-#' @param model A string specifying the model name. Use [get_models()] to view all options.
+#' @param model A string specifying the model name, or a btpc_model object.
+#' If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
+#' Use [get_models()] to view all options.
 #' @returns `get_formula` returns the formula for the provided model as an expression.
 #' @seealso [get_model_function()]
 #' @examples
@@ -207,4 +209,22 @@ get_model_function <- function(model) {
     function_string <- paste0("function(", params_string, constant_string, "Temp){return(", formula_string, ")}")
   }
   return(eval(str2lang(function_string)))
+}
+
+
+#' Full Model Specification
+#'
+#' Returns the full details of an implemented model.
+#'
+#' @export
+#' @param model A string, naming either a default or user-implemented model in `bayesTPC`.
+#'   Use [get_models()] to view all options.
+#' @returns A `btpc_model` object containing the model type, formula, parameters and respective priors,
+#'   constants and respective default values if applicable, and variance prior if applicable.
+get_default_model_specification <- function(model){
+  if (!(model %in% model_list)){
+    stop("Unsupported model, use get_models() to view implemented models.")
+  }
+
+  return(model_list[[model]])
 }

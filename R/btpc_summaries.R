@@ -380,3 +380,4 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
     }
   }
 }
+

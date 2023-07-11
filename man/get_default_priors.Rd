@@ -7,7 +7,9 @@
 get_default_priors(model)
 }
 \arguments{
-\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
+\item{model}{A string specifying the model name, or a btpc_model object.
+If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
+Use \code{\link[=get_models]{get_models()}} to view all options.}
 }
 \value{
 A named list of all parameters and their default prior distribution.
