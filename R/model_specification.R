@@ -280,12 +280,24 @@ change_priors <- function(model, priors) {
   }
   params_to_change <- names(priors)
   current_priors <- attr(model, "parameters")
-  if (!all(params_to_change %in% names(current_priors))) {
-    stop("Attempting to change prior of non-existent parameter.")
+  if ("sigma.sq" %in% params_to_change) {
+    if (!all(params_to_change %in% c(names(current_priors), "sigma.sq"))) {
+      stop("Attempting to change prior of non-existent parameter.")
+    }
+    model_priors <- priors[names(priors) != "sigma.sq"]
+    current_priors[names(model_priors)] <- unlist(model_priors)
+    attr(model, "parameters") <- current_priors
+    attr(model, "sigma.sq") <- priors["sigma.sq"]
+    return(model)
+  } else {
+    if (!all(params_to_change %in% names(current_priors))) {
+      stop("Attempting to change prior of non-existent parameter.")
+    }
+    current_priors[params_to_change] <- unlist(priors)
+    attr(model, "parameters") <- current_priors
+    return(model)
   }
-  current_priors[params_to_change] <- unlist(priors)
-  attr(model, "parameters") <- current_priors
-  return(model)
+
 }
 
 #' Change constants of pre-specified model
