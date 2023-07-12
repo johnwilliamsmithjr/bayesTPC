@@ -1,77 +1,74 @@
-.loop_string <- function(model){
+.loop_string <- function(model) {
   UseMethod(".loop_string")
 }
 
 #' @export
-.loop_string.btpc_binomial_model <- function(model){
+.loop_string.btpc_binomial_model <- function(model) {
   model_string <- paste0(
     "{\n    for (i in 1:N){\n            ",
     "Trait[i] ~ dbinom(p[i], n[i])\n            ",
     "logit(p[i]) <- ", gsub("Temp", "Temp[i]", attr(model, "formula")),
-    "\n    }\n")
+    "\n    }\n"
+  )
 
   return(model_string)
 }
 
 #' @export
-.loop_string.btpc_normal_model <- function(model){
+.loop_string.btpc_normal_model <- function(model) {
   model_string <- paste0(
     "{\n    for (i in 1:N){\n            ",
     "Trait[i] ~ T(dnorm(mean = ",
     gsub("Temp", "Temp[i]", attr(model, "formula")),
-    ", var = sigma.sq), 0, )\n    }\n")
+    ", var = sigma.sq), 0, )\n    }\n"
+  )
 }
 #' @export
-.loop_string.default <- function(model){
+.loop_string.default <- function(model) {
   stop("Misconfigured Model Specification.")
 }
 
 
 
-.priors_string <- function(model){
+.priors_string <- function(model) {
   UseMethod(".priors_string")
 }
 
 #' @export
-.priors_string.btpc_binomial_model <- function(model){
+.priors_string.btpc_binomial_model <- function(model) {
   priors <- attr(model, "parameters")
   num_params <- length(priors)
 
   priors_vec <- paste0(names(priors), " ~ ", priors)
-  priors_string <- paste0("    ",paste0(priors_vec, collapse = "\n    "))
+  priors_string <- paste0("    ", paste0(priors_vec, collapse = "\n    "))
   return(priors_string)
 }
 
 #' @export
-.priors_string.btpc_normal_model <- function(model){
+.priors_string.btpc_normal_model <- function(model) {
   priors <- attr(model, "parameters")
   sig <- attr(model, "sigma.sq")
   num_params <- length(priors)
 
   priors_vec <- paste0(names(priors), " ~ ", priors)
-  priors_string <- paste0("    ",paste0(priors_vec, collapse = "\n    "),"\n    sigma.sq ~ ", sig)
-
-
+  priors_string <- paste0("    ", paste0(priors_vec, collapse = "\n    "), "\n    sigma.sq ~ ", sig)
 }
 
 #' @export
-.priors_string.default <- function(model){
+.priors_string.default <- function(model) {
   stop("Misconfigured Model Specification.")
 }
 
 .check_inits <- function(inits) {
-
   if (!is.null(inits)) {
     if (length(inits) == 0) stop("inits list cannot be empty. Use 'inits = NULL' to sample initial values from the priors.")
     if (!is.list(inits)) stop("Unexpected type for argument 'inits'. Initial values must be given as a list.")
     if (is.null(names(inits))) stop("'inits' list must be named.")
 
     return(inits)
-  }
-  else {
+  } else {
     return(list())
   }
-
 }
 
 .configure_constants <- function(model, N) {
@@ -79,10 +76,9 @@
   const.list <- vector("list", 0)
   const.list$N <- N
 
-  if (length(constants) == 0){
+  if (length(constants) == 0) {
     return(const.list)
-  }
-  else {
+  } else {
     str2expression(paste0("const.list$", names(constants), " <- ", constants)) |> eval()
     return(const.list)
   }
@@ -110,27 +106,27 @@
 #' my_prior <- list(q = "q~beta(.5, .5)")
 #' cat(configure_model(model = "quadratic", priors = my_prior))
 configure_model <- function(model, priors = NULL, constants = NULL, verbose = T) {
-  if(!("btpc_model" %in% class(model))){
-    if (!(model %in% model_list)){
+  if (!("btpc_model" %in% class(model))) {
+    if (!(model %in% model_list)) {
       stop("Unsupported model, use get_models() to view implemented models.")
     }
     model <- model_list[[model]]
   }
 
-  #change priors if necessary
-  if (!is.null(priors)){
+  # change priors if necessary
+  if (!is.null(priors)) {
     if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
     if (is.null(names(priors))) {
       stop("Prior list cannot be empty. To use default priors, use priors = NULL.")
     }
-    if (verbose){
+    if (verbose) {
       warning("At least one user-defined prior being used.")
     }
     model <- change_priors(model, unlist(priors))
   }
 
-  #change constants if necessary
-  if (!is.null(constants)){
+  # change constants if necessary
+  if (!is.null(constants)) {
     if (!is.list(constants)) stop("Unexpected type for argument 'constants'. Contantss must be given as a list.")
     if (is.null(names(constants))) {
       stop("Constant list cannot be empty. To use default constants, use constants = NULL.")
@@ -139,11 +135,10 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = T)
     model <- change_constants(model, unlist(constants))
   }
 
-  if ("btpc_model" %in% class(model)){
+  if ("btpc_model" %in% class(model)) {
     loop <- .loop_string(model)
     pri <- .priors_string(model)
-  }
-  else {
+  } else {
     model <- model_list[[model]]
     loop <- .loop_string(model)
     pri <- .priors_string(model)
@@ -235,13 +230,13 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     # const.list$n = unlist(data['n'])
   }
 
-  #create model specification
-  if (!("btpc_model" %in% class(model))){
+  # create model specification
+  if (!("btpc_model" %in% class(model))) {
     model <- model_list[[model]]
   }
 
-  #change priors if necessary
-  if (!is.null(priors)){
+  # change priors if necessary
+  if (!is.null(priors)) {
     if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
     if (is.null(names(priors))) {
       stop("Prior list cannot be empty. To use default priors, use priors = NULL.")
@@ -250,8 +245,8 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     model <- change_priors(model, unlist(priors))
   }
 
-  #change constants if necessary
-  if (!is.null(constants)){
+  # change constants if necessary
+  if (!is.null(constants)) {
     if (!is.list(constants)) stop("Unexpected type for argument 'constants'. Contantss must be given as a list.")
     if (is.null(names(constants))) {
       stop("Constant list cannot be empty. To use default constants, use constants = NULL.")

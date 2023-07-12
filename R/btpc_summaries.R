@@ -53,15 +53,17 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   tpc_fun <- get_model_function(TPC$model_type)
   max.ind <- nrow(TPC$samples)
 
-  #assign constants
+  # assign constants
   MA <- list(Temp = Temp_interval)
-  if (length(TPC$constants) > 0){
-    for (i in 1:length(TPC$constants)){
+  if (length(TPC$constants) > 0) {
+    for (i in 1:length(TPC$constants)) {
       MA[names(TPC$constants)[i]] <- TPC$constants[i]
     }
   }
-  tpc_evals <- .mapply(FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq" ]),
-                       MoreArgs = MA) |> simplify2array()
+  tpc_evals <- .mapply(
+    FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq"]),
+    MoreArgs = MA
+  ) |> simplify2array()
 
   if (centralSummary == "median") {
     if (summaryType == "quantile") {
@@ -232,18 +234,20 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
   tpc_fun <- get_model_function(TPC$model_type)
   max.ind <- nrow(TPC$samples)
 
-  #assign constants
+  # assign constants
   MA <- list(Temp = Temp_interval)
-  if (length(TPC$constants) > 0){
-    for (i in 1:length(TPC$constants)){
+  if (length(TPC$constants) > 0) {
+    for (i in 1:length(TPC$constants)) {
       MA[names(TPC$constants)[i]] <- TPC$constants[i]
     }
   }
 
 
   if (!is.null(seed)) set.seed(seed)
-  truncmeans <- .mapply(FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq" ]),
-                        MoreArgs = MA) |> simplify2array()
+  truncmeans <- .mapply(
+    FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq"]),
+    MoreArgs = MA
+  ) |> simplify2array()
   ## checking logic here...
   post_pred_draw <- function(X) {
     return(truncnorm::rtruncnorm(
@@ -380,4 +384,3 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
     }
   }
 }
-

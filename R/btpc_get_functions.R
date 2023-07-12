@@ -22,8 +22,8 @@
 #' ans
 #'
 get_formula <- function(model) {
-  if(!("btpc_model" %in% class(model))){
-    if (!(model %in% model_list)){
+  if (!("btpc_model" %in% class(model))) {
+    if (!(model %in% model_list)) {
       stop("Unsupported model, use get_models() to view implemented models.")
     }
     model <- model_list[[model]]
@@ -44,8 +44,8 @@ get_formula <- function(model) {
 #' get_model_params("ratkowsky")
 #'
 get_model_params <- function(model) {
-  if(!("btpc_model" %in% class(model))){
-    if (!(model %in% model_list)){
+  if (!("btpc_model" %in% class(model))) {
+    if (!(model %in% model_list)) {
       stop("Unsupported model, use get_models() to view implemented models.")
     }
     model <- model_list[[model]]
@@ -67,8 +67,8 @@ get_model_params <- function(model) {
 #' @examples
 #' get_default_priors("briere")
 get_default_priors <- function(model) {
-  if(!("btpc_model" %in% class(model))){
-    if (!(model %in% model_list)){
+  if (!("btpc_model" %in% class(model))) {
+    if (!(model %in% model_list)) {
       stop("Unsupported model, use get_models() to view implemented models.")
     }
     model <- model_list[[model]]
@@ -94,8 +94,8 @@ get_default_priors <- function(model) {
 #' # Model with constants
 #' get_model_constants("pawar_shsch")
 get_model_constants <- function(model) {
-  if(!("btpc_model" %in% class(model))){
-    if (!(model %in% model_list)){
+  if (!("btpc_model" %in% class(model))) {
+    if (!(model %in% model_list)) {
       stop("Unsupported model, use get_models() to view implemented models.")
     }
     model <- model_list[[model]]
@@ -128,8 +128,8 @@ get_model_constants <- function(model) {
 #' # Model with constants
 #' get_default_constants("pawar_shsch")
 get_default_constants <- function(model) {
-  if(!("btpc_model" %in% class(model))){
-    if (!(model %in% model_list)){
+  if (!("btpc_model" %in% class(model))) {
+    if (!(model %in% model_list)) {
       stop("Unsupported model, use get_models() to view implemented models.")
     }
     model <- model_list[[model]]
@@ -190,8 +190,8 @@ get_models <- function() {
 #' quadratic_function <- get_model_function("quadratic")
 #' quadratic_function(q = .75, T_max = 35, T_min = 10, Temp = c(15, 20, 25, 30))
 get_model_function <- function(model) {
-  if(!("btpc_model" %in% class(model))){
-    if (!(model %in% model_list)){
+  if (!("btpc_model" %in% class(model))) {
+    if (!(model %in% model_list)) {
       stop("Unsupported model, use get_models() to view implemented models.")
     }
     model <- model_list[[model]]
@@ -221,8 +221,8 @@ get_model_function <- function(model) {
 #'   Use [get_models()] to view all options.
 #' @returns A `btpc_model` object containing the model type, formula, parameters and respective priors,
 #'   constants and respective default values if applicable, and variance prior if applicable.
-get_default_model_specification <- function(model){
-  if (!(model %in% model_list)){
+get_default_model_specification <- function(model) {
+  if (!(model %in% model_list)) {
     stop("Unsupported model, use get_models() to view implemented models.")
   }
 
