@@ -2,21 +2,26 @@
 % Please edit documentation in R/btpc_get_functions.R
 \name{get_model_constants}
 \alias{get_model_constants}
+\alias{get_default_constants}
 \title{Get Model Constants}
 \usage{
 get_model_constants(model)
+
+get_default_constants(model)
 }
 \arguments{
 \item{model}{A string specifying the model name, or a btpc_model object.
-If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
+If a string is provided, the default values are provided if the model is implemented. If the model is not implemented, an error occurs.
 Use \code{\link[=get_models]{get_models()}} to view all options.}
 }
 \value{
-If the specified model has constants, a character vector containing all required constants for the model provided.
-Otherwise, only outputs a message and returns nothing.
+If the specified model does not contain constants, both \code{get_model_constants()} and \code{get_default_constants()} only output a message and return nothing.
+
+Otherwise, \code{get_model_constants()} returns a character vector containing all required constants for the model provided,
+and \code{get_default_constants()}returns a named numeric vector of all default constant values used if none are provided.
 }
 \description{
-Returns the constants of a specified model, if they exist.
+Returns the constants of a specified model or their default values, if they exist.
 }
 \details{
 Using this function is only necessary if the model being fit has constant values.
@@ -26,7 +31,9 @@ Currently, the only implemented model with constants is 'pawar-shsch'.
 
 # Model without constants
 get_model_constants("gaussian")
+get_default_constants("gaussian")
 
 # Model with constants
 get_model_constants("pawar_shsch")
+get_default_constants("pawar_shsch")
 }

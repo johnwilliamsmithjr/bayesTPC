@@ -100,7 +100,7 @@ specify_normal_model <- function(name = character(),
   x <- validate(x)
   model_list[[name]] <- x
   utils::assignInMyNamespace("model_list", model_list)
-  print(paste0(
+  cat(paste0(
     "Normal model type '", name, "' can now be accessed using other bayesTPC functions. ",
     "Reload the package to reset back to defaults.\n"
   ))
@@ -184,12 +184,12 @@ validate.btpc_model <- function(x) {
     stop("Model specification must have parameters.")
   }
   par_names <- names(parameters)
-  if (par_names |> is.null()) {
+  if (is.null(par_names)) {
     stop("'parameters' vector must be named.")
   }
-  if (vapply(par_names, function(x) {
+  if (any(vapply(par_names, function(x) {
     x == ""
-  }, TRUE) |> any()) {
+  }, TRUE))) {
     stop("All model parameters must be named.")
   }
   if (length(par_names) != length(unique(par_names))) {
@@ -201,12 +201,12 @@ validate.btpc_model <- function(x) {
   if (length(constants) > 0) {
     const_names <- names(constants)
 
-    if (const_names |> is.null()) {
+    if (is.null(const_names)) {
       stop("'constants' vector must be named.")
     }
-    if (vapply(const_names, function(x) {
+    if (any(vapply(const_names, function(x) {
       x == ""
-    }, TRUE) |> any()) {
+    }, TRUE))) {
       stop("All model constants must be named.")
     }
     if (length(const_names) != length(unique(const_names))) {
@@ -221,7 +221,7 @@ validate.btpc_model <- function(x) {
   if (length(formula) > 1) {
     stop("Model specification can only have one formula.")
   }
-  formula_vars <- formula |> all.vars() # extract all variables from formula
+  formula_vars <- all.vars(formula) # extract all variables from formula
   if (!"Temp" %in% formula_vars) {
     stop("Model specification formula must contain variable 'Temp'.")
   }
@@ -265,6 +265,9 @@ validate.default <- function(x) {
 #' Intended to be used to change the priors of an already existing model.
 #'
 #' @export
+#' @details `bayesTPC` does not verify if the priors specified are compatible with NIMBLE's dialect of BUGS.
+#'   All available distributions and formatting are provided on the
+#'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
 #' @param model Object of type `btpc_model`. The specification to be changed.
 #' @param priors named character. The names should correspond to the parameters to change, and the values should be the new desired priors.
 #' @returns Returns the modified model. Does not change the default values of any registered model type.
@@ -290,6 +293,9 @@ change_priors <- function(model, priors) {
 #' Intended to be used to change the constants of an already existing model.
 #'
 #' @export
+#' @details `bayesTPC` does not verify if the priors specified are compatible with NIMBLE's dialect of BUGS.
+#'   All available distributions and formatting are provided on the
+#'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
 #' @param model Object of type `btpc_model`. The specification to be changed.
 #' @param constants named character. The names should correspond to the constants to change, and the values should be the new desired constants.
 #' @returns Returns the modified model. Does not change the default values of any registered model type.

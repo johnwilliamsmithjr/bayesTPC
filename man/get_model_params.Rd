@@ -2,26 +2,36 @@
 % Please edit documentation in R/btpc_get_functions.R
 \name{get_model_params}
 \alias{get_model_params}
+\alias{get_default_priors}
 \title{Get Model Parameters}
 \usage{
 get_model_params(model)
+
+get_default_priors(model)
 }
 \arguments{
 \item{model}{A string specifying the model name, or a btpc_model object.
-If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
+If a string is provided, the default values are provided if the model is implemented. If the model is not implemented, an error occurs.
 Use \code{\link[=get_models]{get_models()}} to view all options.}
 }
 \value{
-A character vector containing all required parameters for the model provided.
+\code{get_model_params()} returns a character vector containing all required parameters for the model provided.
+
+\code{get_default_priors()} returns a named numeric vector of all default prior distributions sampled from if none are provided.
 }
 \description{
-Returns the parameters for a specified model.
+Returns the parameters or the default priors for a specified model.
 }
 \details{
-\code{get_model_params} only returns the parameters changed during model training.
-Depending on the model chosen, there may be constants not included in the output. Use \code{\link[=get_model_constants]{get_model_constants()}} to obtain these if needed.
+\code{get_model_params()} and \code{get_default_priors()} only return the parameters changed during model training.
+Depending on the model chosen, there may be constants not included in the output.
+Use \code{\link[=get_model_constants]{get_model_constants()}} to obtain these if needed.
+
+Prior distributions are written in the format required by NIMBLE's BUGS implementation.
+All available distributions and formatting are provided on the
+\href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
 }
 \examples{
 get_model_params("ratkowsky")
-
+get_default_priors("ratkowsky")
 }

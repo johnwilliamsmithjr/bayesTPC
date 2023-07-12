@@ -79,7 +79,7 @@
   if (length(constants) == 0) {
     return(const.list)
   } else {
-    str2expression(paste0("const.list$", names(constants), " <- ", constants)) |> eval()
+    eval(str2expression(paste0("const.list$", names(constants), " <- ", constants)))
     return(const.list)
   }
 }
@@ -90,7 +90,9 @@
 #'
 #' @export
 #' @details This function returns a character string of the full `nimble` model for a user-specified thermal performance curve and prior distributions.
-#' @param model A string specifying the model name. Use [get_models()] to view all options.
+#' @param model A string specifying the model name, or a btpc_model object.
+#'  If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
+#'  Use [get_models()] to view all options.
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL).
 #'  Elements of the list should correspond to model parameters, and written using nimble logic.
 #'  For parameters not specified in the list, default priors are used.
@@ -161,7 +163,9 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = T)
 #' Both the model specification and the MCMC object are compiled by NIMBLE. Progress is printed for clarity's sake.
 #' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve)
 #'  and "Temp" (corresponding to the temperature in Celsius that the trait is being measured at).
-#' @param model A string specifying the model name. Use [get_models()] to view all options.
+#' @param model A string specifying the model name, or a btpc_model object.
+#'  If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
+#'  Use [get_models()] to view all options.
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL).
 #'  Elements of the list should correspond to model parameters,
 #'  and written using NIMBLE logic. For parameters not specified in the list, default priors are used.
@@ -293,7 +297,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     mcmcConfig$addSampler(bugs_params, type = samplerType)
   }
 
-  if (verbose) { # weird output if not using RW sampler
+  if (verbose) {
     # Manually Printing, see mcmcConfig
     cat("===== Monitors ===== \n")
     mcmcConfig$printMonitors()
@@ -316,7 +320,9 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
 
   # remove random objects from global environment
+
   rm(list = base::setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
+  # TODO create an S3 class for a finished MCMC, so we can do fun front end stuff with it
   return(list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
     model_type = c(model), priors = prior_out, constants = attr(model, "constants"), uncomp_model = nimTPCmod

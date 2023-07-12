@@ -17,3 +17,8 @@ Returns the modified model. Does not change the default values of any registered
 \description{
 Intended to be used to change the constants of an already existing model.
 }
+\details{
+\code{bayesTPC} does not verify if the priors specified are compatible with NIMBLE's dialect of BUGS.
+All available distributions and formatting are provided on the
+\href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
+}

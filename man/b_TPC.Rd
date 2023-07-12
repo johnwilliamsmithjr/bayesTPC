@@ -21,7 +21,9 @@ b_TPC(
 \item{data}{list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve)
 and "Temp" (corresponding to the temperature in Celsius that the trait is being measured at).}
 
-\item{model}{A string specifying the model name. Use \code{\link[=get_models]{get_models()}} to view all options.}
+\item{model}{A string specifying the model name, or a btpc_model object.
+If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
+Use \code{\link[=get_models]{get_models()}} to view all options.}
 
 \item{priors}{list, optional input specifying prior distributions for parameters (default = NULL).
 Elements of the list should correspond to model parameters,

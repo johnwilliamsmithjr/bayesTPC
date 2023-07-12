@@ -2,23 +2,28 @@
 % Please edit documentation in R/btpc_get_functions.R
 \name{get_formula}
 \alias{get_formula}
+\alias{get_formulas}
 \title{Get Model Formula}
 \usage{
 get_formula(model)
+
+get_formulas()
 }
 \arguments{
 \item{model}{A string specifying the model name, or a btpc_model object.
-If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
+If a string is provided, the default values are provided if the model is implemented. If the model is not implemented, an error occurs.
 Use \code{\link[=get_models]{get_models()}} to view all options.}
 }
 \value{
-\code{get_formula} returns the formula for the provided model as an expression.
+\code{get_formula()} returns the formula for the provided model as an expression.
+
+\code{get_formulas()} returns a named list containing all models and their respective formulas as expressions.
 }
 \description{
 Returns the formula for a specified model.
 }
 \details{
-This function is best used to investigate specifics of a model before using it.
+\code{get_formula()} is best used to investigate specifics of a model before using it.
 It can be used to evaluate models, but it is better practice to use the output of \code{\link[=get_model_function]{get_model_function()}} for direct model evaluation.
 }
 \examples{

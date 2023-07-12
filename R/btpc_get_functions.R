@@ -3,12 +3,14 @@
 #' Returns the formula for a specified model.
 #'
 #' @export
-#' @details This function is best used to investigate specifics of a model before using it.
+#' @details `get_formula()` is best used to investigate specifics of a model before using it.
 #'  It can be used to evaluate models, but it is better practice to use the output of [get_model_function()] for direct model evaluation.
 #' @param model A string specifying the model name, or a btpc_model object.
-#' If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
+#' If a string is provided, the default values are provided if the model is implemented. If the model is not implemented, an error occurs.
 #' Use [get_models()] to view all options.
-#' @returns `get_formula` returns the formula for the provided model as an expression.
+#' @returns `get_formula()` returns the formula for the provided model as an expression.
+#'
+#'  `get_formulas()` returns a named list containing all models and their respective formulas as expressions.
 #' @seealso [get_model_function()]
 #' @examples
 #' get_formula("stinner")
@@ -33,16 +35,24 @@ get_formula <- function(model) {
 
 #' Get Model Parameters
 #'
-#' Returns the parameters for a specified model.
+#' Returns the parameters or the default priors for a specified model.
 #'
 #' @export
-#' @details `get_model_params` only returns the parameters changed during model training.
-#'  Depending on the model chosen, there may be constants not included in the output. Use [get_model_constants()] to obtain these if needed.
+#' @details `get_model_params()` and `get_default_priors()` only return the parameters changed during model training.
+#'  Depending on the model chosen, there may be constants not included in the output.
+#'  Use [get_model_constants()] to obtain these if needed.
+#'
+#'  Prior distributions are written in the format required by NIMBLE's BUGS implementation.
+#'  All available distributions and formatting are provided on the
+#'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
+#'
 #' @inheritParams get_formula
-#' @returns A character vector containing all required parameters for the model provided.
+#' @returns `get_model_params()` returns a character vector containing all required parameters for the model provided.
+#'
+#'  `get_default_priors()` returns a named numeric vector of all default prior distributions sampled from if none are provided.
 #' @examples
 #' get_model_params("ratkowsky")
-#'
+#' get_default_priors("ratkowsky")
 get_model_params <- function(model) {
   if (!("btpc_model" %in% class(model))) {
     if (!(model %in% model_list)) {
@@ -53,19 +63,8 @@ get_model_params <- function(model) {
   return(names(attr(model, "parameters")))
 }
 
-#' Get Default Prior Distributions
-#'
-#' Returns the default distributions for all parameters trained by [b_TPC()].
-#' These are used if no priors are provided.
-#'
+#' @rdname get_model_params
 #' @export
-#' @details Prior distributions are written in the format required by NIMBLE's BUGS implementation.
-#'  All available distributions and formatting are provided on the
-#'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
-#' @inheritParams get_formula
-#' @returns A named list of all parameters and their default prior distribution.
-#' @examples
-#' get_default_priors("briere")
 get_default_priors <- function(model) {
   if (!("btpc_model" %in% class(model))) {
     if (!(model %in% model_list)) {
@@ -78,21 +77,25 @@ get_default_priors <- function(model) {
 
 #' Get Model Constants
 #'
-#' Returns the constants of a specified model, if they exist.
+#' Returns the constants of a specified model or their default values, if they exist.
 #'
 #' @export
 #' @details Using this function is only necessary if the model being fit has constant values.
 #'  Currently, the only implemented model with constants is 'pawar-shsch'.
 #' @inheritParams get_formula
-#' @returns If the specified model has constants, a character vector containing all required constants for the model provided.
-#'  Otherwise, only outputs a message and returns nothing.
+#' @returns If the specified model does not contain constants, both `get_model_constants()` and `get_default_constants()` only output a message and return nothing.
+#'
+#' Otherwise, `get_model_constants()` returns a character vector containing all required constants for the model provided,
+#' and `get_default_constants()`returns a named numeric vector of all default constant values used if none are provided.
 #' @examples
 #'
 #' # Model without constants
 #' get_model_constants("gaussian")
+#' get_default_constants("gaussian")
 #'
 #' # Model with constants
 #' get_model_constants("pawar_shsch")
+#' get_default_constants("pawar_shsch")
 get_model_constants <- function(model) {
   if (!("btpc_model" %in% class(model))) {
     if (!(model %in% model_list)) {
@@ -109,31 +112,14 @@ get_model_constants <- function(model) {
   }
 }
 
-#' Get Default Model Constants
-#'
-#' Returns the default values for all constants of a specified model.
-#' These are used if no constant values are provided to [b_TPC()].
-#'
+#' @rdname get_model_constants
 #' @export
-#' @details Using this function is only necessary if the model being fit has constant values.
-#'  Currently, the only implemented model with constants is 'pawar-shsch'.
-#' @inheritParams get_formula
-#' @returns If the specified model has constants, `get_default_constants` returns a named numeric vector
-#' of all default constant values used when none are provided. Otherwise, only outputs a message and returns nothing.
-#' @examples
-#'
-#' #' # Model without constants
-#' get_default_constants("gaussian")
-#'
-#' # Model with constants
-#' get_default_constants("pawar_shsch")
 get_default_constants <- function(model) {
-  if (!("btpc_model" %in% class(model))) {
-    if (!(model %in% model_list)) {
-      stop("Unsupported model, use get_models() to view implemented models.")
-    }
-    model <- model_list[[model]]
+  if (!(model %in% model_list)) {
+    stop("Unsupported model, use get_models() to view implemented models.")
   }
+
+  model <- model_list[[model]]
   consts <- attr(model, "constants")
 
   if (length(consts) > 0) {
@@ -143,15 +129,8 @@ get_default_constants <- function(model) {
   }
 }
 
-#' Get Models and Formulas
-#'
-#' Returns all implemented models and their respective formulas.
-#'
+#' @rdname get_formula
 #' @export
-#' @returns `get_formulas()` returns a named list containing all models and their respective formulas as expressions.
-#' @examples
-#'
-#' get_models()
 get_formulas <- function() {
   return(lapply(model_list, get_formula))
 }
@@ -181,6 +160,7 @@ get_models <- function() {
 #' @inheritParams get_formula
 #' @returns `get_model_function` returns a function that evaluates the implemented formula of the specified model.
 #' The parameters of the specified model along with constants (if present) are used as the arguments to the returned function.
+#' @seealso [get_formula()]
 #' @examples
 #'
 #' stinner_function <- get_model_function("stinner")

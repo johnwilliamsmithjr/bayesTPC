@@ -8,7 +8,7 @@ get_model_function(model)
 }
 \arguments{
 \item{model}{A string specifying the model name, or a btpc_model object.
-If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
+If a string is provided, the default values are provided if the model is implemented. If the model is not implemented, an error occurs.
 Use \code{\link[=get_models]{get_models()}} to view all options.}
 }
 \value{
@@ -30,4 +30,7 @@ stinner_function
 # compare to example in get_formula()
 quadratic_function <- get_model_function("quadratic")
 quadratic_function(q = .75, T_max = 35, T_min = 10, Temp = c(15, 20, 25, 30))
+}
+\seealso{
+\code{\link[=get_formula]{get_formula()}}
 }

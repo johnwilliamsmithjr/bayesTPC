@@ -46,9 +46,11 @@ my_parameters <- c(a = "dunif(0,1)", b = "dnorm(0,1)")
 my_constants <- c(c = 1.5)
 
 \dontrun{
-my_model <- specify_binomial_model(name = my_name,
-                                 parameters = my_parameters,
-                                 formula = my_formula,
-                                 constants = my_constants)
+my_model <- specify_binomial_model(
+  name = my_name,
+  parameters = my_parameters,
+  formula = my_formula,
+  constants = my_constants
+)
 }
 }
