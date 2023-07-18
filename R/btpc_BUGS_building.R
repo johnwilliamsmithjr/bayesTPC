@@ -228,6 +228,12 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   original_environmental_objects <- force(ls(envir = .GlobalEnv))
   data.nimble <- check_data(data)
 
+  #MONADing it. no change of state!
+  original_verbose_option <- nimble::getNimbleOption("verbose")
+  user_verbose <- verbose #avoid quoting mishaps
+  nimble::nimbleOptions(verbose = user_verbose)
+
+
   if (!(samplerType %in% c("RW", "RW_block", "AF_slice", "slice"))) stop("Unsupported option for input samplerType. Currently only RW, RW_block, slice, and AF_slice are supported.")
   if ("btpc_binomial_model" %in% class(model)) {
     if (is.null(unlist(data["n"]))) stop("For a Binomial GLM, data list must have a variable called 'n'. Perhaps check spelling and capitalization?")
@@ -268,7 +274,8 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   # create uncompiled nimble model
   # TODO get verbose to interact with this.
-  cat("Creating NIMBLE model:\n")
+  # TODO odd things with importing functions from nimble ???? fix at some point
+  cat("Creating NIMBLE model.\n")
   nimTPCmod <- nimble::nimbleModel(str2expression(modelStr),
     constants = const.list,
     data = data.nimble$data, inits = inits.list,
@@ -299,13 +306,14 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   if (verbose) {
     # Manually Printing, see mcmcConfig
-    cat("===== Monitors ===== \n")
+    cat("\n===== Monitors ===== \n")
     mcmcConfig$printMonitors()
     cat("===== Samplers ===== \n")
     mcmcConfig$printSamplers(byType = T)
+    cat("\n")
   }
 
-  cat("\nRunning MCMC:\n")
+  cat("Running MCMC.\n")
   mcmcConfig$enableWAIC <- TRUE
   mcmc <- nimble::buildMCMC(mcmcConfig)
   tpc_mcmc <- nimble::compileNimble(mcmc, project = nimTPCmod_compiled)
@@ -320,8 +328,9 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
 
   # remove random objects from global environment
-
   rm(list = base::setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
+  # set verbose option back to what nimble had
+  nimble::nimbleOptions(verbose = original_verbose_option)
   # TODO create an S3 class for a finished MCMC, so we can do fun front end stuff with it
   return(list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,

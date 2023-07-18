@@ -27,6 +27,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                              summaryType = "hdi", centralSummary = "median",
                              plot = TRUE, probs = c(.05, .95),
                              burn = 0, plotOnly = FALSE, traitName = "Trait", ...) {
+  # TODO make this into a generic function and maybe clean it up :)
   if (!(summaryType %in% c("hdi", "quantile")) & summaryOnly) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
   if (!(centralSummary %in% c("mean", "median")) & summaryOnly) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
 
@@ -206,6 +207,7 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                              summaryType = "hdi", centralSummary = "median",
                              plot = TRUE, probs = c(.05, .95),
                              burn = 0, plotOnly = FALSE, traitName = "Trait", seed = NULL, ...) {
+  # TODO rename because we aren't using camelCase now randomly
   if (!(summaryType %in% c("hdi", "quantile")) & summaryOnly) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
   if (!(centralSummary %in% c("mean", "median")) & summaryOnly) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
   if (!(is.null(seed))) {
