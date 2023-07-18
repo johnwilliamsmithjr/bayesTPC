@@ -181,7 +181,7 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = T)
 #' @param burn optional integer, number of initial MCMC iterations to be discarded as burn-in. Default is burn = 0.
 #' @param constants optional list, constants to be provided to model. If constants are needed and not provided, constant values are used.
 #'  Currently only used for model = 'pawar-shsch'.
-#' @param verbose logical, determines whether to print additional information, Default is TRUE.
+#' @param verbose logical, determines whether to print additional information, Default is FALSE.
 #' @param ... Additional parameters to be passed to nimble during MCMC configuration and sampling.
 #' @return `b_TPC` returns a list containing entries:
 #'  * `samples` - `mcmc.list` containing posterior samples of parameters for corresponding model.
@@ -219,7 +219,7 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = T)
 #' )
 #' }
 b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
-                  niter = 10000, inits = NULL, burn = 0, constants = NULL, verbose = TRUE, ...) {
+                  niter = 10000, inits = NULL, burn = 0, constants = NULL, verbose = FALSE, ...) {
   # exception handling and variable setup
   if (is.null(model) || ((!(model %in% model_list)) && !("btpc_model" %in% class(model)))) {
     stop("Unsupported model, use get_models() to view implemented models.")
