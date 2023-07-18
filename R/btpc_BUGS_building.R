@@ -225,10 +225,12 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     stop("Unsupported model, use get_models() to view implemented models.")
   }
 
-  original_environmental_objects <- force(ls(envir = .GlobalEnv))
   data.nimble <- check_data(data)
+  inits.list <- .check_inits(inits)
+  const.list <- .configure_constants(model, data.nimble$N)
 
-  #MONADing it. no change of state!
+  #no change of state! we are functional programmers!!!!!!
+  original_environmental_objects <- force(ls(envir = .GlobalEnv))
   original_verbose_option <- nimble::getNimbleOption("verbose")
   user_verbose <- verbose #avoid quoting mishaps
   nimble::nimbleOptions(verbose = user_verbose)
@@ -266,14 +268,11 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   }
 
   # configure model, handles the density funciton, priors, and constants
-  inits.list <- .check_inits(inits)
-  const.list <- .configure_constants(model, data.nimble$N)
   modelStr <- configure_model(model)
 
 
 
   # create uncompiled nimble model
-  # TODO get verbose to interact with this.
   # TODO odd things with importing functions from nimble ???? fix at some point
   cat("Creating NIMBLE model.\n")
   nimTPCmod <- nimble::nimbleModel(str2expression(modelStr),
@@ -332,8 +331,11 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   # set verbose option back to what nimble had
   nimble::nimbleOptions(verbose = original_verbose_option)
   # TODO create an S3 class for a finished MCMC, so we can do fun front end stuff with it
-  return(list(
+  out <- list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
     model_type = c(model), priors = prior_out, constants = attr(model, "constants"), uncomp_model = nimTPCmod
-  ))
+  )
+
+  class(out) <- "btpc_MCMC"
+  return(out)
 }

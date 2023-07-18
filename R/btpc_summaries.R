@@ -27,7 +27,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                              summaryType = "hdi", centralSummary = "median",
                              plot = TRUE, probs = c(.05, .95),
                              burn = 0, plotOnly = FALSE, traitName = "Trait", ...) {
-  # TODO make this into a generic function and maybe clean it up :)
+  # TODO make this into generic functions. plural. and maybe clean it up :)
   if (!(summaryType %in% c("hdi", "quantile")) & summaryOnly) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
   if (!(centralSummary %in% c("mean", "median")) & summaryOnly) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
 
@@ -61,10 +61,10 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       MA[names(TPC$constants)[i]] <- TPC$constants[i]
     }
   }
-  tpc_evals <- .mapply(
+  tpc_evals <- simplify2array(.mapply(
     FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq"]),
     MoreArgs = MA
-  ) |> simplify2array()
+  ))
 
   if (centralSummary == "median") {
     if (summaryType == "quantile") {
@@ -79,9 +79,10 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       medians <- matrixStats::rowMedians(tpc_evals)
     }
     if (plot) {
-      plot(Temp_interval, upper_bounds, type = "l", lty = 2, col = "blue", xlab = "Temperature (C)", ylab = traitName, ylim = c(0, max(upper_bounds)))
+      plot(Temp_interval, upper_bounds, type = "l", lty = 2, col = "blue", xlab = "Temperature (C)", ylab = traitName, ylim = c(0, max(upper_bounds, TPC$data$Trait)))
       graphics::points(Temp_interval, lower_bounds, type = "l", col = "blue", lty = 2)
       graphics::points(Temp_interval, medians, type = "l", col = "blue")
+      graphics::points(TPC$data$Temp, TPC$data$Trait)
       if (plotOnly) {
         return(invisible(NULL))
       } else {
@@ -134,9 +135,10 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       means <- matrixStats::rowMeans2(tpc_evals)
     }
     if (plot) {
-      plot(Temp_interval, upper_bounds, type = "l", col = "blue", lty = 2, xlab = "Temperature (C)", ylab = traitName, ylim = c(0, max(upper_bounds)))
+      plot(Temp_interval, upper_bounds, type = "l", col = "blue", lty = 2, xlab = "Temperature (C)", ylab = traitName, ylim = c(0, max(upper_bounds, TPC$data$Trait)))
       graphics::points(Temp_interval, lower_bounds, type = "l", col = "blue", lty = 2)
       graphics::points(Temp_interval, means, type = "l", col = "blue")
+      graphics::points(TPC$data$Temp, TPC$data$Trait)
       if (plotOnly) {
         return(invisible(NULL))
       } else {

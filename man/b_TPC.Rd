@@ -13,7 +13,7 @@ b_TPC(
   inits = NULL,
   burn = 0,
   constants = NULL,
-  verbose = TRUE,
+  verbose = FALSE,
   ...
 )
 }
@@ -48,7 +48,7 @@ Currently, supported options are:
 \item{constants}{optional list, constants to be provided to model. If constants are needed and not provided, constant values are used.
 Currently only used for model = 'pawar-shsch'.}
 
-\item{verbose}{logical, determines whether to print additional information, Default is TRUE.}
+\item{verbose}{logical, determines whether to print additional information, Default is FALSE.}
 
 \item{...}{Additional parameters to be passed to nimble during MCMC configuration and sampling.}
 }

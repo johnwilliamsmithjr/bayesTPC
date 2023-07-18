@@ -346,10 +346,13 @@ print.btpc_model <- function(x, ...) {
     cat(paste0("\nModel Constants:"))
     cat(paste0("\n  ", names(consts), ": ", consts))
   }
+
+  invisible(x)
 }
 
 #' @export
 print.btpc_normal_model <- function(x, ...) {
   print.btpc_model(x)
   cat(paste0("\nPrior for Variance:\n  ", attr(x, "sigma.sq")))
+  invisible(x)
 }
