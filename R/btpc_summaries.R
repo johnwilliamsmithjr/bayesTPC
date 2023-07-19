@@ -61,6 +61,7 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       MA[names(TPC$constants)[i]] <- TPC$constants[i]
     }
   }
+
   tpc_evals <- simplify2array(.mapply(
     FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq"]),
     MoreArgs = MA
@@ -210,6 +211,7 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
                              plot = TRUE, probs = c(.05, .95),
                              burn = 0, plotOnly = FALSE, traitName = "Trait", seed = NULL, ...) {
   # TODO rename because we aren't using camelCase now randomly
+  # TODO add plot legend idk why it doesnt have one yet
   if (!(summaryType %in% c("hdi", "quantile")) & summaryOnly) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
   if (!(centralSummary %in% c("mean", "median")) & summaryOnly) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported. To use other summary functions, try using summaryOnly = FALSE and working with the entire matrix')
   if (!(is.null(seed))) {
