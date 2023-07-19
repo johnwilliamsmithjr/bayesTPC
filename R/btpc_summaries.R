@@ -60,10 +60,10 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
       MA[names(TPC$constants)[i]] <- TPC$constants[i]
     }
   }
-  tpc_evals <- .mapply(
+  tpc_evals <- simplify2array(.mapply(
     FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq"]),
     MoreArgs = MA
-  ) |> simplify2array()
+  ))
 
   if (centralSummary == "median") {
     if (summaryType == "quantile") {
@@ -244,10 +244,10 @@ posteriorPredTPC <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
 
 
   if (!is.null(seed)) set.seed(seed)
-  truncmeans <- .mapply(
+  truncmeans <- simplify2array(.mapply(
     FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq"]),
     MoreArgs = MA
-  ) |> simplify2array()
+  ))
   ## checking logic here...
   post_pred_draw <- function(X) {
     return(truncnorm::rtruncnorm(
