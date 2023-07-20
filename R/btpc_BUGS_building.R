@@ -6,8 +6,8 @@
 .loop_string.btpc_binomial_model <- function(model) {
   model_string <- paste0(
     "{\n    for (i in 1:N){\n            ",
-    "Trait[i] ~ dbinom(p[i], n[i])\n            ",
     "logit(p[i]) <- ", gsub("Temp", "Temp[i]", attr(model, "formula")),
+    "Trait[i] ~ dbinom(p[i], n[i])\n            ",
     "\n    }\n"
   )
 
