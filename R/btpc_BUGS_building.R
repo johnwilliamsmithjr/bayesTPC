@@ -7,7 +7,7 @@
   model_string <- paste0(
     "{\n    for (i in 1:N){\n            ",
     "logit(p[i]) <- ", gsub("Temp", "Temp[i]", attr(model, "formula")),
-    "Trait[i] ~ dbinom(p[i], n[i])\n            ",
+    "\n            Trait[i] ~ dbinom(p[i], n[i])",
     "\n    }\n"
   )
 
