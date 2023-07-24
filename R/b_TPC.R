@@ -152,7 +152,6 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   nimTPCmod <- nimble::nimbleModel(str2expression(modelStr),
                                    constants = const.list,
                                    data = data.nimble$data, inits = inits.list,
-                                   where = environment(),
                                    check = nimble::getNimbleOption("checkModel"),
                                    buildDerivs = nimble::getNimbleOption("buildModelDerivs")
   )
@@ -205,7 +204,6 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   rm(list = base::setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
   # set verbose option back to what nimble had
   nimble::nimbleOptions(verbose = original_verbose_option)
-  # TODO create an S3 class for a finished MCMC, so we can do fun front end stuff with it
   out <- list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
     model_type = c(model), priors = prior_out, constants = attr(model, "constants"), uncomp_model = nimTPCmod
