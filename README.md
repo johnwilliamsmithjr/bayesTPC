@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# bayesTPC
+# bayesTPC: An accessible interface to fit bayesian models in R.
 
 <!-- badges: start -->
 
