@@ -93,7 +93,7 @@ print.btpc_normal_model <- function(x, ...) {
     "{\n    for (i in 1:N){\n            ",
     "Trait[i] ~ T(dnorm(mean = ",
     gsub("Temp", "Temp[i]", attr(model, "formula")),
-    ", var = sigma.sq), 0, )\n    }\n"
+    ", tau = 1/sigma.sq), 0, )\n    }\n"
   )
 }
 

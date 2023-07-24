@@ -1,7 +1,7 @@
 ## Constructors
 
 # internal
-new_btpc_binomial_model <- function(name = character(),
+new_btpc_bernoulli_model <- function(name = character(),
                                     parameters = character(), # names are parameters, values are priors
                                     formula = character(),
                                     constants = double(),
@@ -12,12 +12,12 @@ new_btpc_binomial_model <- function(name = character(),
     parameters = parameters,
     formula = formula,
     constants = constants,
-    class = "btpc_binomial_model",
+    class = "btpc_bernoulli_model",
     ...
   )
 }
 
-#' Specify a binomial model
+#' Specify a Bernoulli model
 #'
 #' Creates an object with the required formatting to be fit using other `bayesTPC` functions.
 #' @export
@@ -25,7 +25,7 @@ new_btpc_binomial_model <- function(name = character(),
 #'   All available distributions and formatting are provided on the
 #'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
 #'
-#'  This model type should be used for counts of binary results.
+#'  This model type should be used for data with a binary result.
 #' @param name character, The desired name of the model specification.
 #' @param parameters named character vector. The names should correspond to the parameters being fit,
 #'   and the values should be the prior distributions to be drawn from for each respective parameter.
@@ -34,7 +34,7 @@ new_btpc_binomial_model <- function(name = character(),
 #'   Must include 'Temp' to represent temperature and all specified parameters and constants
 #' @param constants optional double. Represents any terms in the formula that should not be fit.
 #' @param ... Additional model specification attributes. Unused by other functions.
-#' @returns Returns an object of type `btpc_binomial_model`, which can then be used in other `bayesTPC` functions.
+#' @returns Returns an object of type `btpc_bernoulli_model`, which can then be used in other `bayesTPC` functions.
 #'   The model name is also registered, and so can be accessed using by passing only the name into functions.
 #'   However, user-defined models are not saved between sessions, and will be reset whenever the package is reloaded.
 #' @examples
@@ -44,24 +44,24 @@ new_btpc_binomial_model <- function(name = character(),
 #' my_constants <- c(c = 1.5)
 #'
 #' \dontrun{
-#' my_model <- specify_binomial_model(
+#' my_model <- specify_bernoulli_model(
 #'   name = my_name,
 #'   parameters = my_parameters,
 #'   formula = my_formula,
 #'   constants = my_constants
 #' )
 #' }
-specify_binomial_model <- function(name = character(),
+specify_bernoulli_model <- function(name = character(),
                                    parameters = character(), # names are parameters, values are priors
                                    formula = expression(),
                                    constants = double(), # names are constant names, values are default values
                                    ...) {
-  x <- new_btpc_binomial_model(name, parameters, formula, constants, ...)
+  x <- new_btpc_bernoulli_model(name, parameters, formula, constants, ...)
   x <- validate(x)
   model_list[[name]] <- x
   utils::assignInMyNamespace("model_list", model_list)
   cat(paste0(
-    "Binomial model type '", name, "' can now be accessed using other bayesTPC functions. ",
+    "Bernoulli model type '", name, "' can now be accessed using other bayesTPC functions. ",
     "Reload the package to reset back to defaults.\n"
   ))
 }
@@ -69,11 +69,11 @@ specify_binomial_model <- function(name = character(),
 ## Methods
 
 #' @export
-.loop_string.btpc_binomial_model <- function(model) {
+.loop_string.btpc_bernoulli_model <- function(model) {
   model_string <- paste0(
     "{\n    for (i in 1:N){\n            ",
     "logit(p[i]) <- ", gsub("Temp", "Temp[i]", attr(model, "formula")),
-    "\n            Trait[i] ~ dbinom(p[i], n[i])",
+    "\n            Trait[i] ~ dbern( p[i] )",
     "\n    }\n"
   )
 

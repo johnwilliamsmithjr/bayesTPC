@@ -186,6 +186,8 @@ change_constants <- function(model, constants) {
 }
 
 
+## Methods
+
 #' @export
 print.btpc_model <- function(x, ...) {
   cat(paste0("bayesTPC Model Specification of Type: ", c(x)))
@@ -198,4 +200,25 @@ print.btpc_model <- function(x, ...) {
     cat(paste0("\nModel Constants:"))
     cat(paste0("\n  ", names(consts), ": ", consts))
   }
+}
+
+#' @export
+.loop_string.btpc_model <- function(model) {
+  model_string <- paste0(
+    "{\n    for (i in 1:N){\n            ",
+    "Trait[i] ~ dnorm(Temp[i],1) ",
+    "\n    }\n"
+  )
+
+  return(model_string)
+}
+
+#' @export
+.priors_string.btpc_model <- function(model) {
+  priors <- attr(model, "parameters")
+  num_params <- length(priors)
+
+  priors_vec <- paste0(names(priors), " ~ ", priors)
+  priors_string <- paste0("    ", paste0(priors_vec, collapse = "\n    "))
+  return(priors_string)
 }
