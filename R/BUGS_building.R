@@ -83,5 +83,3 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = T)
   nimble_string <- paste0(loop, pri, "\n}")
   return(nimble_string)
 }
-
-

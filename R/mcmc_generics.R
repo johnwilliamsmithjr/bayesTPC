@@ -1,11 +1,11 @@
 #' @export
-print.btpc_MCMC <- function(x, digits = 3, ...){
+print.btpc_MCMC <- function(x, digits = 3, ...) {
   cat("bayesTPC MCMC of type:", x$model_type)
   cat("\n\nModel Formula:\n", as.character(get_formula(x$model_type)), "\n\n", sep = "")
   s <- x$samples
   means <- round(matrixStats::colMeans2(s), digits)
   medians <- round(matrixStats::colMedians(s), digits)
-  tbl <- cbind.data.frame(means,medians,x$priors[colnames(s)])
+  tbl <- cbind.data.frame(means, medians, x$priors[colnames(s)])
   rownames(tbl) <- colnames(s)
   colnames(tbl) <- c("Mean", "Median", "Priors")
   cat("Model Parameters:\n")
@@ -32,9 +32,9 @@ summary.btpc_MCMC <- function(object,
                               summaryType = "hdi",
                               centralSummary = "median",
                               prob = .9,
-                              quantiles = c(.05,.95),
+                              quantiles = c(.05, .95),
                               burn = 0,
-                              ...){
+                              ...) {
   if (!(summaryType %in% c("hdi", "quantile"))) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported.')
   if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
 
@@ -73,7 +73,7 @@ summary.btpc_MCMC <- function(object,
     MoreArgs = MA
   ))
 
-  if (centralSummary == "median"){
+  if (centralSummary == "median") {
     centers <- matrixStats::rowMedians(tpc_evals)
   } else if (centralSummary == "mean") {
     centers <- matrixStats::rowMeans2(tpc_evals)
@@ -81,11 +81,11 @@ summary.btpc_MCMC <- function(object,
     stop("Unsupported argument for 'centralSummary'. Currently only 'median' and 'mean' are supported.")
   }
 
-  if (summaryType == "hdi"){
+  if (summaryType == "hdi") {
     hdi_mat <- apply(FUN = HDInterval::hdi, X = tpc_evals, MARGIN = 1, credMass = prob)
     upper_bounds <- hdi_mat[2, ]
     lower_bounds <- hdi_mat[1, ]
-  } else if (summaryType == "quantile"){
+  } else if (summaryType == "quantile") {
     upper_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = quantiles[2])
     lower_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = quantiles[1])
   } else {
@@ -127,9 +127,9 @@ plot.btpc_MCMC <- function(x,
                            summaryType = "hdi",
                            centralSummary = "median",
                            prob = .9,
-                           quantiles = c(.05,.95),
+                           quantiles = c(.05, .95),
                            burn = 0,
-                           ylab = "Trait", ...){
+                           ylab = "Trait", ...) {
   if (!(summaryType %in% c("hdi", "quantile"))) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported.')
   if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
   if (is.null(temp_interval)) temp_interval <- seq(from = min(x$data$Temp), to = max(x$data$Temp), length.out = 1000)
@@ -149,7 +149,7 @@ plot.btpc_MCMC <- function(x,
     MoreArgs = MA
   ))
 
-  if (centralSummary == "median"){
+  if (centralSummary == "median") {
     centers <- matrixStats::rowMedians(tpc_evals)
   } else if (centralSummary == "mean") {
     centers <- matrixStats::rowMeans2(tpc_evals)
@@ -157,11 +157,11 @@ plot.btpc_MCMC <- function(x,
     stop("Unsupported argument for 'centralSummary'. Currently only 'median' and 'mean' are supported.")
   }
 
-  if (summaryType == "hdi"){
+  if (summaryType == "hdi") {
     hdi_mat <- apply(FUN = HDInterval::hdi, X = tpc_evals, MARGIN = 1, credMass = prob)
     upper_bounds <- hdi_mat[2, ]
     lower_bounds <- hdi_mat[1, ]
-  } else if (summaryType == "quantile"){
+  } else if (summaryType == "quantile") {
     upper_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = quantiles[2])
     lower_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = quantiles[1])
   } else {
@@ -193,13 +193,13 @@ plot.btpc_MCMC <- function(x,
 #' @examples
 #' ## need data to set up example here. placeholder for now
 posterior_predictive <- function(TPC,
-                              temp_interval = NULL,
-                              summaryType = "hdi",
-                              centralSummary = "median",
-                              prob = .9,
-                              quantiles = c(.05,.95),
-                              burn = 0,
-                              seed = NULL){
+                                 temp_interval = NULL,
+                                 summaryType = "hdi",
+                                 centralSummary = "median",
+                                 prob = .9,
+                                 quantiles = c(.05, .95),
+                                 burn = 0,
+                                 seed = NULL) {
   if (!(is.null(seed))) {
     if (!(is.integer(seed))) stop('Argument "seed" must be integer valued')
   }
@@ -220,7 +220,7 @@ posterior_predictive <- function(TPC,
     MoreArgs = MA
   ))
 
-  post_pred_draw <- function(X) { #this can be optimized i think. a lot of overhead
+  post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
     return(truncnorm::rtruncnorm(
       n = length(X) - 1, mean = X[1:(length(X) - 1)], sd = sqrt(X[length(X)]),
       a = 0
@@ -232,7 +232,7 @@ posterior_predictive <- function(TPC,
   )
   tpc_ev <- matrixStats::rowMeans2(truncmeans)
 
-  if (centralSummary == "median"){
+  if (centralSummary == "median") {
     centers <- matrixStats::rowMedians(post_pred_samples)
   } else if (centralSummary == "mean") {
     centers <- matrixStats::rowMeans2(post_pred_samples)
@@ -240,11 +240,11 @@ posterior_predictive <- function(TPC,
     stop("Unsupported argument for 'centralSummary'. Currently only 'median' and 'mean' are supported.")
   }
 
-  if (summaryType == "hdi"){ #also can be optimized. god this function is slow
+  if (summaryType == "hdi") { # also can be optimized. god this function is slow
     hdi_mat <- apply(FUN = HDInterval::hdi, X = post_pred_samples, MARGIN = 1, credMass = prob)
     upper_bounds <- hdi_mat[2, ]
     lower_bounds <- hdi_mat[1, ]
-  } else if (summaryType == "quantile"){
+  } else if (summaryType == "quantile") {
     upper_bounds <- matrixStats::rowQuantiles(post_pred_samples, probs = quantiles[2])
     lower_bounds <- matrixStats::rowQuantiles(post_pred_samples, probs = quantiles[1])
   } else {
@@ -282,8 +282,8 @@ posterior_predictive <- function(TPC,
 #' @param prediction `btpc_prediction`, output from `posterior_predictive()`.
 #' @param ylab a title for the y-axis. Default is "Trait".
 #' @param ... additional parameters passed to `plot.default()`.
-plot_prediction <- function(prediction, ylab = "Trait", ...){
-  if (!"btpc_prediction" %in% class(prediction)){
+plot_prediction <- function(prediction, ylab = "Trait", ...) {
+  if (!"btpc_prediction" %in% class(prediction)) {
     stop("Input should be the output of 'posterior_predictive'.")
   }
 

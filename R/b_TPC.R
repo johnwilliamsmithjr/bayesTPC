@@ -103,10 +103,10 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   inits.list <- .check_inits(inits)
   const.list <- .configure_constants(model, data.nimble$N)
 
-  #no change of state! we are functional programmers!!!!!!
+  # no change of state! we are functional programmers!!!!!!
   original_environmental_objects <- force(ls(envir = .GlobalEnv))
   original_verbose_option <- nimble::getNimbleOption("verbose")
-  user_verbose <- verbose #avoid quoting mishaps
+  user_verbose <- verbose # avoid quoting mishaps
   nimble::nimbleOptions(verbose = user_verbose)
 
 
@@ -150,10 +150,10 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   # TODO odd things with importing functions from nimble ???? fix at some point
   cat("Creating NIMBLE model.\n")
   nimTPCmod <- nimble::nimbleModel(str2expression(modelStr),
-                                   constants = const.list,
-                                   data = data.nimble$data, inits = inits.list,
-                                   check = nimble::getNimbleOption("checkModel"),
-                                   buildDerivs = nimble::getNimbleOption("buildModelDerivs")
+    constants = const.list,
+    data = data.nimble$data, inits = inits.list,
+    check = nimble::getNimbleOption("checkModel"),
+    buildDerivs = nimble::getNimbleOption("buildModelDerivs")
   )
 
   nimTPCmod_compiled <- nimble::compileNimble(nimTPCmod)

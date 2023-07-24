@@ -2,10 +2,10 @@
 
 # internal
 new_btpc_bernoulli_model <- function(name = character(),
-                                    parameters = character(), # names are parameters, values are priors
-                                    formula = character(),
-                                    constants = double(),
-                                    ...) { # names are constant names, values are default values
+                                     parameters = character(), # names are parameters, values are priors
+                                     formula = character(),
+                                     constants = double(),
+                                     ...) { # names are constant names, values are default values
 
   new_btpc_model(
     name = name,
@@ -52,10 +52,10 @@ new_btpc_bernoulli_model <- function(name = character(),
 #' )
 #' }
 specify_bernoulli_model <- function(name = character(),
-                                   parameters = character(), # names are parameters, values are priors
-                                   formula = expression(),
-                                   constants = double(), # names are constant names, values are default values
-                                   ...) {
+                                    parameters = character(), # names are parameters, values are priors
+                                    formula = expression(),
+                                    constants = double(), # names are constant names, values are default values
+                                    ...) {
   x <- new_btpc_bernoulli_model(name, parameters, formula, constants, ...)
   x <- validate(x)
   model_list[[name]] <- x
@@ -79,4 +79,3 @@ specify_bernoulli_model <- function(name = character(),
 
   return(model_string)
 }
-

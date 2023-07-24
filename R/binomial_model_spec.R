@@ -79,4 +79,3 @@ specify_binomial_model <- function(name = character(),
 
   return(model_string)
 }
-

@@ -13,11 +13,11 @@ new_btpc_model <- function(name = character(),
   stopifnot(is.character(class))
 
   structure(name,
-            class = c(class, "btpc_model"),
-            parameters = parameters,
-            formula = formula,
-            constants = constants,
-            ...
+    class = c(class, "btpc_model"),
+    parameters = parameters,
+    formula = formula,
+    constants = constants,
+    ...
   )
 }
 
@@ -149,7 +149,6 @@ change_priors <- function(model, priors) {
     attr(model, "parameters") <- current_priors
     return(model)
   }
-
 }
 
 #' Change constants of pre-specified model
