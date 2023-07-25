@@ -1,7 +1,7 @@
 Type: Package
 Package: bayesTPC
 Title: bayesTPC
-Version: 0.3.1
+Version: 0.4.2
 Authors@R: c( person("John W.", "Smith", email = "john.smith20@montana.edu", role = c("aut", "cre")),
 	person("Sean", "Sorek", email = "sssorek1@gmail.com", role = "aut"))
 Maintainer: John W. Smith <john.smith20@montana.edu>

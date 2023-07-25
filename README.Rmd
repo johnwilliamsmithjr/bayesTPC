@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# bayesTPC
+# bayesTPC: An accessible interface to fit bayesian models in R.
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/johnwilliamsmithjr/bayesTPC/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/johnwilliamsmithjr/bayesTPC/actions/workflows/R-CMD-check.yaml)
