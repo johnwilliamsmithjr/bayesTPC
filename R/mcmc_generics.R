@@ -25,7 +25,7 @@ print.btpc_MCMC <- function(x, digits = 3, ...) {
 #' @param prob numeric, the credible mass used to compute the highest density interval. Used if summaryType = "hdi".
 #' @param quantiles length 2 numeric, quantiles used for a credible interval. Used if summaryType = "quantile".
 #' @param burn numeric, initial number of iterations to be discarded as burn-in. Default is 0.
-#' @param ... additonal parameters, unused.
+#' @param ... additional parameters, unused.
 #' @returns A list (invisible) containing the central summary and the bounds of the credible interval generated.
 summary.btpc_MCMC <- function(object,
                               temp_interval = NULL,
@@ -121,6 +121,8 @@ summary.btpc_MCMC <- function(object,
 #' @param quantiles length 2 numeric, quantiles used for a credible interval. Used if summaryType = "quantile".
 #' @param burn numeric, initial number of iterations to be discarded as burn-in. Default is 0.
 #' @param ylab a title for the y axis.
+#' @param legend logical, should a legend be added to the plot? Default is TRUE.
+#' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
 #' @param ... additional parameters passed to `plot.default()`.
 plot.btpc_MCMC <- function(x,
                            temp_interval = NULL,
@@ -129,7 +131,9 @@ plot.btpc_MCMC <- function(x,
                            prob = .9,
                            quantiles = c(.05, .95),
                            burn = 0,
-                           ylab = "Trait", ...) {
+                           ylab = "Trait",
+                           legend = TRUE, legend_position = "bottomright",
+                           ...) {
   if (!(summaryType %in% c("hdi", "quantile"))) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported.')
   if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
   if (is.null(temp_interval)) temp_interval <- seq(from = min(x$data$Temp), to = max(x$data$Temp), length.out = 1000)
@@ -172,6 +176,9 @@ plot.btpc_MCMC <- function(x,
   graphics::points(temp_interval, lower_bounds, type = "l", col = "blue", lty = 2)
   graphics::points(temp_interval, centers, type = "l", col = "red")
   graphics::points(x$data$Temp, x$data$Trait, pch = 16, cex = .75)
+  if (legend){
+    graphics::legend(legend_position, legend = c("Bounds", tools::toTitleCase(paste0(centralSummary, "s"))), lty = c(2,1), col = c("blue","red"))
+  }
 }
 
 #' Provide thermal performance curve posterior predictive summaries
@@ -269,8 +276,8 @@ posterior_predictive <- function(TPC,
     "data"
   )
 
-  class(out) <- "btpc_prediction"
-  return(out)
+  class(output) <- "btpc_prediction"
+  return(output)
 }
 
 
@@ -281,15 +288,21 @@ posterior_predictive <- function(TPC,
 #' @export
 #' @param prediction `btpc_prediction`, output from `posterior_predictive()`.
 #' @param ylab a title for the y-axis. Default is "Trait".
+#' @param legend logical, should a legend be added to the plot? Default is TRUE.
+#' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
 #' @param ... additional parameters passed to `plot.default()`.
-plot_prediction <- function(prediction, ylab = "Trait", ...) {
+plot_prediction <- function(prediction, ylab = "Trait",
+                            legend = TRUE, legend_position = "bottomright",...) {
   if (!"btpc_prediction" %in% class(prediction)) {
     stop("Input should be the output of 'posterior_predictive'.")
   }
 
   plot(prediction$temp_interval, prediction$upper_bounds, type = "l", lty = 3, col = "blue", xlab = "Temperature (C)", ylab = ylab, ylim = c(0, max(max(prediction$upper_bounds), max(prediction$data$Trait))), ...)
-  graphics::points(prediction$temp_interval, prediction$tpc_ev, col = "red", type = "l", lty = 2, lwd = 1.1)
+  graphics::points(prediction$temp_interval, prediction$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
   graphics::points(prediction$temp_interval, prediction$lower_bounds, type = "l", col = "blue", lty = 3)
   graphics::points(prediction$temp_interval, prediction$medians, type = "l", col = "blue")
-  graphics::points(prediction$data$Temp, prediction$data$Trait)
+  graphics::points(prediction$data$Temp, prediction$data$Trait, pch = 16, cex = .75)
+  if (legend){
+    graphics::legend(legend_position, legend = c("Bounds", "Means", "Medians"), lty = c(3,2,1), col = c("blue","red","blue"))
+  }
 }
