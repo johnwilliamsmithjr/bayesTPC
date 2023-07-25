@@ -31,7 +31,7 @@ If no vector is provided, temp_interval is set as a sequence from the lowest obs
 
 \item{burn}{numeric, initial number of iterations to be discarded as burn-in. Default is 0.}
 
-\item{...}{additonal parameters, unused.}
+\item{...}{additional parameters, unused.}
 }
 \value{
 A list (invisible) containing the central summary and the bounds of the credible interval generated.

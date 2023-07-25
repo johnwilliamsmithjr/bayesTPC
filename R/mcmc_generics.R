@@ -172,12 +172,18 @@ plot.btpc_MCMC <- function(x,
     stop("Unsupported argument for 'summaryType'. Currently only 'quantile' and 'hdi' are supported.")
   }
 
-  plot(temp_interval, upper_bounds, type = "l", col = "blue", lty = 2, ylab = ylab, xlab = "Temperature (C)", ylim = c(0, max(upper_bounds, x$data$Trait)), ...)
+  plot(temp_interval, upper_bounds,
+    type = "l", col = "blue", lty = 2,
+    ylab = ylab, xlab = "Temperature (C)", ylim = c(0, max(upper_bounds, x$data$Trait)), ...
+  )
   graphics::points(temp_interval, lower_bounds, type = "l", col = "blue", lty = 2)
   graphics::points(temp_interval, centers, type = "l", col = "red")
   graphics::points(x$data$Temp, x$data$Trait, pch = 16, cex = .75)
-  if (legend){
-    graphics::legend(legend_position, legend = c("Bounds", tools::toTitleCase(paste0(centralSummary, "s"))), lty = c(2,1), col = c("blue","red"))
+  if (legend) {
+    graphics::legend(legend_position,
+      legend = c("Bounds", tools::toTitleCase(paste0(centralSummary, "s"))),
+      lty = c(2, 1), col = c("blue", "red")
+    )
   }
 }
 
@@ -292,17 +298,23 @@ posterior_predictive <- function(TPC,
 #' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
 #' @param ... additional parameters passed to `plot.default()`.
 plot_prediction <- function(prediction, ylab = "Trait",
-                            legend = TRUE, legend_position = "bottomright",...) {
+                            legend = TRUE, legend_position = "bottomright", ...) {
   if (!"btpc_prediction" %in% class(prediction)) {
     stop("Input should be the output of 'posterior_predictive'.")
   }
 
-  plot(prediction$temp_interval, prediction$upper_bounds, type = "l", lty = 3, col = "blue", xlab = "Temperature (C)", ylab = ylab, ylim = c(0, max(max(prediction$upper_bounds), max(prediction$data$Trait))), ...)
+  plot(prediction$temp_interval, prediction$upper_bounds,
+    type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
+    ylab = ylab, ylim = c(0, max(max(prediction$upper_bounds), max(prediction$data$Trait))), ...
+  )
   graphics::points(prediction$temp_interval, prediction$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
   graphics::points(prediction$temp_interval, prediction$lower_bounds, type = "l", col = "blue", lty = 3)
   graphics::points(prediction$temp_interval, prediction$medians, type = "l", col = "blue")
   graphics::points(prediction$data$Temp, prediction$data$Trait, pch = 16, cex = .75)
-  if (legend){
-    graphics::legend(legend_position, legend = c("Bounds", "Means", "Medians"), lty = c(3,2,1), col = c("blue","red","blue"))
+  if (legend) {
+    graphics::legend(legend_position,
+      legend = c("Bounds", "Means", "Medians"),
+      lty = c(3, 2, 1), col = c("blue", "red", "blue")
+    )
   }
 }

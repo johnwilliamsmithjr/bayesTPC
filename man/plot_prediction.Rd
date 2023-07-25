@@ -4,12 +4,22 @@
 \alias{plot_prediction}
 \title{Plots posterior predictive samples}
 \usage{
-plot_prediction(prediction, ylab = "Trait", ...)
+plot_prediction(
+  prediction,
+  ylab = "Trait",
+  legend = TRUE,
+  legend_position = "bottomright",
+  ...
+)
 }
 \arguments{
 \item{prediction}{\code{btpc_prediction}, output from \code{posterior_predictive()}.}
 
 \item{ylab}{a title for the y-axis. Default is "Trait".}
+
+\item{legend}{logical, should a legend be added to the plot? Default is TRUE.}
+
+\item{legend_position}{character, position of the legend. Only used if legend = TRUE. Default is "bottomright".}
 
 \item{...}{additional parameters passed to \code{plot.default()}.}
 }
