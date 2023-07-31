@@ -24,5 +24,6 @@ Roxygen: list(markdown = TRUE)
 URL: https://github.com/johnwilliamsmithjr/bayesTPC
 BugReports: https://github.com/johnwilliamsmithjr/bayesTPC/issues
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    withr
 Config/testthat/edition: 3
