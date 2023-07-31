@@ -6,6 +6,8 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/johnwilliamsmithjr/bayesTPC/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/johnwilliamsmithjr/bayesTPC/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/johnwilliamsmithjr/bayesTPC/branch/master/graph/badge.svg)](https://app.codecov.io/gh/johnwilliamsmithjr/bayesTPC?branch=master)
 <!-- badges: end -->
 
 ## Installation
