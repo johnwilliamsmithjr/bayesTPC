@@ -289,14 +289,14 @@ posterior_predictive <- function(TPC,
 
 #' Plots posterior predictive samples
 #'
-#' Plots the output of `posterior_predictive()`.
+#' Plots the output of [posterior_predictive()].
 #'
 #' @export
-#' @param prediction `btpc_prediction`, output from `posterior_predictive()`.
+#' @param prediction `btpc_prediction`, output from [posterior_predictive()].
 #' @param ylab a title for the y-axis. Default is "Trait".
 #' @param legend logical, should a legend be added to the plot? Default is TRUE.
 #' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
-#' @param ... additional parameters passed to `plot.default()`.
+#' @param ... additional parameters passed to [plot.default()].
 plot_prediction <- function(prediction, ylab = "Trait",
                             legend = TRUE, legend_position = "bottomright", ...) {
   if (!"btpc_prediction" %in% class(prediction)) {

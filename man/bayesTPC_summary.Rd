@@ -51,6 +51,7 @@ For summaryOnly = TRUE, a list of summaries is returned. For summaryOnly = FALSE
 }
 \description{
 Deprecated. Please use \code{\link[=summary.btpc_MCMC]{summary.btpc_MCMC()}} and \code{\link[=plot.btpc_MCMC]{plot.btpc_MCMC()}} instead.
+
 Provide thermal performance curve summaries using output from \code{\link[=b_TPC]{b_TPC()}}'s nimble MCMC.
 }
 \details{

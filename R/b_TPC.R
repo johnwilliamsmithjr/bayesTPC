@@ -1,3 +1,20 @@
+# Helper for b_TPC
+check_data <- function(data) {
+  ## data checks to make sure there are values for Temp and Trait
+  if (!is.list(data)) stop("Unexpected class for argument 'data'. Data must be input as a list.")
+  if (is.null(unlist(data["Temp"]))) stop("Data list must have a variable called 'Temp'. Perhaps check spelling and capitalization?")
+  if (is.null(unlist(data["Trait"]))) stop("Data list must have a variable called 'Trait'. Perhaps check spelling and capitalization?")
+  if (!is.numeric(unlist(data["Trait"]))) stop("List elements of data must be numeric vectors.")
+  if (!is.numeric(unlist(data["Temp"]))) stop("List elements of data must be numeric vectors.")
+  if (length(data$Trait) != length(data$Temp)) stop("'Temp' and 'Trait' must have the same length.")
+  if (any(is.na(data$Temp))) stop("Temperature data contains missing values.")
+  if (any(is.na(data$Trait))) stop("Trait data contains missing values.")
+  ## warnings for when temperature may be in F instead of C
+  if (any(data$Temp > 50)) warning("Unusual (Temp>50) temperature values detected (are Temps given in Celcius?)")
+  if (any(data$Temp < 0)) warning("Unusual (Temp<0) temperature values detected (are Temps given in Celcius?)")
+
+  return(list(data = data, N = length(unlist(data["Trait"]))))
+}
 
 # Helper for b_TPC
 .check_inits <- function(inits) {
@@ -96,9 +113,14 @@
 b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
                   niter = 10000, inits = NULL, burn = 0, constants = NULL, verbose = FALSE, ...) {
   # exception handling and variable setup
-  if (is.null(model) || ((!(model %in% model_list)) && !("btpc_model" %in% class(model)))) {
-    stop("Unsupported model, use get_models() to view implemented models.")
+  if (is.null(model) || !(model %in% model_list)){
+    if ("btpc_model" %in% class(model)){
+      stop("Model has been specified incorrectly. Please use specify_x_model() to create custom models.")
+    } else {
+      stop("Unsupported model. Use get_models() to view implemented models.")
+    }
   }
+
 
   data.nimble <- check_data(data)
   inits.list <- .check_inits(inits)
@@ -110,23 +132,27 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   user_verbose <- verbose # avoid quoting mishaps
   nimble::nimbleOptions(verbose = user_verbose)
 
-
-  if (!(samplerType %in% c("RW", "RW_block", "AF_slice", "slice"))) stop("Unsupported option for input samplerType. Currently only RW, RW_block, slice, and AF_slice are supported.")
-  if ("btpc_binomial_model" %in% class(model)) {
-    if (is.null(unlist(data["n"]))) stop("For a Binomial GLM, data list must have a variable called 'n'. Perhaps check spelling and capitalization?")
-    # const.list$n = unlist(data['n'])
-  }
-
   # create model specification
   if (!("btpc_model" %in% class(model))) {
     model <- model_list[[model]]
   }
 
+  if (!(samplerType %in% c("RW", "RW_block", "AF_slice", "slice"))) stop("Unsupported option for input samplerType. Currently only RW, RW_block, slice, and AF_slice are supported.")
+  if ("btpc_binomial_model" %in% class(model)) {
+    if (is.null(data$n)) stop("For a Binomial GLM, data list must have a variable called 'n'. Perhaps check spelling and capitalization?")
+    # const.list$n = unlist(data['n'])
+  }
+
+
+
   # change priors if necessary
   if (!is.null(priors)) {
     if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
-    if (is.null(names(priors))) {
+    if (length(priors) == 0){
       stop("Prior list cannot be empty. To use default priors, use priors = NULL.")
+    }
+    if (is.null(names(priors))) {
+      stop("Prior list must be named.")
     }
 
     model <- change_priors(model, unlist(priors))
@@ -134,15 +160,18 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   # change constants if necessary
   if (!is.null(constants)) {
-    if (!is.list(constants)) stop("Unexpected type for argument 'constants'. Contantss must be given as a list.")
+    if (!is.list(constants)) stop("Unexpected type for argument 'constants'. Contants must be given as a list.")
+    if (length(constants) == 0){
+      stop("Constant list cannot be empty. To use default priors, use priors = NULL.")
+    }
     if (is.null(names(constants))) {
-      stop("Constant list cannot be empty. To use default constants, use constants = NULL.")
+      stop("Constant list must be named.")
     }
 
     model <- change_constants(model, unlist(constants))
   }
 
-  # configure model, handles the density funciton, priors, and constants
+  # configure model, handles the density function, priors, and constants
   modelStr <- configure_model(model)
 
 

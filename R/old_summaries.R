@@ -1,6 +1,7 @@
 #' Provide thermal performance curve summaries
 #'
-#' Deprecated. Please use [summary.btpc_MCMC()] and [plot.btpc_MCMC()] instead.
+#' @description Deprecated. Please use [summary.btpc_MCMC()] and [plot.btpc_MCMC()] instead.
+#'
 #' Provide thermal performance curve summaries using output from [b_TPC()]'s nimble MCMC.
 #'
 #' @export
@@ -180,9 +181,9 @@ bayesTPC_summary <- function(TPC, Temp_interval = NULL, summaryOnly = TRUE,
 
 #' Provide thermal performance curve posterior predictive summaries
 #'
-#' Deprecated. Please use [posterior_predictive()] and [plot_prediction()] instead.
-#' Provide thermal performance curve posterior predictive summaries using output from [b_TPC()]'s nimble MCMC.
+#' @description Deprecated. Please use [posterior_predictive()] and [plot_prediction()] instead.
 #'
+#' Provides thermal performance curve posterior predictive summaries using output from [b_TPC()]'s nimble MCMC.
 #' @export
 #' @details This function returns various summaries of the output of the thermal performance curve posterior predictive model samples, generated using MCMC samples from the object returned by `b_TPC()`.
 #' @param TPC list, object output from performing MCMC using the `bTPC` function.

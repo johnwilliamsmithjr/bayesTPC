@@ -53,7 +53,8 @@ For summaryOnly = FALSE, a list is returned with summaries as well as the entire
 }
 \description{
 Deprecated. Please use \code{\link[=posterior_predictive]{posterior_predictive()}} and \code{\link[=plot_prediction]{plot_prediction()}} instead.
-Provide thermal performance curve posterior predictive summaries using output from \code{\link[=b_TPC]{b_TPC()}}'s nimble MCMC.
+
+Provides thermal performance curve posterior predictive summaries using output from \code{\link[=b_TPC]{b_TPC()}}'s nimble MCMC.
 }
 \details{
 This function returns various summaries of the output of the thermal performance curve posterior predictive model samples, generated using MCMC samples from the object returned by \code{b_TPC()}.

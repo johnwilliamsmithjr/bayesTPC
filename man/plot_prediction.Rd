@@ -13,7 +13,7 @@ plot_prediction(
 )
 }
 \arguments{
-\item{prediction}{\code{btpc_prediction}, output from \code{posterior_predictive()}.}
+\item{prediction}{\code{btpc_prediction}, output from \code{\link[=posterior_predictive]{posterior_predictive()}}.}
 
 \item{ylab}{a title for the y-axis. Default is "Trait".}
 
@@ -21,8 +21,8 @@ plot_prediction(
 
 \item{legend_position}{character, position of the legend. Only used if legend = TRUE. Default is "bottomright".}
 
-\item{...}{additional parameters passed to \code{plot.default()}.}
+\item{...}{additional parameters passed to \code{\link[=plot.default]{plot.default()}}.}
 }
 \description{
-Plots the output of \code{posterior_predictive()}.
+Plots the output of \code{\link[=posterior_predictive]{posterior_predictive()}}.
 }
