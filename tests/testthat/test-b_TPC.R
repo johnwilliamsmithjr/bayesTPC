@@ -51,7 +51,7 @@ test_that("bad inits are caught", {
   expect_equal(.check_inits(list(hi = 5)), list(hi = 5))
 })
 
-test_that("b_TPC works", {
+test_that("b_TPC catches errors", {
   withr::local_package("nimble")
   set.seed(12345)
   N = 16
@@ -90,4 +90,56 @@ test_that("b_TPC works", {
   expect_error(b_TPC(dat, model = "quadratic", constants = list()), regexp = "cannot be empty")
   expect_error(b_TPC(dat, model = "quadratic", constants = c(q = 10)), regexp = "Unexpected type")
   expect_error(b_TPC(dat, model = "quadratic", constants = list(10)), regexp = "must be named")
+  })
+
+test_that("b_TPC parameters work", {
+  withr::local_package("nimble")
+  set.seed(12345)
+  N = 16
+  q = .75
+  T_min = 10
+  T_max = 35
+  sd_trait = 2
+  Temps = rep(c(15, 20, 25, 30), N/4)
+  Traits = rep(0, N)
+  for (i in 1:N){
+    while(Traits[i] <= 0){
+      Traits[i] = rnorm(1, -1 * q * (Temps[i] - T_max) * (Temps[i]-T_min) * (Temps[i] > T_min) * (Temps[i] < T_max), 2)
+    }
+  }
+
+  dat <- list(Trait = Traits, Temp = Temps)
+  default_quad <- b_TPC(dat, "quadratic")
+
+  expect_equal(default_quad$model_type, "quadratic")
+  expect_equal(length(default_quad$constants), 0)
+  expect_equal(nrow(default_quad$samples), 10000)
+  expect_equal(default_quad$priors[1:3], get_default_priors("quadratic"))
+  expect_equal(default_quad$priors[4], c(sigma.sq = "T(dt(mu = 0, tau = 1/10, df = 1), 0, )"))
+
+  changed_quad <- b_TPC(dat, 'quadratic', niter = 8000, burn = 1000,
+                        samplerType = "slice",
+                        priors = list(q = 'dunif(0, 1.5)',
+                                      T_min = 'dunif(0, 35)',
+                                      sigma.sq = "dexp(1)"))
+
+  expect_equal(nrow(changed_quad$samples), 7000)
+  expect_equal(changed_quad$priors[1:3], c(q = 'dunif(0, 1.5)', T_max = "dunif(25, 60)", T_min = "dunif(0, 35)"))
+  expect_equal(changed_quad$priors[4], c(sigma.sq = "dexp(1)"))
+
+  #constants
+  load(testthat::test_path("example_data", "chlorella_tpc.rda"))
+  ps_test <- list(Trait = chlorella_tpc$rate[which(chlorella_tpc$flux == 'photosynthesis')],
+                  Temp = chlorella_tpc$temp[which(chlorella_tpc$flux == 'photosynthesis')])
+
+
+  ps_default <- b_TPC(data = ps_test, model = 'pawar_shsch')
+  ps_changed <- b_TPC(data = ps_test, model = 'pawar_shsch',
+                      constants = list(T_ref = 30))
+  expect_equal(ps_default$constants, c(T_ref = 20))
+  expect_equal(ps_changed$constants, c(T_ref = 30))
+
+  #binomial
+  load(testthat::test_path("example_data", "bin_data.rda"))
+  bin_tpc <- b_TPC(bin_test_list, "binomial_glm_quad")
   })

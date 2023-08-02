@@ -41,43 +41,45 @@
 #' my_prior <- list(q = "q~beta(.5, .5)")
 #' cat(configure_model(model = "quadratic", priors = my_prior))
 configure_model <- function(model, priors = NULL, constants = NULL, verbose = T) {
-  if (!("btpc_model" %in% class(model))) {
-    if (!(model %in% model_list)) {
-      stop("Unsupported model, use get_models() to view implemented models.")
+  if (is.null(model) || !(model %in% model_list)){
+    if ("btpc_model" %in% class(model)){
+      stop("Model has been specified incorrectly. Please use specify_*_model() to create custom models.")
+    } else {
+      stop("Unsupported model. Use get_models() to view implemented models.")
     }
+  }
+  if (!("btpc_model" %in% class(model))) {
     model <- model_list[[model]]
   }
 
   # change priors if necessary
   if (!is.null(priors)) {
     if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
-    if (is.null(names(priors))) {
+    if (length(priors) == 0){
       stop("Prior list cannot be empty. To use default priors, use priors = NULL.")
     }
-    if (verbose) {
-      warning("At least one user-defined prior being used.")
+    if (is.null(names(priors))) {
+      stop("Prior list must be named.")
     }
+
     model <- change_priors(model, unlist(priors))
   }
 
   # change constants if necessary
   if (!is.null(constants)) {
-    if (!is.list(constants)) stop("Unexpected type for argument 'constants'. Contantss must be given as a list.")
+    if (!is.list(constants)) stop("Unexpected type for argument 'constants'. Contants must be given as a list.")
+    if (length(constants) == 0){
+      stop("Constant list cannot be empty. To use default priors, use priors = NULL.")
+    }
     if (is.null(names(constants))) {
-      stop("Constant list cannot be empty. To use default constants, use constants = NULL.")
+      stop("Constant list must be named.")
     }
 
     model <- change_constants(model, unlist(constants))
   }
 
-  if ("btpc_model" %in% class(model)) {
-    loop <- .loop_string(model)
-    pri <- .priors_string(model)
-  } else {
-    model <- model_list[[model]]
-    loop <- .loop_string(model)
-    pri <- .priors_string(model)
-  }
+  loop <- .loop_string(model)
+  pri <- .priors_string(model)
 
 
   nimble_string <- paste0(loop, pri, "\n}")

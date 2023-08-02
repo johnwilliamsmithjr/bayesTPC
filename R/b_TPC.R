@@ -115,16 +115,17 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   # exception handling and variable setup
   if (is.null(model) || !(model %in% model_list)){
     if ("btpc_model" %in% class(model)){
-      stop("Model has been specified incorrectly. Please use specify_x_model() to create custom models.")
+      stop("Model has been specified incorrectly. Please use specify_*_model() to create custom models.")
     } else {
       stop("Unsupported model. Use get_models() to view implemented models.")
     }
   }
 
-
+  if (!(samplerType %in% c("RW", "RW_block", "AF_slice", "slice"))) {
+    stop("Unsupported option for input samplerType. Currently only RW, RW_block, slice, and AF_slice are supported.")
+  }
   data.nimble <- check_data(data)
-  inits.list <- .check_inits(inits)
-  const.list <- .configure_constants(model, data.nimble$N)
+
 
   # no change of state! we are functional programmers!!!!!!
   original_environmental_objects <- force(ls(envir = .GlobalEnv))
@@ -137,15 +138,13 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     model <- model_list[[model]]
   }
 
-  if (!(samplerType %in% c("RW", "RW_block", "AF_slice", "slice"))) stop("Unsupported option for input samplerType. Currently only RW, RW_block, slice, and AF_slice are supported.")
+  # misc error check (will refactor this when possible)
   if ("btpc_binomial_model" %in% class(model)) {
     if (is.null(data$n)) stop("For a Binomial GLM, data list must have a variable called 'n'. Perhaps check spelling and capitalization?")
     # const.list$n = unlist(data['n'])
   }
 
-
-
-  # change priors if necessary
+  # change priors if necessary - this will become a helper function for b_TPC and configure_model
   if (!is.null(priors)) {
     if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
     if (length(priors) == 0){
@@ -171,19 +170,17 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     model <- change_constants(model, unlist(constants))
   }
 
-  # configure model, handles the density function, priors, and constants
+  # handles the density function, priors, and constants
+  inits.list <- .check_inits(inits)
+  const.list <- .configure_constants(model, data.nimble$N)
   modelStr <- configure_model(model)
-
-
 
   # create uncompiled nimble model
   # TODO odd things with importing functions from nimble ???? fix at some point
-  cat("Creating NIMBLE model.\n")
+  cat("\nCreating NIMBLE model.\n")
   nimTPCmod <- nimble::nimbleModel(str2expression(modelStr),
     constants = const.list,
-    data = data.nimble$data, inits = inits.list,
-    check = nimble::getNimbleOption("checkModel"),
-    buildDerivs = nimble::getNimbleOption("buildModelDerivs")
+    data = data.nimble$data, inits = inits.list
   )
 
   nimTPCmod_compiled <- nimble::compileNimble(nimTPCmod)
@@ -191,7 +188,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   # no printing because sampler hasn't changed yet, can be confusing
   mcmcConfig <- nimble::configureMCMC(nimTPCmod, print = F)
 
-  # set correct sampler type
+  # set correct sampler type (will also refactor this)
   if ("btpc_normal_model" %in% class(model)) {
     bugs_params <- c(names(attr(model, "parameters")), "sigma.sq")
   } else if ("btpc_binomial_model" %in% class(model)) {
@@ -221,7 +218,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   mcmc <- nimble::buildMCMC(mcmcConfig)
   tpc_mcmc <- nimble::compileNimble(mcmc, project = nimTPCmod_compiled)
   tpc_mcmc$run(niter, nburnin = burn, ...)
-  samples <- coda::as.mcmc(as.matrix(tpc_mcmc$mvSamples))
+  samples <- coda::as.mcmc(as.matrix(tpc_mcmc$mvSamples)) #TODO theres a way to do this in nimble
 
   prior_out <- attr(model, "parameters")
 
@@ -234,11 +231,11 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   rm(list = base::setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
   # set verbose option back to what nimble had
   nimble::nimbleOptions(verbose = original_verbose_option)
+
   out <- list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
     model_type = c(model), priors = prior_out, constants = attr(model, "constants"), uncomp_model = nimTPCmod
   )
-
   class(out) <- "btpc_MCMC"
   return(out)
 }
