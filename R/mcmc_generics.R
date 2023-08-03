@@ -1,14 +1,14 @@
 #' @export
 print.btpc_MCMC <- function(x, digits = 3, ...) {
   cat("bayesTPC MCMC of type:", x$model_type)
-  cat("\n\nModel Formula:\n", as.character(get_formula(x$model_type)), "\n\n", sep = "")
+  cat(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")), as.character(get_formula(x$model_type)), "\n\n", sep = "")
   s <- x$samples
   means <- round(matrixStats::colMeans2(s), digits)
   medians <- round(matrixStats::colMedians(s), digits)
   tbl <- cbind.data.frame(means, medians, x$priors[colnames(s)])
   rownames(tbl) <- colnames(s)
   colnames(tbl) <- c("Mean", "Median", "Priors")
-  cat("Model Parameters:\n")
+  cat(cli::style_underline(cli::col_cyan("Model Parameters:\n")))
   print(tbl)
 }
 
@@ -39,14 +39,14 @@ summary.btpc_MCMC <- function(object,
   if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
 
   cat("bayesTPC MCMC of type:", object$model_type)
-  cat("\n\nModel Formula:\n", as.character(get_formula(object$model_type)), sep = "")
-  cat("\n\nModel Priors:\n")
+  cat(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")), as.character(get_formula(object$model_type)), sep = "")
+  cat(cli::style_underline(cli::col_cyan("\n\nModel Priors:\n")))
   print(object$priors)
   if (length(object$constants) > 0) {
-    cat("\n\nModel Constants:")
+    cat(cli::style_underline(cli::col_cyan("\n\nModel Constants:")))
     cat("\n  ", names(object$constants), ": ", object$constants, sep = "")
   }
-  cat("\nMCMC Results:")
+  cat(cli::style_underline(cli::col_cyan("\nMCMC Results:")))
   print(summary(object$samples))
 
   # assign constants

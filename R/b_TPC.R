@@ -113,8 +113,8 @@ check_data <- function(data) {
 b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
                   niter = 10000, inits = NULL, burn = 0, constants = NULL, verbose = FALSE, ...) {
   # exception handling and variable setup
-  if (is.null(model) || !(model %in% model_list)){
-    if ("btpc_model" %in% class(model)){
+  if (is.null(model) || !(model %in% model_list)) {
+    if ("btpc_model" %in% class(model)) {
       stop("Model has been specified incorrectly. Please use specify_*_model() to create custom models.")
     } else {
       stop("Unsupported model. Use get_models() to view implemented models.")
@@ -124,14 +124,23 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   if (!(samplerType %in% c("RW", "RW_block", "AF_slice", "slice"))) {
     stop("Unsupported option for input samplerType. Currently only RW, RW_block, slice, and AF_slice are supported.")
   }
+
   data.nimble <- check_data(data)
 
 
-  # no change of state! we are functional programmers!!!!!!
+  # prep for cleanup
   original_environmental_objects <- force(ls(envir = .GlobalEnv))
   original_verbose_option <- nimble::getNimbleOption("verbose")
   user_verbose <- verbose # avoid quoting mishaps
   nimble::nimbleOptions(verbose = user_verbose)
+
+  on.exit({
+    # remove random objects from global environment
+    rm(list = base::setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
+    # set verbose option back to what nimble had
+    nimble::nimbleOptions(verbose = original_verbose_option)
+
+  })
 
   # create model specification
   if (!("btpc_model" %in% class(model))) {
@@ -147,7 +156,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   # change priors if necessary - this will become a helper function for b_TPC and configure_model
   if (!is.null(priors)) {
     if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
-    if (length(priors) == 0){
+    if (length(priors) == 0) {
       stop("Prior list cannot be empty. To use default priors, use priors = NULL.")
     }
     if (is.null(names(priors))) {
@@ -160,7 +169,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   # change constants if necessary
   if (!is.null(constants)) {
     if (!is.list(constants)) stop("Unexpected type for argument 'constants'. Contants must be given as a list.")
-    if (length(constants) == 0){
+    if (length(constants) == 0) {
       stop("Constant list cannot be empty. To use default priors, use priors = NULL.")
     }
     if (is.null(names(constants))) {
@@ -170,6 +179,10 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     model <- change_constants(model, unlist(constants))
   }
 
+  cat(cli::style_underline(cli::col_cyan("Creating NIMBLE model.\n")))
+  if (!verbose){
+    cat(" - Configuring model.\n")
+  }
   # handles the density function, priors, and constants
   inits.list <- .check_inits(inits)
   const.list <- .configure_constants(model, data.nimble$N)
@@ -177,14 +190,22 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   # create uncompiled nimble model
   # TODO odd things with importing functions from nimble ???? fix at some point
-  cat("\nCreating NIMBLE model.\n")
+
   nimTPCmod <- nimble::nimbleModel(str2expression(modelStr),
     constants = const.list,
     data = data.nimble$data, inits = inits.list
   )
 
+  if (!verbose){
+    cat(" - Compiling model.\n")
+  }
   nimTPCmod_compiled <- nimble::compileNimble(nimTPCmod)
 
+  cat(cli::style_underline(cli::col_cyan("\nCreating MCMC.\n")))
+
+  if (!verbose){
+    cat(" - Configuring MCMC.\n")
+  }
   # no printing because sampler hasn't changed yet, can be confusing
   mcmcConfig <- nimble::configureMCMC(nimTPCmod, print = F)
 
@@ -213,24 +234,26 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     cat("\n")
   }
 
-  cat("Running MCMC.\n")
+
   mcmcConfig$enableWAIC <- TRUE
   mcmc <- nimble::buildMCMC(mcmcConfig)
+  if (!verbose){
+    cat(" - Compiling MCMC.\n")
+  }
   tpc_mcmc <- nimble::compileNimble(mcmc, project = nimTPCmod_compiled)
+  if (!verbose){
+    cat(" - Running MCMC.\n")
+    Sys.sleep(.25)
+    cat("\nProgress:\n")
+  }
   tpc_mcmc$run(niter, nburnin = burn, ...)
-  samples <- coda::as.mcmc(as.matrix(tpc_mcmc$mvSamples)) #TODO theres a way to do this in nimble
+  samples <- coda::as.mcmc(as.matrix(tpc_mcmc$mvSamples)) # TODO theres a way to do this in nimble
 
   prior_out <- attr(model, "parameters")
 
   if ("btpc_normal_model" %in% class(model)) {
     prior_out["sigma.sq"] <- attr(model, "sigma.sq")
   }
-
-
-  # remove random objects from global environment
-  rm(list = base::setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
-  # set verbose option back to what nimble had
-  nimble::nimbleOptions(verbose = original_verbose_option)
 
   out <- list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,

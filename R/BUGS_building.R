@@ -41,8 +41,8 @@
 #' my_prior <- list(q = "q~beta(.5, .5)")
 #' cat(configure_model(model = "quadratic", priors = my_prior))
 configure_model <- function(model, priors = NULL, constants = NULL, verbose = T) {
-  if (is.null(model) || !(model %in% model_list)){
-    if ("btpc_model" %in% class(model)){
+  if (is.null(model) || !(model %in% model_list)) {
+    if ("btpc_model" %in% class(model)) {
       stop("Model has been specified incorrectly. Please use specify_*_model() to create custom models.")
     } else {
       stop("Unsupported model. Use get_models() to view implemented models.")
@@ -55,7 +55,7 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = T)
   # change priors if necessary
   if (!is.null(priors)) {
     if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
-    if (length(priors) == 0){
+    if (length(priors) == 0) {
       stop("Prior list cannot be empty. To use default priors, use priors = NULL.")
     }
     if (is.null(names(priors))) {
@@ -68,7 +68,7 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = T)
   # change constants if necessary
   if (!is.null(constants)) {
     if (!is.list(constants)) stop("Unexpected type for argument 'constants'. Contants must be given as a list.")
-    if (length(constants) == 0){
+    if (length(constants) == 0) {
       stop("Constant list cannot be empty. To use default priors, use priors = NULL.")
     }
     if (is.null(names(constants))) {

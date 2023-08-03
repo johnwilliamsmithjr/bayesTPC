@@ -1,7 +1,7 @@
 Type: Package
 Package: bayesTPC
 Title: bayesTPC
-Version: 0.4.3
+Version: 0.4.5
 Authors@R: c( person("John W.", "Smith", email = "john.smith20@montana.edu", role = c("aut", "cre")),
 	person("Sean", "Sorek", email = "sssorek1@gmail.com", role = "aut"))
 Maintainer: John W. Smith <john.smith20@montana.edu>
@@ -9,6 +9,7 @@ Description: An R package for fitting mathematical models that describe
     thermal performance curves.
 License: GPL-3
 Imports: 
+    cli,
     coda,
     HDInterval,
     IDPmisc,

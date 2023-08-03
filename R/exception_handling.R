@@ -34,6 +34,3 @@ check_params <- function(model, params) {
 
   return(params)
 }
-
-
-
