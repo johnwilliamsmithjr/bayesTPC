@@ -139,7 +139,6 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     rm(list = base::setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
     # set verbose option back to what nimble had
     nimble::nimbleOptions(verbose = original_verbose_option)
-
   })
 
   # create model specification
@@ -180,7 +179,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   }
 
   cat(cli::style_underline(cli::col_cyan("Creating NIMBLE model.\n")))
-  if (!verbose){
+  if (!verbose) {
     cat(" - Configuring model.\n")
   }
   # handles the density function, priors, and constants
@@ -196,14 +195,14 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     data = data.nimble$data, inits = inits.list
   )
 
-  if (!verbose){
+  if (!verbose) {
     cat(" - Compiling model.\n")
   }
   nimTPCmod_compiled <- nimble::compileNimble(nimTPCmod)
 
   cat(cli::style_underline(cli::col_cyan("\nCreating MCMC.\n")))
 
-  if (!verbose){
+  if (!verbose) {
     cat(" - Configuring MCMC.\n")
   }
   # no printing because sampler hasn't changed yet, can be confusing
@@ -237,11 +236,11 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   mcmcConfig$enableWAIC <- TRUE
   mcmc <- nimble::buildMCMC(mcmcConfig)
-  if (!verbose){
+  if (!verbose) {
     cat(" - Compiling MCMC.\n")
   }
   tpc_mcmc <- nimble::compileNimble(mcmc, project = nimTPCmod_compiled)
-  if (!verbose){
+  if (!verbose) {
     cat(" - Running MCMC.\n")
     Sys.sleep(.25)
     cat("\nProgress:\n")
