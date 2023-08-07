@@ -281,7 +281,8 @@ posterior_predictive <- function(TPC,
                                  seed = NULL) {
   if (!(is.null(seed))) {
     if (!(is.integer(seed))) stop('Argument "seed" must be integer valued')
-  }
+    set.seed(seed)
+    }
 
   if (is.null(temp_interval)) temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
   tpc_fun <- get_model_function(TPC$model_spec)
@@ -293,23 +294,103 @@ posterior_predictive <- function(TPC,
     MA[names(TPC$constants)] <- TPC$constants
   }
 
-  if (!is.null(seed)) set.seed(seed)
-  truncmeans <- simplify2array(.mapply(
-    FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq"]),
-    MoreArgs = MA
-  ))
-
-  post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
-    return(truncnorm::rtruncnorm(
-      n = length(X) - 1, mean = X[1:(length(X) - 1)], sd = sqrt(X[length(X)]),
-      a = 0
+  #find evaluations
+  #each row is a temperature, each column is a different sample
+  if ("btpc_normal" %in% class(TPC$model_spec)) {
+    link_evals <- simplify2array(.mapply(
+      FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq"]),
+      MoreArgs = MA
     ))
   }
-  post_pred_samples <- apply(
-    FUN = post_pred_draw, X = rbind(truncmeans, TPC$samples[(burn + 1):max.ind, "sigma.sq"]),
-    MARGIN = 2
-  )
-  tpc_ev <- matrixStats::rowMeans2(truncmeans)
+  else if ("btpc_gamma" %in% class(TPC$model_spec)) {
+    link_evals <- simplify2array(.mapply(
+      FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "shape_var"]),
+      MoreArgs = MA
+    ))
+  }
+  else {
+    link_evals <- simplify2array(.mapply(
+      FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, ]),
+      MoreArgs = MA
+    ))
+  }
+
+  #transform from link to parameter
+  #transform link into response. I want to verify w/ Leah if this is theoretically sound
+  if ("btpc_identity" %in% class(TPC$model_spec)) {
+    tpc_evals <- link_evals
+  }
+  else if ("btpc_logit" %in% class(TPC$model_spec)) {
+    tpc_evals <- exp(link_evals) / (1 + exp(link_evals))
+  }
+  else if ("btpc_log" %in% class(TPC$model_spec)) {
+    tpc_evals <- exp(link_evals)
+  }
+  else if ("btpc_reciprocal" %in% class(TPC$model_spec)) {
+    tpc_evals <- 1 / link_evals
+  } else {
+    stop("Broken model specification. If you see this error, please contact the package developers.")
+  }
+
+  #draw from posterior sample, will make this into a switch when i have time
+  if ("btpc_normal" %in% class(TPC$model_spec)) {
+    post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
+      return(truncnorm::rtruncnorm(
+        n = length(X) - 1, mean = X[1:(length(X) - 1)], sd = sqrt(X[length(X)]),
+        a = 0
+      ))
+    }
+    post_pred_samples <- apply(
+      FUN = post_pred_draw, X = rbind(tpc_evals, TPC$samples[(burn + 1):max.ind, "sigma.sq"]),
+      MARGIN = 2
+    )
+  }
+  else if ("btpc_gamma" %in% class(TPC$model_spec)) {
+    post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
+      return(stats::rgamma(
+        n = length(X) - 1, rate = X[1:(length(X) - 1)], shape = X[length(X)]
+      )) # TODO verify if this is parameterized correctly
+    }
+    post_pred_samples <- apply(
+      FUN = post_pred_draw, X = rbind(tpc_evals, TPC$samples[(burn + 1):max.ind, "shape_var"]),
+      MARGIN = 2
+    )
+  }
+  else if ("btpc_poisson" %in% class(TPC$model_spec)){
+    post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
+      return(stats::rpois(
+        n = length(X), lambda = X
+      )) # TODO verify if this is parameterized correctly
+    }
+    post_pred_samples <- apply(
+      FUN = post_pred_draw, X = tpc_evals,
+      MARGIN = 2
+    )
+  } else if ("btpc_bernoulli" %in% class(TPC$model_spec)) {
+    post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
+      return(stats::rbinom(
+        n = length(X), size = 1, prob = X
+      )) # TODO verify if this is parameterized correctly
+    }
+    post_pred_samples <- apply(
+      FUN = post_pred_draw, X = tpc_evals,
+      MARGIN = 2
+    )
+  } else if ("btpc_binomial" %in% class(TPC$model_spec)) {
+    post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
+      return(stats::rbinom(
+        n = length(X), size = 1, prob = X
+      )) # TODO verify if this is parameterized correctly
+    }
+    post_pred_samples <- apply(
+      FUN = post_pred_draw, X = tpc_evals,
+      MARGIN = 2
+    )
+  }
+
+
+
+  tpc_ev <- matrixStats::rowMeans2(tpc_evals)
 
   if (centralSummary == "median") {
     centers <- matrixStats::rowMedians(post_pred_samples)
@@ -336,7 +417,8 @@ posterior_predictive <- function(TPC,
     upper_bounds,
     lower_bounds,
     tpc_ev,
-    TPC$data
+    TPC$data,
+    TPC$model_spec
   )
 
   names(output) <- c(
@@ -345,7 +427,8 @@ posterior_predictive <- function(TPC,
     "upper_bounds",
     "lower_bounds",
     "TPC_means",
-    "data"
+    "data",
+    "model_spec"
   )
 
   class(output) <- "btpc_prediction"
@@ -368,15 +451,27 @@ plot_prediction <- function(prediction, ylab = "Trait",
   if (!"btpc_prediction" %in% class(prediction)) {
     stop("Input should be the output of 'posterior_predictive'.")
   }
+  if ("btpc_binomial" %in% class(prediction$model_spec)){
+    plot(prediction$temp_interval, prediction$upper_bounds,
+         type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
+         ylab = ylab, ylim = c(0,1.2), ...
+    )
+  } else {
+    plot(prediction$temp_interval, prediction$upper_bounds,
+         type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
+         ylab = ylab, ylim = c(0, max(max(prediction$upper_bounds), max(prediction$data$Trait))), ...
+    )
+  }
 
-  plot(prediction$temp_interval, prediction$upper_bounds,
-    type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
-    ylab = ylab, ylim = c(0, max(max(prediction$upper_bounds), max(prediction$data$Trait))), ...
-  )
   graphics::points(prediction$temp_interval, prediction$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
   graphics::points(prediction$temp_interval, prediction$lower_bounds, type = "l", col = "blue", lty = 3)
   graphics::points(prediction$temp_interval, prediction$medians, type = "l", col = "blue")
-  graphics::points(prediction$data$Temp, prediction$data$Trait, pch = 16, cex = .75)
+  if ("btpc_binomial" %in% class(prediction$model_spec)){
+    graphics::points(prediction$data$Temp, prediction$data$Trait / prediction$data$n, pch = 16, cex = .75)
+  } else {
+    graphics::points(prediction$data$Temp, prediction$data$Trait, pch = 16, cex = .75)
+  }
+
   if (legend) {
     graphics::legend(legend_position,
       legend = c("Bounds", "Means", "Medians"),

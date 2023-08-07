@@ -114,7 +114,7 @@ test_that("b_TPC parameters work", {
   dat <- list(Trait = Traits, Temp = Temps)
   default_quad <- b_TPC(dat, "quadratic")
 
-  expect_equal(default_quad$model_type, "quadratic")
+  expect_equal(c(default_quad$model_spec), "quadratic")
   expect_equal(length(default_quad$constants), 0)
   expect_equal(nrow(default_quad$samples), 10000)
   expect_equal(default_quad$priors[1:3], get_default_priors("quadratic"))
