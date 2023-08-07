@@ -79,7 +79,7 @@ check_data <- function(data) {
 #'  * `samples` - `mcmc.list` containing posterior samples of parameters for corresponding model.
 #'  * `mcmc` -  `nimbleModel` object corresponding to model being fit.
 #'  * `data` -  `list` containing trait and temperature data and number of observations (N).
-#'  * `model_type` -  `character` containing the type of thermal performance curve being fit.
+#'  * `model_spec` -  `btpc_model` containing the model specification being fit.
 #'  * `constants` - A named vector containing the constant values used, if the model includes constants. Otherwise, returns NULL.
 #'  * `uncomp_model` - Uncompiled version of the NIMBLE model. For internal use.
 #' @examples
