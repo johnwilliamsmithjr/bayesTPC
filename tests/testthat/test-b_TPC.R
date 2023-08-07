@@ -73,10 +73,10 @@ test_that("b_TPC catches errors", {
   expect_error(b_TPC(dat, model = NULL), regexp = "view implemented")
   expect_error(b_TPC(dat, model = "something_completely_wrong"), regexp = "Unsupported model")
   weird_model_spec <- new_btpc_model("weee",
-                                     parameters = c(a = "dunif(0,1)"),
-                                     formula = expression(a * Temp),
-                                     link = "identity",
-                                     distribution = "normal"
+    parameters = c(a = "dunif(0,1)"),
+    formula = expression(a * Temp),
+    link = "identity",
+    distribution = "normal"
   )
   expect_error(b_TPC(dat, model = weird_model_spec), regexp = "incorrectly")
 
