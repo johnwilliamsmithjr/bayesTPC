@@ -1,8 +1,10 @@
-## Model Creation
+## Model Creation ================================
 new_btpc_model <- function(name = character(),
                            parameters = character(), # names are parameters, values are priors
                            formula = expression(),
                            constants = double(), # names are constant names, values are default values
+                           link = character(),
+                           distribution = character(),
                            class = character(), # for subclassing support
                            ...) {
   # forcing explicit types
@@ -10,10 +12,15 @@ new_btpc_model <- function(name = character(),
   stopifnot(is.character(parameters))
   stopifnot(is.expression(formula))
   stopifnot(is.double(constants))
+  stopifnot(is.character(link))
+  stopifnot(is.character(distribution))
   stopifnot(is.character(class))
 
+
   structure(name,
-    class = c(class, "btpc_model"),
+    class = c(paste0("btpc_",distribution),
+              paste0("btpc_",link),
+              "btpc_model"),
     parameters = parameters,
     formula = formula,
     constants = constants,
@@ -21,7 +28,82 @@ new_btpc_model <- function(name = character(),
   )
 }
 
-## Model Validation
+#' Specify a model
+#'
+#' Creates an object with the required formatting to be fit using other `bayesTPC` functions.
+#' @export
+#' @details `bayesTPC` does not verify if the priors specified are compatible with NIMBLE's dialect of BUGS.
+#'   All available distributions and formatting are provided on the
+#'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
+#'
+#'  This model type should be used for counts of binary results.
+#' @param name character, The desired name of the model specification.
+#' @param parameters named character vector. The names should correspond to the parameters being fit,
+#'   and the values should be the prior distributions to be drawn from for each respective parameter.
+#'   Uniform distributions should be used unless there is good reason to draw from another.
+#' @param formula expression. The actual formula being fit.
+#'   Must include 'Temp' to represent temperature and all specified parameters and constants
+#' @param constants optional double. Represents any terms in the formula that should not be fit.
+#' @param link character. A link function between the model fit and the trait values.
+#'   Currently supported options are: 'identity', 'log', 'logit', and 'reciprocal'. Default is 'identity'.
+#' @param distribution character. The distribution used to calculate likelihoods.
+#'   Currently supported options are: 'normal', 'poisson', 'bernoulli', 'binomial', 'exponential', and 'gamma'. Default is 'normal'.
+#' @param ... Additional model specification attributes.
+#'   If distribution is 'normal' or 'gamma', one can include an attribute named
+#'   'sigma.sq' or 'shape_par' respectively to choose a non-default prior.
+#' @returns Returns an object of type `btpc_model`, which can then be used in other `bayesTPC` functions.
+#'   The model name is also registered, and so can be accessed using by passing only the name into functions.
+#'   However, user-defined models are not saved between sessions, and will be reset whenever the package is reloaded.
+#' @examples
+#' my_name <- "my_model"
+#' my_formula <- expression(a * Temp^c + b)
+#' my_parameters <- c(a = "dunif(0,1)", b = "dnorm(0,1)")
+#' my_constants <- c(c = 1.5)
+#'
+#' \dontrun{
+#' my_model <- specify_model(
+#'   name = my_name,
+#'   parameters = my_parameters,
+#'   formula = my_formula,
+#'   constants = my_constants,
+#'   link = "logit",
+#'   distribution = "binomial"
+#' )
+#' }
+specify_model <- function(name = character(),
+                          parameters = character(),
+                          formula = expression(),
+                          constants = double(),
+                          link = "identity",
+                          distribution = "normal",
+                          ...){
+  supported_links <- c("identity", "log", "logit", "reciprocal")
+  supported_dist <- c("normal", "poisson", "bernoulli", "binomial", "exponential", "gamma")
+
+  if (!link %in% supported_links){
+    stop("Unsupported link function.")
+  }
+  if (!distribution %in% supported_dist){
+    stop("Unsupported distribution.")
+  }
+
+  x <- new_btpc_model(name, parameters, formula, constants, link, distribution, ...)
+  x <- validate(x)
+
+  #add to model list. lets us check that model has been input validated
+  model_list[[name]] <- x
+  utils::assignInMyNamespace("model_list", model_list)
+  cat(paste0(
+    "Model type '", name, "' can now be accessed using other bayesTPC functions. ",
+    "Reload the package to reset back to defaults.\n"
+  ))
+}
+
+## Model Validation ================================================
+validate <- function(x) {
+  UseMethod("validate")
+}
+
 #' @export
 validate.btpc_model <- function(x) {
   name <- unclass(x)
@@ -101,8 +183,28 @@ validate.btpc_model <- function(x) {
   return(x)
 }
 
-validate <- function(x) {
-  UseMethod("validate")
+#' @export
+validate.btpc_normal <- function(x) {
+  x <- validate.btpc_model(x)
+  var <- attr(x, "sigma.sq")
+  if (length(var) == 0) {
+    cat("Using default prior for model variance.\n")
+    attr(x, "sigma.sq") <- "dexp(1)"
+  }
+
+  return(x)
+}
+
+#' @export
+validate.btpc_poisson <- function(x) {
+  x <- validate.btpc_model(x)
+  var <- attr(x, "shape_par")
+  if (length(var) == 0) {
+    cat("Using default prior for model variance.\n")
+    attr(x, "shape_par") <- "dexp(1)"
+  }
+
+  return(x)
 }
 
 #' @export
@@ -132,7 +234,7 @@ change_priors <- function(model, priors) {
   }
   params_to_change <- names(priors)
   current_priors <- attr(model, "parameters")
-  if ("sigma.sq" %in% params_to_change) {
+  if ("sigma.sq" %in% params_to_change) { #TODO add gamma shape parameter
     if (!all(params_to_change %in% c(names(current_priors), "sigma.sq"))) {
       stop("Attempting to change prior of non-existent parameter.")
     }
@@ -190,7 +292,8 @@ change_constants <- function(model, constants) {
 #' @export
 print.btpc_model <- function(x, ...) {
   cat(paste0("bayesTPC Model Specification of Type: ", c(x)))
-  cat(paste0("\nModel Formula:\n  ", attr(x, "formula")))
+  cat(paste0("\nModel Formula:\n  ", .link_string(x),attr(x, "formula"), " )"))
+  cat(paste0("\nModel Distribution:\n  Trait[i] ~ ", .distribution_string(x)))
   cat(paste0("\nModel Parameters and Priors:"))
   params <- attr(x, "parameters")
   cat(paste0("\n  ", names(params), ": ", params))
@@ -202,22 +305,13 @@ print.btpc_model <- function(x, ...) {
 }
 
 #' @export
-.loop_string.btpc_model <- function(model) {
-  model_string <- paste0(
-    "{\n    for (i in 1:N){\n            ",
-    "Trait[i] ~ dnorm(Temp[i],1) ",
-    "\n    }\n"
-  )
-
-  return(model_string)
+print.btpc_normal <- function(x, ...) {
+  print.btpc_model(x)
+  cat(paste0("\nPrior for Variance:\n  ", attr(x, "sigma.sq")))
 }
 
 #' @export
-.priors_string.btpc_model <- function(model) {
-  priors <- attr(model, "parameters")
-  num_params <- length(priors)
-
-  priors_vec <- paste0(names(priors), " ~ ", priors)
-  priors_string <- paste0("    ", paste0(priors_vec, collapse = "\n    "))
-  return(priors_string)
+print.btpc_gamma <- function(x, ...) {
+  print.btpc_model(x)
+  cat(paste0("\nPrior for Shape:\n  ", attr(x, "shape_par")))
 }
