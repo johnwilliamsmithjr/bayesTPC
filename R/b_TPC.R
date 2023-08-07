@@ -147,7 +147,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   }
 
   # misc error check (will refactor this when possible)
-  if ("btpc_binomial_model" %in% class(model)) {
+  if ("btpc_binomial" %in% class(model)) {
     if (is.null(data$n)) stop("For a Binomial GLM, data list must have a variable called 'n'. Perhaps check spelling and capitalization?")
     # const.list$n = unlist(data['n'])
   }
@@ -178,7 +178,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     model <- change_constants(model, unlist(constants))
   }
 
-  cat(cli::style_underline(cli::col_cyan("Creating NIMBLE model.\n")))
+  cat(cli::style_underline(cli::col_cyan("Creating NIMBLE model:\n")))
   if (!verbose) {
     cat(" - Configuring model.\n")
   }
@@ -200,7 +200,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   }
   nimTPCmod_compiled <- nimble::compileNimble(nimTPCmod)
 
-  cat(cli::style_underline(cli::col_cyan("\nCreating MCMC.\n")))
+  cat(cli::style_underline(cli::col_cyan("\nCreating MCMC:\n")))
 
   if (!verbose) {
     cat(" - Configuring MCMC.\n")
@@ -209,9 +209,11 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   mcmcConfig <- nimble::configureMCMC(nimTPCmod, print = F)
 
   # set correct sampler type (will also refactor this)
-  if ("btpc_normal_model" %in% class(model)) {
+  if ("btpc_normal" %in% class(model)) { # TODO refactor this with generics
     bugs_params <- c(names(attr(model, "parameters")), "sigma.sq")
-  } else if ("btpc_binomial_model" %in% class(model)) {
+  } else if ("btpc_gamma" %in% class(model)) {
+    bugs_params <- c(names(attr(model, "parameters")), "shape_par")
+  } else {
     bugs_params <- names(attr(model, "parameters"))
   }
   if (samplerType == "slice") { # TODO make this less weird. There was a reason it was set up this way i just cannot remember.
@@ -243,15 +245,18 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   if (!verbose) {
     cat(" - Running MCMC.\n")
     Sys.sleep(.25)
-    cat("\nProgress:\n")
+    cat(cli::style_underline(cli::col_cyan("\nProgress:\n")))
   }
   tpc_mcmc$run(niter, nburnin = burn, ...)
   samples <- coda::as.mcmc(as.matrix(tpc_mcmc$mvSamples)) # TODO theres a way to do this in nimble
 
   prior_out <- attr(model, "parameters")
 
-  if ("btpc_normal_model" %in% class(model)) {
+  if ("btpc_normal" %in% class(model)) {
     prior_out["sigma.sq"] <- attr(model, "sigma.sq")
+  }
+  if ("btpc_gamma" %in% class(model)) {
+    prior_out["shape_par"] <- attr(model, "shape_par")
   }
 
   out <- list(

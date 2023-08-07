@@ -72,9 +72,11 @@ test_that("b_TPC catches errors", {
   # bad model specification
   expect_error(b_TPC(dat, model = NULL), regexp = "view implemented")
   expect_error(b_TPC(dat, model = "something_completely_wrong"), regexp = "Unsupported model")
-  weird_model_spec <- new_btpc_normal_model("weee",
+  weird_model_spec <- new_btpc_model("weee",
     parameters = c(a = "dunif(0,1)"),
-    formula = expression(a * Temp)
+    formula = expression(a * Temp),
+    link = "identity",
+    distribution = "normal"
   )
   expect_error(b_TPC(dat, model = weird_model_spec), regexp = "incorrectly")
 
@@ -116,7 +118,7 @@ test_that("b_TPC parameters work", {
   expect_equal(length(default_quad$constants), 0)
   expect_equal(nrow(default_quad$samples), 10000)
   expect_equal(default_quad$priors[1:3], get_default_priors("quadratic"))
-  expect_equal(default_quad$priors[4], c(sigma.sq = "T(dt(mu = 0, tau = 1/10, df = 1), 0, )"))
+  expect_equal(default_quad$priors[4], c(sigma.sq = "dexp(1)"))
 
   changed_quad <- b_TPC(dat, "quadratic",
     niter = 8000, burn = 1000,

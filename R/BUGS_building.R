@@ -1,14 +1,95 @@
-.loop_string <- function(model) {
-  UseMethod(".loop_string")
+.link_string <- function(model) {
+  UseMethod(".link_string")
 }
 
 #' @export
-.loop_string.default <- function(model) {
+.link_string.btpc_identity <- function(model) {
+  "m[i] <- ( "
+}
+
+#' @export
+.link_string.btpc_log <- function(model) {
+  "log(m[i]) <- ( "
+}
+
+#' @export
+.link_string.btpc_logit <- function(model) {
+  "logit(m[i]) <- ( "
+}
+
+#' @export
+.link_string.btpc_reciprocal <- function(model) {
+  "m[i] <- 1 / ( "
+}
+
+#' @export
+.link_string.default <- function(model) {
+  stop("Misconfigured Model Specification.")
+}
+
+.distribution_string <- function(model) {
+  UseMethod(".distribution_string")
+}
+
+#' @export
+.distribution_string.btpc_normal <- function(model) {
+  "T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )"
+}
+
+#' @export
+.distribution_string.btpc_poisson <- function(model) {
+  "dpois(m[i])"
+}
+
+#' @export
+.distribution_string.btpc_bernoulli <- function(model) {
+  "dbern(m[i])"
+}
+
+#' @export
+.distribution_string.btpc_binomial <- function(model) {
+  "dbinom(m[i], n[i])"
+}
+
+#' @export
+.distribution_string.btpc_exponential <- function(model) {
+  "dexp(m[i])"
+}
+
+#' @export
+.distribution_string.btpc_gamma <- function(model) {
+  "dgamma(shape_par, shape_par * m[i])"
+}
+
+#' @export
+.distribution_string.default <- function(model) {
   stop("Misconfigured Model Specification.")
 }
 
 .priors_string <- function(model) {
   UseMethod(".priors_string")
+}
+
+#' @export
+.priors_string.btpc_normal <- function(model) {
+  c(
+    .priors_string.btpc_model(model),
+    paste0("sigma.sq ~ ", attr(model, "sigma.sq"))
+  )
+}
+
+#' @export
+.priors_string.btpc_gamma <- function(model) {
+  c(
+    .priors_string.btpc_model(model),
+    paste0("shape_par ~ ", attr(model, "shape_par"))
+  )
+}
+
+#' @export
+.priors_string.btpc_model <- function(model) {
+  priors <- attr(model, "parameters")
+  paste0(names(priors), " ~ ", priors)
 }
 
 #' @export
@@ -78,10 +159,12 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = T)
     model <- change_constants(model, unlist(constants))
   }
 
-  loop <- .loop_string(model)
-  pri <- .priors_string(model)
-
-
-  nimble_string <- paste0(loop, pri, "\n}")
+  loop <- paste0(
+    "{\n    for (i in 1:N){\n        ",
+    .link_string(model), gsub("Temp", "Temp[i]", attr(model, "formula")),
+    " )\n        Trait[i] ~ ", .distribution_string(model), "\n    }\n"
+  )
+  pri <- paste0(.priors_string(model), collapse = "\n    ")
+  nimble_string <- paste0(loop, "    ", pri, "\n}")
   return(nimble_string)
 }

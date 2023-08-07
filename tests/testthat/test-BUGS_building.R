@@ -2,9 +2,11 @@ test_that("configure_model catches errors", {
   # bad model specification
   expect_error(configure_model(model = NULL), regexp = "view implemented")
   expect_error(configure_model(model = "something_completely_wrong"), regexp = "Unsupported model")
-  weird_model_spec <- new_btpc_normal_model("weee",
+  weird_model_spec <- new_btpc_model("weee",
     parameters = c(a = "dunif(0,1)"),
-    formula = expression(a * Temp)
+    formula = expression(a * Temp),
+    link = "identity",
+    distribution = "normal"
   )
   expect_error(configure_model(model = weird_model_spec), regexp = "incorrectly")
 
@@ -25,7 +27,7 @@ test_that("configure model works", {
     priors = list(
       q = "dunif(0, 1.5)",
       T_min = "dunif(0, 35)",
-      sigma.sq = "dexp(1)"
+      sigma.sq = "dexp(2)"
     )
   )
 
@@ -33,14 +35,15 @@ test_that("configure model works", {
   expect_match(default_quad, regexp = "q ~ dunif(0, 1)", fixed = TRUE)
   expect_match(default_quad, regexp = "T_max ~ dunif(25, 60)", fixed = TRUE)
   expect_match(default_quad, regexp = "T_min ~ dunif(0, 24)", fixed = TRUE)
-  expect_match(default_quad, regexp = "sigma.sq ~ T(dt(mu = 0, tau = 1/10, df = 1), 0, )", fixed = TRUE)
+  expect_match(default_quad, regexp = "sigma.sq ~ dexp(1)", fixed = TRUE)
 
   expect_match(changed_quad, regexp = "q ~ dunif(0, 1.5)", fixed = TRUE)
   expect_match(changed_quad, regexp = "T_max ~ dunif(25, 60)", fixed = TRUE)
   expect_match(changed_quad, regexp = "T_min ~ dunif(0, 35)", fixed = TRUE)
-  expect_match(changed_quad, regexp = "sigma.sq ~ dexp(1)", fixed = TRUE)
+  expect_match(changed_quad, regexp = "sigma.sq ~ dexp(2)", fixed = TRUE)
 })
 test_that("default S3 BUGS functions throw errors", {
-  expect_error(.loop_string("random string"), regexp = "Misconfigured")
+  expect_error(.link_string("random string"), regexp = "Misconfigured")
+  expect_error(.distribution_string("random string"), regexp = "Misconfigured")
   expect_error(.priors_string("random string"), regexp = "Misconfigured")
 })
