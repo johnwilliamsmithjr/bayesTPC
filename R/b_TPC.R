@@ -261,7 +261,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   out <- list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
-    model_type = c(model), priors = prior_out, constants = attr(model, "constants"), uncomp_model = nimTPCmod
+    model_spec = model, priors = prior_out, constants = attr(model, "constants"), uncomp_model = nimTPCmod
   )
   class(out) <- "btpc_MCMC"
   return(out)

@@ -293,12 +293,12 @@ change_constants <- function(model, constants) {
 
 #' @export
 print.btpc_model <- function(x, ...) {
-  cat(paste0("bayesTPC Model Specification of Type: ", c(x)))
-  cat(paste0("\nModel Formula:\n  ", .link_string(x), attr(x, "formula"), " )"))
-  cat(paste0("\nModel Distribution:\n  Trait[i] ~ ", .distribution_string(x)))
-  cat(paste0("\nModel Parameters and Priors:"))
+  cat(paste0(cli::style_underline(cli::col_cyan("bayesTPC Model Specification of Type:\n")), "  ",c(x)))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")),"  " ,.link_string(x), attr(x, "formula"), " )"))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Distribution:\n")),"  Trait[i] ~ ", .distribution_string(x)))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Parameters and Priors:"))))
   params <- attr(x, "parameters")
-  cat(paste0("\n  ", names(params), ": ", params))
+  cat(paste0("\n  ", names(params), " ~ ", params))
   consts <- attr(x, "constants")
   if (length(consts) > 0) {
     cat(paste0("\nModel Constants:"))
