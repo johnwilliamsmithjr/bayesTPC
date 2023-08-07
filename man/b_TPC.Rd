@@ -58,7 +58,7 @@ Currently only used for model = 'pawar-shsch'.}
 \item \code{samples} - \code{mcmc.list} containing posterior samples of parameters for corresponding model.
 \item \code{mcmc} -  \code{nimbleModel} object corresponding to model being fit.
 \item \code{data} -  \code{list} containing trait and temperature data and number of observations (N).
-\item \code{model_type} -  \code{character} containing the type of thermal performance curve being fit.
+\item \code{model_spec} -  \code{btpc_model} containing the model specification being fit.
 \item \code{constants} - A named vector containing the constant values used, if the model includes constants. Otherwise, returns NULL.
 \item \code{uncomp_model} - Uncompiled version of the NIMBLE model. For internal use.
 }
