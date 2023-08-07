@@ -72,14 +72,18 @@
 
 #' @export
 .priors_string.btpc_normal <- function(model) {
-  c(.priors_string.btpc_model(model),
-    paste0("sigma.sq ~ ", attr(model, "sigma.sq")))
+  c(
+    .priors_string.btpc_model(model),
+    paste0("sigma.sq ~ ", attr(model, "sigma.sq"))
+  )
 }
 
 #' @export
 .priors_string.btpc_gamma <- function(model) {
-  c(.priors_string.btpc_model(model),
-    paste0("shape_par ~ ", attr(model, "shape_par")))
+  c(
+    .priors_string.btpc_model(model),
+    paste0("shape_par ~ ", attr(model, "shape_par"))
+  )
 }
 
 #' @export
@@ -156,11 +160,11 @@ configure_model <- function(model, priors = NULL, constants = NULL, verbose = T)
   }
 
   loop <- paste0(
-    "{\n    for (i in 1:N){\n            ",
+    "{\n    for (i in 1:N){\n        ",
     .link_string(model), gsub("Temp", "Temp[i]", attr(model, "formula")),
     " )\n        Trait[i] ~ ", .distribution_string(model), "\n    }\n"
   )
   pri <- paste0(.priors_string(model), collapse = "\n    ")
-  nimble_string <- paste0(loop, pri, "\n}")
+  nimble_string <- paste0(loop, "    ", pri, "\n}")
   return(nimble_string)
 }

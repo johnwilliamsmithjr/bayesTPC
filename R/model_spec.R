@@ -18,9 +18,11 @@ new_btpc_model <- function(name = character(),
 
 
   structure(name,
-    class = c(paste0("btpc_",distribution),
-              paste0("btpc_",link),
-              "btpc_model"),
+    class = c(
+      paste0("btpc_", distribution),
+      paste0("btpc_", link),
+      "btpc_model"
+    ),
     parameters = parameters,
     formula = formula,
     constants = constants,
@@ -76,21 +78,21 @@ specify_model <- function(name = character(),
                           constants = double(),
                           link = "identity",
                           distribution = "normal",
-                          ...){
+                          ...) {
   supported_links <- c("identity", "log", "logit", "reciprocal")
   supported_dist <- c("normal", "poisson", "bernoulli", "binomial", "exponential", "gamma")
 
-  if (!link %in% supported_links){
+  if (!link %in% supported_links) {
     stop("Unsupported link function.")
   }
-  if (!distribution %in% supported_dist){
+  if (!distribution %in% supported_dist) {
     stop("Unsupported distribution.")
   }
 
   x <- new_btpc_model(name, parameters, formula, constants, link, distribution, ...)
   x <- validate(x)
 
-  #add to model list. lets us check that model has been input validated
+  # add to model list. lets us check that model has been input validated
   model_list[[name]] <- x
   utils::assignInMyNamespace("model_list", model_list)
   cat(paste0(
@@ -234,7 +236,7 @@ change_priors <- function(model, priors) {
   }
   params_to_change <- names(priors)
   current_priors <- attr(model, "parameters")
-  if ("sigma.sq" %in% params_to_change) { #TODO add gamma shape parameter
+  if ("sigma.sq" %in% params_to_change) { # TODO add gamma shape parameter
     if (!all(params_to_change %in% c(names(current_priors), "sigma.sq"))) {
       stop("Attempting to change prior of non-existent parameter.")
     }
@@ -292,7 +294,7 @@ change_constants <- function(model, constants) {
 #' @export
 print.btpc_model <- function(x, ...) {
   cat(paste0("bayesTPC Model Specification of Type: ", c(x)))
-  cat(paste0("\nModel Formula:\n  ", .link_string(x),attr(x, "formula"), " )"))
+  cat(paste0("\nModel Formula:\n  ", .link_string(x), attr(x, "formula"), " )"))
   cat(paste0("\nModel Distribution:\n  Trait[i] ~ ", .distribution_string(x)))
   cat(paste0("\nModel Parameters and Priors:"))
   params <- attr(x, "parameters")

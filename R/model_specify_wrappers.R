@@ -1,4 +1,3 @@
-
 #' Specify a Bernoulli model
 #'
 #' Creates an object with the required formatting to be fit using other `bayesTPC` functions.
@@ -38,13 +37,15 @@ specify_bernoulli_model <- function(name = character(),
                                     formula = expression(),
                                     constants = double(), # names are constant names, values are default values
                                     ...) {
-  specify_model(name = name,
-                parameters = parameters,
-                formula = formula,
-                constants = constants,
-                link = "logit",
-                distribution = "bernoulli",
-                ...)
+  specify_model(
+    name = name,
+    parameters = parameters,
+    formula = formula,
+    constants = constants,
+    link = "logit",
+    distribution = "bernoulli",
+    ...
+  )
 }
 
 #' Specify a binomial model
@@ -82,17 +83,19 @@ specify_bernoulli_model <- function(name = character(),
 #' )
 #' }
 specify_binomial_model <- function(name = character(),
-                                    parameters = character(), # names are parameters, values are priors
-                                    formula = expression(),
-                                    constants = double(), # names are constant names, values are default values
-                                    ...) {
-  specify_model(name = name,
-                parameters = parameters,
-                formula = formula,
-                constants = constants,
-                link = "logit",
-                distribution = "binomial",
-                ...)
+                                   parameters = character(), # names are parameters, values are priors
+                                   formula = expression(),
+                                   constants = double(), # names are constant names, values are default values
+                                   ...) {
+  specify_model(
+    name = name,
+    parameters = parameters,
+    formula = formula,
+    constants = constants,
+    link = "logit",
+    distribution = "binomial",
+    ...
+  )
 }
 
 #' Specify model with normally distributed error
@@ -124,17 +127,19 @@ specify_binomial_model <- function(name = character(),
 #' )
 #' }
 specify_normal_model <- function(name = character(),
-                                    parameters = character(), # names are parameters, values are priors
-                                    formula = expression(),
-                                    constants = double(), # names are constant names, values are default values
-                                    sigma.sq = "dexp(1)",
-                                    ...) {
-  specify_model(name = name,
-                parameters = parameters,
-                formula = formula,
-                constants = constants,
-                link = "identity",
-                distribution = "normal",
-                sigma.sq = sigma.sq,
-                ...)
+                                 parameters = character(), # names are parameters, values are priors
+                                 formula = expression(),
+                                 constants = double(), # names are constant names, values are default values
+                                 sigma.sq = "dexp(1)",
+                                 ...) {
+  specify_model(
+    name = name,
+    parameters = parameters,
+    formula = formula,
+    constants = constants,
+    link = "identity",
+    distribution = "normal",
+    sigma.sq = sigma.sq,
+    ...
+  )
 }
