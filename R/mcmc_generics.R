@@ -73,10 +73,33 @@ summary.btpc_MCMC <- function(object,
     }
   }
 
-  tpc_evals <- simplify2array(.mapply(
+  link_evals <- simplify2array(.mapply(
     FUN = tpc_fun, dots = data.frame(object$samples[(burn + 1):max.ind, !colnames(object$samples) %in% "sigma.sq"]),
     MoreArgs = MA
   ))
+
+  #transform link into response. I want to verify w/ Leah if this is theoretically sound
+  if (type == "link") {
+    tpc_evals <- link_evals
+  }
+  else if (type == "response") {
+    if ("btpc_identity" %in% class(object$model_spec)) {
+      tpc_evals <- link_evals
+    }
+    else if ("btpc_logit" %in% class(object$model_spec)) {
+      tpc_evals <- exp(link_evals) / (1 + exp(link_evals))
+    }
+    else if ("btpc_log" %in% class(object$model_spec)) {
+      tpc_evals <- exp(link_evals)
+    }
+    else if ("btpc_reciprocal" %in% class(object$model_spec)) {
+      tpc_evals <- 1 / link_evals
+    } else {
+      stop("Broken model specification. If you see this error, please contact the package developers.")
+    }
+  } else {
+    stop("Invalid input for parameter 'type'. Supported options are 'link' and 'response'.")
+  }
 
   if (centralSummary == "median") {
     centers <- matrixStats::rowMedians(tpc_evals)
@@ -166,16 +189,16 @@ plot.btpc_MCMC <- function(x,
     tpc_evals <- link_evals
   }
   else if (type == "response") {
-    if (attr(x$model_spec, "link") == "identity") {
+    if ("btpc_identity" %in% class(x$model_spec)) {
       tpc_evals <- link_evals
     }
-    else if (attr(x$model_spec, "link") == "logit") {
+    else if ("btpc_logit" %in% class(x$model_spec)) {
       tpc_evals <- exp(link_evals) / (1 + exp(link_evals))
     }
-    else if (attr(x$model_spec, "link") == "log") {
+    else if ("btpc_log" %in% class(x$model_spec)) {
       tpc_evals <- exp(link_evals)
     }
-    else if (attr(x$model_spec, "link") == "reciprocal") {
+    else if ("btpc_reciprocal" %in% class(x$model_spec)) {
       tpc_evals <- 1 / link_evals
     } else {
       stop("Broken model specification. If you see this error, please contact the package developers.")
@@ -210,7 +233,18 @@ plot.btpc_MCMC <- function(x,
   )
   graphics::points(temp_interval, lower_bounds, type = "l", col = "blue", lty = 2)
   graphics::points(temp_interval, centers, type = "l", col = "red")
-  graphics::points(x$data$Temp, x$data$Trait, pch = 16, cex = .75)
+  if ("btpc_binomial" %in% class(x$model_spec)){
+    plot(temp_interval, upper_bounds,
+         type = "l", col = "blue", lty = 2,
+         ylab = ylab, xlab = "Temperature (C)", ylim = c(0, 1.2), ...
+    )
+    graphics::points(temp_interval, lower_bounds, type = "l", col = "blue", lty = 2)
+    graphics::points(temp_interval, centers, type = "l", col = "red")
+    graphics::points(x$data$Temp, x$data$Trait / x$data$n, pch = 16, cex = .75)
+  } else {
+    graphics::points(x$data$Temp, x$data$Trait, pch = 16, cex = .75)
+  }
+
   if (legend) {
     graphics::legend(legend_position,
       legend = c("Bounds", tools::toTitleCase(paste0(centralSummary, "s"))),
