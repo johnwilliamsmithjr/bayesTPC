@@ -1,8 +1,8 @@
 #' @export
 print.btpc_MCMC <- function(x, digits = 3, ...) {
-  cat(paste0(cli::style_underline(cli::col_cyan("bayesTPC MCMC of Type:\n")), "  ",c(x$model_spec)))
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")),"  " ,.link_string(x$model_spec), attr(x$model_spec, "formula"), " )"))
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Distribution:\n")),"  Trait[i] ~ ", .distribution_string(x$model_spec)))
+  cat(paste0(cli::style_underline(cli::col_cyan("bayesTPC MCMC of Type:\n")), "  ", c(x$model_spec)))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")), "  ", .link_string(x$model_spec), attr(x$model_spec, "formula"), " )"))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Distribution:\n")), "  Trait[i] ~ ", .distribution_string(x$model_spec)))
   s <- x$samples
   means <- round(matrixStats::colMeans2(s), digits)
   medians <- round(matrixStats::colMedians(s), digits)
@@ -42,9 +42,9 @@ summary.btpc_MCMC <- function(object,
   if (!(summaryType %in% c("hdi", "quantile"))) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported.')
   if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
 
-  cat(paste0(cli::style_underline(cli::col_cyan("bayesTPC MCMC of Type:\n")), "  ",c(object$model_spec)))
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")),"  " ,.link_string(object$model_spec), attr(object$model_spec, "formula"), " )"))
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Distribution:\n")),"  Trait[i] ~ ", .distribution_string(object$model_spec)))
+  cat(paste0(cli::style_underline(cli::col_cyan("bayesTPC MCMC of Type:\n")), "  ", c(object$model_spec)))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")), "  ", .link_string(object$model_spec), attr(object$model_spec, "formula"), " )"))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Distribution:\n")), "  Trait[i] ~ ", .distribution_string(object$model_spec)))
   cat(cli::style_underline(cli::col_cyan("\n\nModel Priors:")))
   cat(paste0("\n  ", names(object$priors), " ~ ", object$priors))
   if (length(object$constants) > 0) {
@@ -78,21 +78,17 @@ summary.btpc_MCMC <- function(object,
     MoreArgs = MA
   ))
 
-  #transform link into response. I want to verify w/ Leah if this is theoretically sound
+  # transform link into response. I want to verify w/ Leah if this is theoretically sound
   if (type == "link") {
     tpc_evals <- link_evals
-  }
-  else if (type == "response") {
+  } else if (type == "response") {
     if ("btpc_identity" %in% class(object$model_spec)) {
       tpc_evals <- link_evals
-    }
-    else if ("btpc_logit" %in% class(object$model_spec)) {
+    } else if ("btpc_logit" %in% class(object$model_spec)) {
       tpc_evals <- exp(link_evals) / (1 + exp(link_evals))
-    }
-    else if ("btpc_log" %in% class(object$model_spec)) {
+    } else if ("btpc_log" %in% class(object$model_spec)) {
       tpc_evals <- exp(link_evals)
-    }
-    else if ("btpc_reciprocal" %in% class(object$model_spec)) {
+    } else if ("btpc_reciprocal" %in% class(object$model_spec)) {
       tpc_evals <- 1 / link_evals
     } else {
       stop("Broken model specification. If you see this error, please contact the package developers.")
@@ -184,21 +180,17 @@ plot.btpc_MCMC <- function(x,
     MoreArgs = MA
   ))
 
-  #transform link into response. I want to verify w/ Leah if this is theoretically sound
+  # transform link into response. I want to verify w/ Leah if this is theoretically sound
   if (type == "link") {
     tpc_evals <- link_evals
-  }
-  else if (type == "response") {
+  } else if (type == "response") {
     if ("btpc_identity" %in% class(x$model_spec)) {
       tpc_evals <- link_evals
-    }
-    else if ("btpc_logit" %in% class(x$model_spec)) {
+    } else if ("btpc_logit" %in% class(x$model_spec)) {
       tpc_evals <- exp(link_evals) / (1 + exp(link_evals))
-    }
-    else if ("btpc_log" %in% class(x$model_spec)) {
+    } else if ("btpc_log" %in% class(x$model_spec)) {
       tpc_evals <- exp(link_evals)
-    }
-    else if ("btpc_reciprocal" %in% class(x$model_spec)) {
+    } else if ("btpc_reciprocal" %in% class(x$model_spec)) {
       tpc_evals <- 1 / link_evals
     } else {
       stop("Broken model specification. If you see this error, please contact the package developers.")
@@ -233,10 +225,10 @@ plot.btpc_MCMC <- function(x,
   )
   graphics::points(temp_interval, lower_bounds, type = "l", col = "blue", lty = 2)
   graphics::points(temp_interval, centers, type = "l", col = "red")
-  if ("btpc_binomial" %in% class(x$model_spec)){
+  if ("btpc_binomial" %in% class(x$model_spec)) {
     plot(temp_interval, upper_bounds,
-         type = "l", col = "blue", lty = 2,
-         ylab = ylab, xlab = "Temperature (C)", ylim = c(0, 1.2), ...
+      type = "l", col = "blue", lty = 2,
+      ylab = paste0(ylab, " / n"), xlab = "Temperature (C)", ylim = c(0, 1.2), ...
     )
     graphics::points(temp_interval, lower_bounds, type = "l", col = "blue", lty = 2)
     graphics::points(temp_interval, centers, type = "l", col = "red")
@@ -282,7 +274,7 @@ posterior_predictive <- function(TPC,
   if (!(is.null(seed))) {
     if (!(is.integer(seed))) stop('Argument "seed" must be integer valued')
     set.seed(seed)
-    }
+  }
 
   if (is.null(temp_interval)) temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
   tpc_fun <- get_model_function(TPC$model_spec)
@@ -294,45 +286,40 @@ posterior_predictive <- function(TPC,
     MA[names(TPC$constants)] <- TPC$constants
   }
 
-  #find evaluations
-  #each row is a temperature, each column is a different sample
+  # find evaluations
+  # each row is a temperature, each column is a different sample
   if ("btpc_normal" %in% class(TPC$model_spec)) {
     link_evals <- simplify2array(.mapply(
       FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq"]),
       MoreArgs = MA
     ))
-  }
-  else if ("btpc_gamma" %in% class(TPC$model_spec)) {
+  } else if ("btpc_gamma" %in% class(TPC$model_spec)) {
     link_evals <- simplify2array(.mapply(
       FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "shape_var"]),
       MoreArgs = MA
     ))
-  }
-  else {
+  } else {
     link_evals <- simplify2array(.mapply(
       FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, ]),
       MoreArgs = MA
     ))
   }
 
-  #transform from link to parameter
-  #transform link into response. I want to verify w/ Leah if this is theoretically sound
+  # transform from link to parameter
+  # transform link into response. I want to verify w/ Leah if this is theoretically sound
   if ("btpc_identity" %in% class(TPC$model_spec)) {
     tpc_evals <- link_evals
-  }
-  else if ("btpc_logit" %in% class(TPC$model_spec)) {
+  } else if ("btpc_logit" %in% class(TPC$model_spec)) {
     tpc_evals <- exp(link_evals) / (1 + exp(link_evals))
-  }
-  else if ("btpc_log" %in% class(TPC$model_spec)) {
+  } else if ("btpc_log" %in% class(TPC$model_spec)) {
     tpc_evals <- exp(link_evals)
-  }
-  else if ("btpc_reciprocal" %in% class(TPC$model_spec)) {
+  } else if ("btpc_reciprocal" %in% class(TPC$model_spec)) {
     tpc_evals <- 1 / link_evals
   } else {
     stop("Broken model specification. If you see this error, please contact the package developers.")
   }
 
-  #draw from posterior sample, will make this into a switch when i have time
+  # draw from posterior sample, will make this into a switch when i have time
   if ("btpc_normal" %in% class(TPC$model_spec)) {
     post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
       return(truncnorm::rtruncnorm(
@@ -344,8 +331,7 @@ posterior_predictive <- function(TPC,
       FUN = post_pred_draw, X = rbind(tpc_evals, TPC$samples[(burn + 1):max.ind, "sigma.sq"]),
       MARGIN = 2
     )
-  }
-  else if ("btpc_gamma" %in% class(TPC$model_spec)) {
+  } else if ("btpc_gamma" %in% class(TPC$model_spec)) {
     post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
       return(stats::rgamma(
         n = length(X) - 1, rate = X[1:(length(X) - 1)], shape = X[length(X)]
@@ -355,8 +341,7 @@ posterior_predictive <- function(TPC,
       FUN = post_pred_draw, X = rbind(tpc_evals, TPC$samples[(burn + 1):max.ind, "shape_var"]),
       MARGIN = 2
     )
-  }
-  else if ("btpc_poisson" %in% class(TPC$model_spec)){
+  } else if ("btpc_poisson" %in% class(TPC$model_spec)) {
     post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
       return(stats::rpois(
         n = length(X), lambda = X
@@ -451,22 +436,22 @@ plot_prediction <- function(prediction, ylab = "Trait",
   if (!"btpc_prediction" %in% class(prediction)) {
     stop("Input should be the output of 'posterior_predictive'.")
   }
-  if ("btpc_binomial" %in% class(prediction$model_spec)){
+  if ("btpc_binomial" %in% class(prediction$model_spec)) {
     plot(prediction$temp_interval, prediction$upper_bounds,
-         type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
-         ylab = ylab, ylim = c(0,1.2), ...
+      type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
+      ylab = paste0(ylab, " / n"), ylim = c(0, 1.2), ...
     )
   } else {
     plot(prediction$temp_interval, prediction$upper_bounds,
-         type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
-         ylab = ylab, ylim = c(0, max(max(prediction$upper_bounds), max(prediction$data$Trait))), ...
+      type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
+      ylab = ylab, ylim = c(0, max(max(prediction$upper_bounds), max(prediction$data$Trait))), ...
     )
   }
 
   graphics::points(prediction$temp_interval, prediction$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
   graphics::points(prediction$temp_interval, prediction$lower_bounds, type = "l", col = "blue", lty = 3)
   graphics::points(prediction$temp_interval, prediction$medians, type = "l", col = "blue")
-  if ("btpc_binomial" %in% class(prediction$model_spec)){
+  if ("btpc_binomial" %in% class(prediction$model_spec)) {
     graphics::points(prediction$data$Temp, prediction$data$Trait / prediction$data$n, pch = 16, cex = .75)
   } else {
     graphics::points(prediction$data$Temp, prediction$data$Trait, pch = 16, cex = .75)
