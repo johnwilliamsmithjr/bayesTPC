@@ -50,9 +50,10 @@ check_data <- function(data) {
 #'
 #' @export
 #' @details Behind the scenes, this function configures the necessary components to generate a BUGS model using NIMBLE.
-#' The default priors and constant values are chosen to be as flexible as possible.
+#'  The default priors and constant values are chosen to be as flexible as possible.
 #'
-#' Both the model specification and the MCMC object are compiled by NIMBLE. Progress is printed for clarity's sake.
+#'  Both the model interface and the MCMC object are compiled by NIMBLE. Progress is printed for clarity's sake.
+#'  Users seeking to interact with the fitted model should use `comp_model`.
 #' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve)
 #'  and "Temp" (corresponding to the temperature in Celsius that the trait is being measured at).
 #' @param model A string specifying the model name, or a btpc_model object.
@@ -82,6 +83,7 @@ check_data <- function(data) {
 #'  * `model_spec` -  `btpc_model` containing the model specification being fit.
 #'  * `constants` - A named vector containing the constant values used, if the model includes constants. Otherwise, returns NULL.
 #'  * `uncomp_model` - Uncompiled version of the NIMBLE model. For internal use.
+#'  * `comp_model` - Compiled version of the NIMBLE model.
 #' @examples
 #' library(nimble)
 #' # simulate data
@@ -252,7 +254,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   prior_out <- attr(model, "parameters")
 
-  if ("btpc_normal" %in% class(model)) {
+  if ("btpc_normal" %in% class(model)) { #TODO remove hard-coding
     prior_out["sigma.sq"] <- attr(model, "sigma.sq")
   }
   if ("btpc_gamma" %in% class(model)) {
@@ -261,8 +263,40 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   out <- list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
-    model_spec = model, priors = prior_out, constants = attr(model, "constants"), uncomp_model = nimTPCmod
+    model_spec = model, priors = prior_out, constants = attr(model, "constants"),
+    uncomp_model = nimTPCmod, comp_model = nimTPCmod_compiled
   )
   class(out) <- "btpc_MCMC"
   return(out)
+}
+
+
+nimMAP <- nimble::nimbleFunction(
+  setup = function(fit){
+    model <- fit$uncomp_model #has to be uncompiled for some reason
+    spl <- as.matrix(fit$samples)
+    pars <- colnames(spl)
+    b_pars <- numeric(length(pars))
+    b_lp <- -Inf
+    n <- nrow(spl)
+  },
+  run = function(){
+    for (i in 1:n){
+      values(model, pars) <<- spl[i,]
+      lp <- model$calculate()
+      if (lp > b_lp) {
+        b_lp <<- lp
+        b_pars <<- spl[i,]
+      }
+    }
+  returnType(double(1))
+  return(c(b_pars, b_lp))
+  }
+)
+
+
+MAP_model <- function(fit){
+  com <- compileNimble(nimMAP(fit))
+  out <- com$run(); names(out) <- c(colnames(fit$samples), "log_prob")
+  out
 }
