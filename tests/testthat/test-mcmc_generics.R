@@ -38,6 +38,7 @@ test_that("summary errors checked", {
 })
 
 test_that("plot errors checked", {
+  withr::local_package("nimble")
   expect_error(plot.btpc_MCMC("object"), regexp = "Only use this method")
 
   set.seed(12345)
