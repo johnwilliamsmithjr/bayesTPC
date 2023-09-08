@@ -154,5 +154,5 @@ test_that("b_TPC parameters work", {
   load(testthat::test_path("example_data", "bin_data.rda"))
   bin_tpc <- b_TPC(bin_test_list, "binomial_glm_quad",
     samplerType = "AF_slice", verbose = T
-  ) # need to check verbose manually
+  ) # need to check verbose manually (maybe expect_output in the future idk)
 })

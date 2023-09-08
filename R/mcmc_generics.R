@@ -39,8 +39,9 @@ summary.btpc_MCMC <- function(object,
                               burn = 0,
                               type = "response",
                               ...) {
-  if (!(summaryType %in% c("hdi", "quantile"))) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported.')
-  if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
+
+  #input validation
+  if (!"btpc_MCMC" %in% class(object)) stop("Unexpected type for parameter 'object'. Only use this method with the output of b_TPC().")
 
   cat(paste0(cli::style_underline(cli::col_cyan("bayesTPC MCMC of Type:\n")), "  ", c(object$model_spec)))
   cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")), "  ", .link_string(object$model_spec), attr(object$model_spec, "formula"), " )"))
@@ -90,9 +91,7 @@ summary.btpc_MCMC <- function(object,
       tpc_evals <- exp(link_evals)
     } else if ("btpc_reciprocal" %in% class(object$model_spec)) {
       tpc_evals <- 1 / link_evals
-    } else {
-      stop("Broken model specification. If you see this error, please contact the package developers.")
-    }
+    } #This error always gets caught earlier, redudant code.
   } else {
     stop("Invalid input for parameter 'type'. Supported options are 'link' and 'response'.")
   }
@@ -161,8 +160,8 @@ plot.btpc_MCMC <- function(x,
                            ylab = "Trait",
                            legend = TRUE, legend_position = "bottomright",
                            ...) {
-  if (!(summaryType %in% c("hdi", "quantile"))) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported.')
-  if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
+  if (!"btpc_MCMC" %in% class(x)) stop("Unexpected type for parameter 'object'. Only use this method with the output of b_TPC().")
+
   if (is.null(temp_interval)) temp_interval <- seq(from = min(x$data$Temp), to = max(x$data$Temp), length.out = 1000)
   tpc_fun <- get_model_function(x$model_spec)
   max.ind <- nrow(x$samples)
@@ -192,8 +191,6 @@ plot.btpc_MCMC <- function(x,
       tpc_evals <- exp(link_evals)
     } else if ("btpc_reciprocal" %in% class(x$model_spec)) {
       tpc_evals <- 1 / link_evals
-    } else {
-      stop("Broken model specification. If you see this error, please contact the package developers.")
     }
   } else {
     stop("Invalid input for parameter 'type'. Supported options are 'link' and 'response'.")
@@ -271,6 +268,8 @@ posterior_predictive <- function(TPC,
                                  quantiles = c(.05, .95),
                                  burn = 0,
                                  seed = NULL) {
+
+  if (!"btpc_MCMC" %in% class(TPC)) stop("Unexpected type for parameter 'TPC'. Only use this method with the output of b_TPC().")
   if (!(is.null(seed))) {
     if (!(is.integer(seed))) stop('Argument "seed" must be integer valued')
     set.seed(seed)
@@ -288,22 +287,13 @@ posterior_predictive <- function(TPC,
 
   # find evaluations
   # each row is a temperature, each column is a different sample
-  if ("btpc_normal" %in% class(TPC$model_spec)) {
-    link_evals <- simplify2array(.mapply(
-      FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq"]),
-      MoreArgs = MA
-    ))
-  } else if ("btpc_gamma" %in% class(TPC$model_spec)) {
-    link_evals <- simplify2array(.mapply(
-      FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "shape_var"]),
-      MoreArgs = MA
-    ))
-  } else {
-    link_evals <- simplify2array(.mapply(
-      FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, ]),
-      MoreArgs = MA
-    ))
-  }
+  link_evals <- simplify2array(.mapply(
+    FUN = tpc_fun,
+    dots = data.frame(TPC$samples[(burn + 1):max.ind,
+                                  colnames(TPC$samples) != "sigma.sq" &
+                                  colnames(TPC$samples) != "shape_par"]),
+    MoreArgs = MA
+  ))
 
   # transform from link to parameter
   # transform link into response. I want to verify w/ Leah if this is theoretically sound
@@ -316,7 +306,8 @@ posterior_predictive <- function(TPC,
   } else if ("btpc_reciprocal" %in% class(TPC$model_spec)) {
     tpc_evals <- 1 / link_evals
   } else {
-    stop("Broken model specification. If you see this error, please contact the package developers.")
+    # not sure this would be caught elsewhere
+    stop("Misconfigured Model Specification. If you see this error, please contact the package developers.")
   }
 
   # draw from posterior sample, will make this into a switch when i have time
@@ -381,6 +372,9 @@ posterior_predictive <- function(TPC,
       FUN = post_pred_draw, X = tpc_evals,
       MARGIN = 2
     )
+  } else {
+    # not sure this would be caught elsewhere
+    stop("Misconfigured Model Specification. If you see this error, please contact the package developers.")
   }
 
 
