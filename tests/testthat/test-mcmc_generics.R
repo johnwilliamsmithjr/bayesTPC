@@ -189,10 +189,10 @@ test_that("MCMC methods output correctly", {
   expect_equal(mean_hdi_95$lower_bounds, quad_hdi_95[1,])
   expect_equal(mean_hdi_95$upper_bounds, quad_hdi_95[2,])
 
-  expect_equal(mean_quantile_90$lower_bounds, quad_q_90[1,])
-  expect_equal(mean_quantile_90$upper_bounds, quad_q_90[2,])
-  expect_equal(median_quantile_95$lower_bounds, quad_q_95[1,])
-  expect_equal(median_quantile_95$upper_bounds, quad_q_95[2,])
+  expect_equal(mean_quantile_90$lower_bounds, quad_q_90[,1])
+  expect_equal(mean_quantile_90$upper_bounds, quad_q_90[,2])
+  expect_equal(median_quantile_95$lower_bounds, quad_q_95[,1])
+  expect_equal(median_quantile_95$upper_bounds, quad_q_95[,2])
   link <- summary(bin, type = "link")
   response <- summary(bin, type = "response")
 
