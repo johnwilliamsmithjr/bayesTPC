@@ -1,4 +1,4 @@
-test_that("MCMC generics errors checked", {
+test_that("MCMC methods errors checked", {
   withr::local_package("nimble")
   # bad object type
   expect_error(summary.btpc_MCMC("object"), regexp = "Only use this method")
@@ -69,7 +69,7 @@ test_that("MCMC generics errors checked", {
   expect_error(plot_prediction("heeeey"), regexp = "should be the output of")
 })
 
-test_that("print outputs correctly", {
+test_that("MCMC methods output correctly", {
   withr::local_package("nimble")
 
   set.seed(12345)
@@ -92,6 +92,11 @@ test_that("print outputs correctly", {
   quad <- b_TPC(dat, "quadratic")
   bri <- b_TPC(dat, "briere")
 
+  ## print
+  print_quad <- paste0(capture.output(print(quad)), collapse = "\n")
+  print_bri <- paste0(capture.output(print(bri)), collapse = "\n")
+  print_bin <- paste0(capture.output(print(bin)), collapse = "\n")
+
   expect_output(print_MCMC_metadata(quad), regexp = "quadratic")
   expect_output(print_MCMC_metadata(quad), regexp = "m[i] <- ( ", fixed = T)
   expect_output(print_MCMC_metadata(quad), regexp = "Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )", fixed = T)
@@ -100,15 +105,110 @@ test_that("print outputs correctly", {
   expect_output(print_MCMC_metadata(bri), regexp = "m[i] <- ( ", fixed = T)
   expect_output(print_MCMC_metadata(bri), regexp = "Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )", fixed = T)
 
-
   expect_output(print_MCMC_metadata(bin), regexp = "binomial_glm_lin")
   expect_output(print_MCMC_metadata(bin), regexp = "logit(m[i]) <- ( ", fixed = T)
   expect_output(print_MCMC_metadata(bin), regexp = "Trait[i] ~ dbinom(m[i], n[i])", fixed = T)
-})
 
-test_that("summary outputs correctly", {
-  # use expect_output
-})
+  expect_match(print_quad, regexp = "quadratic")
+  expect_match(print_quad, regexp = "m[i] <- ( ", fixed = T)
+  expect_match(print_quad, regexp = "Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )", fixed = T)
+  expect_match(print_quad, regexp = get_default_priors("quadratic")[1], fixed = T)
+  expect_match(print_quad, regexp = get_default_priors("quadratic")[2], fixed = T)
+  expect_match(print_quad, regexp = get_default_priors("quadratic")[3], fixed = T)
+  expect_match(print_quad, regexp = "dexp(1)", fixed = T)
+
+  expect_match(print_bri, regexp = "briere")
+  expect_match(print_bri, regexp = "m[i] <- ( ", fixed = T)
+  expect_match(print_bri, regexp = "Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )", fixed = T)
+  expect_match(print_bri, regexp = get_default_priors("briere")[1], fixed = T)
+  expect_match(print_bri, regexp = get_default_priors("briere")[2], fixed = T)
+  expect_match(print_bri, regexp = get_default_priors("briere")[3], fixed = T)
+  expect_match(print_bri, regexp = "dexp(1)", fixed = T)
+
+  expect_match(print_bin, regexp = "binomial_glm_lin")
+  expect_match(print_bin, regexp = "logit(m[i]) <- ( ", fixed = T)
+  expect_match(print_bin, regexp = "Trait[i] ~ dbinom(m[i], n[i])", fixed = T)
+  expect_match(print_bin, regexp = get_default_priors("binomial_glm_lin")[1], fixed = T)
+  expect_match(print_bin, regexp = get_default_priors("binomial_glm_lin")[2], fixed = T)
+
+  ## summary
+  summary_quad <- paste0(capture.output(summary(quad)), collapse = "\n")
+  summary_bri <- paste0(capture.output(summary(bri)), collapse = "\n")
+  summary_bin <- paste0(capture.output(summary(bin)), collapse = "\n")
+
+  expect_output(summary(quad, print = F), regexp = NA)
+
+  expect_match(summary_quad, regexp = "quadratic")
+  expect_match(summary_quad, regexp = "m[i] <- ( ", fixed = T)
+  expect_match(summary_quad, regexp = "Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )", fixed = T)
+  expect_match(summary_quad, regexp = get_default_priors("quadratic")[1], fixed = T)
+  expect_match(summary_quad, regexp = get_default_priors("quadratic")[2], fixed = T)
+  expect_match(summary_quad, regexp = get_default_priors("quadratic")[3], fixed = T)
+  expect_match(summary_quad, regexp = "dexp(1)", fixed = T)
+  expect_match(summary_quad, regexp = "Empirical mean")
+
+  expect_match(summary_bri, regexp = "briere")
+  expect_match(summary_bri, regexp = "m[i] <- ( ", fixed = T)
+  expect_match(summary_bri, regexp = "Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )", fixed = T)
+  expect_match(summary_bri, regexp = get_default_priors("briere")[1], fixed = T)
+  expect_match(summary_bri, regexp = get_default_priors("briere")[2], fixed = T)
+  expect_match(summary_bri, regexp = get_default_priors("briere")[3], fixed = T)
+  expect_match(summary_bri, regexp = "dexp(1)", fixed = T)
+
+  expect_match(summary_bin, regexp = "binomial_glm_lin")
+  expect_match(summary_bin, regexp = "logit(m[i]) <- ( ", fixed = T)
+  expect_match(summary_bin, regexp = "Trait[i] ~ dbinom(m[i], n[i])", fixed = T)
+  expect_match(summary_bin, regexp = get_default_priors("binomial_glm_lin")[1], fixed = T)
+  expect_match(summary_bin, regexp = get_default_priors("binomial_glm_lin")[2], fixed = T)
+
+  #checking different central summaries and interval types
+  median_hdi_90 <- summary(quad)
+  mean_hdi_95 <- summary(quad, centralSummary = "mean", prob = .95)
+  mean_quantile_90 <- summary(quad, summaryType = "quantile", centralSummary = "mean")
+  median_quantile_95 <- summary(quad, summaryType = "quantile", quantiles = c(.025,.975))
+
+  quad_evals <- simplify2array(.mapply(
+    FUN = get_model_function("quadratic"), dots = data.frame(quad$samples[, !colnames(quad$samples) %in% "sigma.sq"]),
+    MoreArgs = list(Temp = seq(from = min(quad$data$Temp), to = max(quad$data$Temp), length.out = 1000))
+  ))
+
+  quad_medians <- matrixStats::rowMedians(quad_evals)
+  quad_means <- matrixStats::rowMeans2(quad_evals)
+  quad_hdi_90 <- apply(FUN = HDInterval::hdi, X = quad_evals, MARGIN = 1, credMass = .9)
+  quad_hdi_95 <- apply(FUN = HDInterval::hdi, X = quad_evals, MARGIN = 1, credMass = .95)
+  quad_q_90 <- matrixStats::rowQuantiles(quad_evals, probs = c(.05,.95))
+  quad_q_95 <- matrixStats::rowQuantiles(quad_evals, probs = c(.025,.975))
+
+  expect_equal(median_hdi_90$medians, quad_medians)
+  expect_equal(mean_hdi_95$means, quad_means)
+  expect_equal(mean_quantile_90$means, quad_means)
+  expect_equal(median_quantile_95$medians, quad_medians)
+
+  expect_equal(median_hdi_90$lower_bounds, quad_hdi_90[1,])
+  expect_equal(median_hdi_90$upper_bounds, quad_hdi_90[2,])
+  expect_equal(mean_hdi_95$lower_bounds, quad_hdi_95[1,])
+  expect_equal(mean_hdi_95$upper_bounds, quad_hdi_95[2,])
+
+  expect_equal(mean_quantile_90$lower_bounds, quad_q_90[1,])
+  expect_equal(mean_quantile_90$upper_bounds, quad_q_90[2,])
+  expect_equal(median_quantile_95$lower_bounds, quad_q_95[1,])
+  expect_equal(median_quantile_95$upper_bounds, quad_q_95[2,])
+  link <- summary(bin, type = "link")
+  response <- summary(bin, type = "response")
+
+  bin_link_evals <- simplify2array(.mapply(
+    FUN = get_model_function("binomial_glm_lin"), dots = data.frame(bin$samples[, !colnames(bin$samples) %in% "sigma.sq"]),
+    MoreArgs = list(Temp = seq(from = min(bin$data$Temp), to = max(bin$data$Temp), length.out = 1000))
+  ))
+  bin_response_evals <- exp(bin_link_evals) / (1 + exp(bin_link_evals))
+  link_medians <- matrixStats::rowMedians(bin_link_evals)
+  response_medians <- matrixStats::rowMedians(bin_response_evals)
+
+  expect_equal(link$medians, link_medians)
+  expect_equal(response$medians, response_medians)
+  })
+
+
 
 
 test_that("posterior_predictive branch statements", {

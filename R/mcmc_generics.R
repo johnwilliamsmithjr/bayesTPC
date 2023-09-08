@@ -53,7 +53,7 @@ summary.btpc_MCMC <- function(object,
   if (!(summaryType %in% c("hdi", "quantile"))) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported.')
   if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
 
-  if (print) { # could be a helper function
+  if (print) {
     print_MCMC_metadata(object)
     cat(cli::style_underline(cli::col_cyan("\n\nModel Priors:")))
     cat(paste0("\n  ", names(object$priors), " ~ ", object$priors))
@@ -65,6 +65,12 @@ summary.btpc_MCMC <- function(object,
     print(summary(object$samples))
   }
 
+
+
+  if (is.null(temp_interval)) temp_interval <- seq(from = min(object$data$Temp), to = max(object$data$Temp), length.out = 1000)
+  tpc_fun <- get_model_function(object$model_spec)
+  max.ind <- nrow(object$samples)
+
   # assign constants
   MA <- list(Temp = temp_interval)
   if (length(object$constants) > 0) {
@@ -73,12 +79,8 @@ summary.btpc_MCMC <- function(object,
     }
   }
 
-  if (is.null(temp_interval)) temp_interval <- seq(from = min(object$data$Temp), to = max(object$data$Temp), length.out = 1000)
-  tpc_fun <- get_model_function(object$model_spec)
-  max.ind <- nrow(object$samples)
-
   link_evals <- simplify2array(.mapply(
-    FUN = tpc_fun, dots = data.frame(object$samples[(burn + 1):max.ind, !colnames(object$samples) %in% "sigma.sq"]),
+    FUN = tpc_fun, dots = data.frame(object$samples[(burn + 1):max.ind, colnames(object$samples) != "sigma.sq" & colnames(object$samples) != "shape_par"]),
     MoreArgs = MA
   ))
 
@@ -147,7 +149,9 @@ summary.btpc_MCMC <- function(object,
 #' @param burn numeric, initial number of iterations to be discarded as burn-in. Default is 0.
 #' @param type character, should the summaries be calculated for the link or the response?
 #'  Supported inputs are "response" and "link". Default is "response".
-#' @param ylab a title for the y axis.
+#' @param ylab a title for the y axis. Default is "Trait".
+#' @param xlab character, a title for the x-axis. Default is "Temperature (C)"
+#' @param ylim numeric, the limits for the y-axis.
 #' @param legend logical, should a legend be added to the plot? Default is TRUE.
 #' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
 #' @param ... additional parameters passed to `plot.default()`.
@@ -161,6 +165,8 @@ plot.btpc_MCMC <- function(x,
                            print_summary = FALSE,
                            type = "response",
                            ylab = "Trait",
+                           xlab = "Temperature (C)",
+                           ylim = NULL,
                            legend = TRUE, legend_position = "bottomright",
                            ...) {
   sm <- summary.btpc_MCMC(
@@ -175,27 +181,23 @@ plot.btpc_MCMC <- function(x,
     print = print_summary
   )
 
-  sm_items <- names(sm)
-  for (i in 1:length(sm)) {
-    # assign isn't vectorized for some reason
-    # maybe with how the C assign internal does the memory stuff?
-    # I will try to avoid diving down this rabbit hole.
-    assign(sm_items[i], sm[[sm_items]])
-  }
+  ylim <- if (is.null(ylim))
+    c(0, max(sm$upper_bounds, x$data$Trait))
+  else ylim
 
   plot(sm$temp_interval, sm$upper_bounds,
     type = "l", col = "blue", lty = 2,
-    ylab = ylab, xlab = "Temperature (C)", ylim = c(0, max(sm$upper_bounds, x$data$Trait)), ...
+    ylab = ylab, xlab = xlab, ylim = ylim, ...
   )
   graphics::points(sm$temp_interval, sm$lower_bounds, type = "l", col = "blue", lty = 2)
-  graphics::points(sm$temp_interval, sm$centers, type = "l", col = "red")
+  graphics::points(sm$temp_interval, sm[[paste0(centralSummary, "s")]], type = "l", col = "red")
   if ("btpc_binomial" %in% class(x$model_spec)) {
     plot(sm$temp_interval, sm$upper_bounds,
       type = "l", col = "blue", lty = 2,
       ylab = paste0(ylab, " / n"), xlab = "Temperature (C)", ylim = c(0, 1.2), ...
     )
     graphics::points(sm$temp_interval, sm$lower_bounds, type = "l", col = "blue", lty = 2)
-    graphics::points(sm$temp_interval, sm$centers, type = "l", col = "red")
+    graphics::points(sm$temp_interval, sm[[paste0(centralSummary, "s")]], type = "l", col = "red")
     graphics::points(x$data$Temp, x$data$Trait / x$data$n, pch = 16, cex = .75)
   } else {
     graphics::points(x$data$Temp, x$data$Trait, pch = 16, cex = .75)
