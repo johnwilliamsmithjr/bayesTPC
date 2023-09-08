@@ -12,6 +12,7 @@
   prob = 0.9,
   quantiles = c(0.05, 0.95),
   burn = 0,
+  print_summary = FALSE,
   type = "response",
   ylab = "Trait",
   legend = TRUE,
@@ -34,6 +35,8 @@ If no vector is provided, temp_interval is set as a sequence from the lowest obs
 \item{quantiles}{length 2 numeric, quantiles used for a credible interval. Used if summaryType = "quantile".}
 
 \item{burn}{numeric, initial number of iterations to be discarded as burn-in. Default is 0.}
+
+\item{print_summary}{logical, should a summary be printed? Default is FALSE.}
 
 \item{type}{character, should the summaries be calculated for the link or the response?
 Supported inputs are "response" and "link". Default is "response".}
