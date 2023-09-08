@@ -287,22 +287,13 @@ posterior_predictive <- function(TPC,
 
   # find evaluations
   # each row is a temperature, each column is a different sample
-  if ("btpc_normal" %in% class(TPC$model_spec)) {
-    link_evals <- simplify2array(.mapply(
-      FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "sigma.sq"]),
-      MoreArgs = MA
-    ))
-  } else if ("btpc_gamma" %in% class(TPC$model_spec)) {
-    link_evals <- simplify2array(.mapply(
-      FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, !colnames(TPC$samples) %in% "shape_var"]),
-      MoreArgs = MA
-    ))
-  } else {
-    link_evals <- simplify2array(.mapply(
-      FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, ]),
-      MoreArgs = MA
-    ))
-  }
+  link_evals <- simplify2array(.mapply(
+    FUN = tpc_fun,
+    dots = data.frame(TPC$samples[(burn + 1):max.ind,
+                                  colnames(TPC$samples) != "sigma.sq" &
+                                  colnames(TPC$samples) != "shape_par"]),
+    MoreArgs = MA
+  ))
 
   # transform from link to parameter
   # transform link into response. I want to verify w/ Leah if this is theoretically sound
@@ -315,7 +306,8 @@ posterior_predictive <- function(TPC,
   } else if ("btpc_reciprocal" %in% class(TPC$model_spec)) {
     tpc_evals <- 1 / link_evals
   } else {
-    stop("Broken model specification. If you see this error, please contact the package developers.")
+    # not sure this would be caught elsewhere
+    stop("Misconfigured Model Specification. If you see this error, please contact the package developers.")
   }
 
   # draw from posterior sample, will make this into a switch when i have time
@@ -380,6 +372,9 @@ posterior_predictive <- function(TPC,
       FUN = post_pred_draw, X = tpc_evals,
       MARGIN = 2
     )
+  } else {
+    # not sure this would be caught elsewhere
+    stop("Misconfigured Model Specification. If you see this error, please contact the package developers.")
   }
 
 
