@@ -159,6 +159,10 @@ test_that("b_TPC parameters work", {
   )
   expect_equal(ps_default$constants, c(T_ref = 20))
   expect_equal(ps_changed$constants, c(T_ref = 30))
+  expect_output(print(ps_default), regexp = "T_ref = 20", fixed = T)
+  expect_output(print(ps_changed), regexp = "T_ref = 30", fixed = T)
+  expect_output(summary(ps_default), regexp = "T_ref = 20", fixed = T)
+  expect_output(summary(ps_changed), regexp = "T_ref = 30", fixed = T)
 
   # binomial
   load(testthat::test_path("example_data", "bin_data.rda"))

@@ -1,9 +1,13 @@
 # helper for reused code
 print_MCMC_metadata <- function(x) {
   cat(paste0(cli::style_underline(cli::col_cyan("bayesTPC MCMC of Type:\n")), "  ", c(x$model_spec)))
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")), "  ", .link_string(x$model_spec), attr(x$model_spec, "formula"), " )"))
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Distribution:\n")), "  Trait[i] ~ ", .distribution_string(x$model_spec)))
-}
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nFormula:\n")), "  ", .link_string(x$model_spec), attr(x$model_spec, "formula"), " )"))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nDistribution:\n")), "  Trait[i] ~ ", .distribution_string(x$model_spec)))
+  if (length(x$constants) > 0) {
+    cat(cli::style_underline(cli::col_cyan("\n\nConstants:")))
+    cat("\n  ", names(x$constants), " = ", x$constants, sep = "")
+  }
+  }
 
 #' @export
 print.btpc_MCMC <- function(x, digits = 3, ...) {
@@ -16,7 +20,7 @@ print.btpc_MCMC <- function(x, digits = 3, ...) {
   tbl <- cbind.data.frame(round(x$MAP_parameters[1:ncol(s)], digits), means, medians, x$priors[colnames(s)])
   rownames(tbl) <- colnames(s)
   colnames(tbl) <- c("MAP", "Mean", "Median", "Priors")
-  cat(cli::style_underline(cli::col_cyan("\n\nModel Parameters:\n")))
+  cat(cli::style_underline(cli::col_cyan("\n\nParameters:\n")))
   print(tbl)
 }
 
@@ -55,13 +59,9 @@ summary.btpc_MCMC <- function(object,
 
   if (print) {
     print_MCMC_metadata(object)
-    cat(cli::style_underline(cli::col_cyan("\n\nModel Priors:")))
+    cat(cli::style_underline(cli::col_cyan("\n\nPriors:")))
     cat(paste0("\n  ", names(object$priors), " ~ ", object$priors))
-    if (length(object$constants) > 0) {
-      cat(cli::style_underline(cli::col_cyan("\n\nModel Constants:")))
-      cat("\n  ", names(object$constants), ": ", object$constants, sep = "")
-    }
-    cat(cli::style_underline(cli::col_cyan("\n\nMax. A Post. Model Parameters:")), "\n")
+    cat(cli::style_underline(cli::col_cyan("\n\nMax. A Post. Parameters:")), "\n")
     print(round(object$MAP_parameters, 4))
     cat(cli::style_underline(cli::col_cyan("\nMCMC Results:")))
     print(summary(object$samples))
