@@ -50,9 +50,10 @@ check_data <- function(data) {
 #'
 #' @export
 #' @details Behind the scenes, this function configures the necessary components to generate a BUGS model using NIMBLE.
-#' The default priors and constant values are chosen to be as flexible as possible.
+#'  The default priors and constant values are chosen to be as flexible as possible.
 #'
-#' Both the model specification and the MCMC object are compiled by NIMBLE. Progress is printed for clarity's sake.
+#'  Both the model interface and the MCMC object are compiled by NIMBLE. Progress is printed for clarity's sake.
+#'  Users seeking to interact with the fitted model should use `comp_model`.
 #' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve)
 #'  and "Temp" (corresponding to the temperature in Celsius that the trait is being measured at).
 #' @param model A string specifying the model name, or a btpc_model object.
@@ -82,6 +83,8 @@ check_data <- function(data) {
 #'  * `model_spec` -  `btpc_model` containing the model specification being fit.
 #'  * `constants` - A named vector containing the constant values used, if the model includes constants. Otherwise, returns NULL.
 #'  * `uncomp_model` - Uncompiled version of the NIMBLE model. For internal use.
+#'  * `comp_model` - Compiled version of the NIMBLE model.
+#'  * `MAP_parameters` - The parameters of the highest density MCMC sample.
 #' @examples
 #' library(nimble)
 #' # simulate data
@@ -134,6 +137,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   user_verbose <- verbose # avoid quoting mishaps
   nimble::nimbleOptions(verbose = user_verbose)
 
+  # removes superflous environmental objects
   on.exit({
     # remove random objects from global environment
     rm(list = base::setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
@@ -252,17 +256,71 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   prior_out <- attr(model, "parameters")
 
-  if ("btpc_normal" %in% class(model)) {
+  if ("btpc_normal" %in% class(model)) { # TODO remove hard-coding
     prior_out["sigma.sq"] <- attr(model, "sigma.sq")
   }
   if ("btpc_gamma" %in% class(model)) {
     prior_out["shape_par"] <- attr(model, "shape_par")
   }
 
+  cat(cli::style_underline(cli::col_cyan("\nConfiguring Output:\n")))
+
   out <- list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
-    model_spec = model, priors = prior_out, constants = attr(model, "constants"), uncomp_model = nimTPCmod
+    model_spec = model, priors = prior_out, constants = attr(model, "constants"),
+    uncomp_model = nimTPCmod, comp_model = nimTPCmod_compiled
   )
   class(out) <- "btpc_MCMC"
+
+  cat(" - Finding Max. a Post. parameters.\n")
+  out$MAP_parameters <- do_map(out)
+
   return(out)
+}
+
+# runner for MAP_model()
+nimMAP <- nimble::nimbleFunction(
+  setup = function(fit) {
+    # I want to do some crazy hackery to compile this on startup
+    # rather than every time it's run, but I do not know how nimble does this well enough
+    # maybe won't make the 1.0.0 release but maybe a 1.1 or 1.2
+    # maybe contact the nimble developers
+    model <- fit$uncomp_model # has to be uncompiled for some reason
+    spl <- as.matrix(fit$samples)
+    pars <- colnames(spl)
+    b_pars <- numeric(length(pars))
+    b_lp <- -Inf
+    n <- nrow(spl)
+  },
+  run = function() {
+    for (i in 1:n) {
+      values(model, pars) <<- spl[i, ]
+      lp <- model$calculate()
+      if (lp > b_lp) { # naive algorithm
+        b_lp <<- lp
+        b_pars <<- spl[i, ]
+      }
+    }
+    returnType(double(1))
+    return(c(b_pars, b_lp))
+  }
+)
+
+do_map <- function(fit) {
+  # wrapper for nimMAP()
+  com <- compileNimble(nimMAP(fit))
+  out <- com$run()
+  names(out) <- c(colnames(fit$samples), "log_prob")
+  out
+}
+
+#' Find Maximum A Posteriori Estimate.
+#'
+#' @param fit `btpc_MCMC`, output from [b_TPC()]
+#'
+#' @return `MAP_estimate` returns the parameters of the sample with the highest posterior density.
+#' @export
+MAP_estimate <- function(fit) {
+  if (!"btpc_MCMC" %in% class(fit)) stop("Unexpected type for parameter 'fit'. Only use this method with the output of b_TPC().")
+  fit$MAP_parameters
 }

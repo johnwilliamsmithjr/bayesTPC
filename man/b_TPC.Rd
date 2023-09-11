@@ -61,6 +61,8 @@ Currently only used for model = 'pawar-shsch'.}
 \item \code{model_spec} -  \code{btpc_model} containing the model specification being fit.
 \item \code{constants} - A named vector containing the constant values used, if the model includes constants. Otherwise, returns NULL.
 \item \code{uncomp_model} - Uncompiled version of the NIMBLE model. For internal use.
+\item \code{comp_model} - Compiled version of the NIMBLE model.
+\item \code{MAP_parameters} - The parameters of the highest density MCMC sample.
 }
 }
 \description{
@@ -70,7 +72,8 @@ Generates NIMBLE model, and performs MCMC.
 Behind the scenes, this function configures the necessary components to generate a BUGS model using NIMBLE.
 The default priors and constant values are chosen to be as flexible as possible.
 
-Both the model specification and the MCMC object are compiled by NIMBLE. Progress is printed for clarity's sake.
+Both the model interface and the MCMC object are compiled by NIMBLE. Progress is printed for clarity's sake.
+Users seeking to interact with the fitted model should use \code{comp_model}.
 }
 \examples{
 library(nimble)

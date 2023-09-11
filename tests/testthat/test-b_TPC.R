@@ -119,6 +119,15 @@ test_that("b_TPC parameters work", {
   expect_equal(nrow(default_quad$samples), 10000)
   expect_equal(default_quad$priors[1:3], get_default_priors("quadratic"))
   expect_equal(default_quad$priors[4], c(sigma.sq = "dexp(1)"))
+  true_MAP <- c(
+    T_max = 35.1866801,
+    T_min = 9.8571586,
+    q = 0.7272414,
+    sigma.sq = 1.9262398,
+    log_prob = -38.2568138
+  )
+  expect_equal(default_quad$MAP_parameters, true_MAP)
+  expect_equal(MAP_estimate(default_quad), default_quad$MAP_parameters)
 
   changed_quad <- b_TPC(dat, "quadratic",
     niter = 8000, burn = 1000,
@@ -135,6 +144,7 @@ test_that("b_TPC parameters work", {
   expect_equal(changed_quad$priors[4], c(sigma.sq = "dexp(1)"))
 
   # constants
+  # want a smaller example dataset for faster testing
   load(testthat::test_path("example_data", "chlorella_tpc.rda"))
   ps_test <- list(
     Trait = chlorella_tpc$rate[which(chlorella_tpc$flux == "photosynthesis")],
@@ -149,6 +159,10 @@ test_that("b_TPC parameters work", {
   )
   expect_equal(ps_default$constants, c(T_ref = 20))
   expect_equal(ps_changed$constants, c(T_ref = 30))
+  expect_output(print(ps_default), regexp = "T_ref = 20", fixed = T)
+  expect_output(print(ps_changed), regexp = "T_ref = 30", fixed = T)
+  expect_output(summary(ps_default), regexp = "T_ref = 20", fixed = T)
+  expect_output(summary(ps_changed), regexp = "T_ref = 30", fixed = T)
 
   # binomial
   load(testthat::test_path("example_data", "bin_data.rda"))
