@@ -136,6 +136,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   user_verbose <- verbose # avoid quoting mishaps
   nimble::nimbleOptions(verbose = user_verbose)
 
+  # removes superflous environmental objects
   on.exit({
     # remove random objects from global environment
     rm(list = base::setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
@@ -261,18 +262,28 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     prior_out["shape_par"] <- attr(model, "shape_par")
   }
 
+  cat(cli::style_underline(cli::col_cyan("\nConfiguring Output:\n")))
+
   out <- list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,
     model_spec = model, priors = prior_out, constants = attr(model, "constants"),
     uncomp_model = nimTPCmod, comp_model = nimTPCmod_compiled
   )
   class(out) <- "btpc_MCMC"
+
+  cat(" - Finding Max. a Post. parameters.\n")
+  out$MAP_parameters <- do_map(out)
+
   return(out)
 }
 
-
+# runner for MAP_model()
 nimMAP <- nimble::nimbleFunction(
   setup = function(fit){
+    # I want to do some crazy hackery to compile this on startup
+    # rather than every time it's run, but I do not know how nimble does this well enough
+    # maybe won't make the 1.0.0 release but maybe a 1.1 or 1.2
+    # maybe contact the nimble developers
     model <- fit$uncomp_model #has to be uncompiled for some reason
     spl <- as.matrix(fit$samples)
     pars <- colnames(spl)
@@ -284,7 +295,7 @@ nimMAP <- nimble::nimbleFunction(
     for (i in 1:n){
       values(model, pars) <<- spl[i,]
       lp <- model$calculate()
-      if (lp > b_lp) {
+      if (lp > b_lp) { # naive algorithm
         b_lp <<- lp
         b_pars <<- spl[i,]
       }
@@ -294,9 +305,20 @@ nimMAP <- nimble::nimbleFunction(
   }
 )
 
-
-MAP_model <- function(fit){
+do_map <- function(fit) {
+  #wrapper for nimMAP()
   com <- compileNimble(nimMAP(fit))
   out <- com$run(); names(out) <- c(colnames(fit$samples), "log_prob")
   out
+}
+
+#' Find Maximum A Posteriori Estimate.
+#'
+#' @param fit `btpc_MCMC`, output from [b_TPC()]
+#'
+#' @return `MAP_model` returns the parameters of the sample with the highest posterior density.
+#' @export
+MAP_model <- function(fit){
+  if (!"btpc_MCMC" %in% class(fit)) stop("Unexpected type for parameter 'fit'. Only use this method with the output of b_TPC().")
+  fit$MAP_parameters
 }

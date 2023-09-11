@@ -301,19 +301,19 @@ print.btpc_model <- function(x, ...) {
   cat(paste0("\n  ", names(params), " ~ ", params))
   consts <- attr(x, "constants")
   if (length(consts) > 0) {
-    cat(paste0("\nModel Constants:"))
-    cat(paste0("\n  ", names(consts), ": ", consts))
+    cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Constants:"))))
+    cat(paste0("\n  ", names(consts), " = ", consts))
   }
 }
 
 #' @export
 print.btpc_normal <- function(x, ...) {
   print.btpc_model(x)
-  cat(paste0("\nPrior for Variance:\n  ", attr(x, "sigma.sq")))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nPrior for Variance:")),"\n  sigma.sq ~ ", attr(x, "sigma.sq")))
 }
 
 #' @export
 print.btpc_gamma <- function(x, ...) {
   print.btpc_model(x)
-  cat(paste0("\nPrior for Shape:\n  ", attr(x, "shape_par")))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nPrior for Shape:")),"\n  shape_par ~ ", attr(x, "shape_par")))
 }
