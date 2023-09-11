@@ -1,6 +1,5 @@
 comment: false
-ignore: 
- - "R/old_summaries.R"
+
 coverage:
   status:
     project:
@@ -13,3 +12,4 @@ coverage:
         target: auto
         threshold: 1%
         informational: true
+
