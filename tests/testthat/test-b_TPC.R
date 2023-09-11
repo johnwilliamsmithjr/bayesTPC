@@ -127,7 +127,7 @@ test_that("b_TPC parameters work", {
     log_prob = -38.2568138
   )
   expect_equal(default_quad$MAP_parameters, true_MAP)
-  expect_equal(MAP_model(default_quad), default_quad$MAP_parameters)
+  expect_equal(MAP_estimate(default_quad), default_quad$MAP_parameters)
 
   changed_quad <- b_TPC(dat, "quadratic",
     niter = 8000, burn = 1000,

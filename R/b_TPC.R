@@ -318,9 +318,9 @@ do_map <- function(fit) {
 #'
 #' @param fit `btpc_MCMC`, output from [b_TPC()]
 #'
-#' @return `MAP_model` returns the parameters of the sample with the highest posterior density.
+#' @return `MAP_estimate` returns the parameters of the sample with the highest posterior density.
 #' @export
-MAP_model <- function(fit) {
+MAP_estimate <- function(fit) {
   if (!"btpc_MCMC" %in% class(fit)) stop("Unexpected type for parameter 'fit'. Only use this method with the output of b_TPC().")
   fit$MAP_parameters
 }
