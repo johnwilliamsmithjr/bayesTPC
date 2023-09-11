@@ -84,6 +84,7 @@ check_data <- function(data) {
 #'  * `constants` - A named vector containing the constant values used, if the model includes constants. Otherwise, returns NULL.
 #'  * `uncomp_model` - Uncompiled version of the NIMBLE model. For internal use.
 #'  * `comp_model` - Compiled version of the NIMBLE model.
+#'  * `MAP_parameters` - The parameters of the highest density MCMC sample.
 #' @examples
 #' library(nimble)
 #' # simulate data
@@ -255,7 +256,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   prior_out <- attr(model, "parameters")
 
-  if ("btpc_normal" %in% class(model)) { #TODO remove hard-coding
+  if ("btpc_normal" %in% class(model)) { # TODO remove hard-coding
     prior_out["sigma.sq"] <- attr(model, "sigma.sq")
   }
   if ("btpc_gamma" %in% class(model)) {
@@ -279,36 +280,37 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
 # runner for MAP_model()
 nimMAP <- nimble::nimbleFunction(
-  setup = function(fit){
+  setup = function(fit) {
     # I want to do some crazy hackery to compile this on startup
     # rather than every time it's run, but I do not know how nimble does this well enough
     # maybe won't make the 1.0.0 release but maybe a 1.1 or 1.2
     # maybe contact the nimble developers
-    model <- fit$uncomp_model #has to be uncompiled for some reason
+    model <- fit$uncomp_model # has to be uncompiled for some reason
     spl <- as.matrix(fit$samples)
     pars <- colnames(spl)
     b_pars <- numeric(length(pars))
     b_lp <- -Inf
     n <- nrow(spl)
   },
-  run = function(){
-    for (i in 1:n){
-      values(model, pars) <<- spl[i,]
+  run = function() {
+    for (i in 1:n) {
+      values(model, pars) <<- spl[i, ]
       lp <- model$calculate()
       if (lp > b_lp) { # naive algorithm
         b_lp <<- lp
-        b_pars <<- spl[i,]
+        b_pars <<- spl[i, ]
       }
     }
-  returnType(double(1))
-  return(c(b_pars, b_lp))
+    returnType(double(1))
+    return(c(b_pars, b_lp))
   }
 )
 
 do_map <- function(fit) {
-  #wrapper for nimMAP()
+  # wrapper for nimMAP()
   com <- compileNimble(nimMAP(fit))
-  out <- com$run(); names(out) <- c(colnames(fit$samples), "log_prob")
+  out <- com$run()
+  names(out) <- c(colnames(fit$samples), "log_prob")
   out
 }
 
@@ -318,7 +320,7 @@ do_map <- function(fit) {
 #'
 #' @return `MAP_model` returns the parameters of the sample with the highest posterior density.
 #' @export
-MAP_model <- function(fit){
+MAP_model <- function(fit) {
   if (!"btpc_MCMC" %in% class(fit)) stop("Unexpected type for parameter 'fit'. Only use this method with the output of b_TPC().")
   fit$MAP_parameters
 }

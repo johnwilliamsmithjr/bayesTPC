@@ -13,9 +13,9 @@ print.btpc_MCMC <- function(x, digits = 3, ...) {
   s <- x$samples
   means <- round(matrixStats::colMeans2(s), digits)
   medians <- round(matrixStats::colMedians(s), digits)
-  tbl <- cbind.data.frame(means, medians, x$priors[colnames(s)])
+  tbl <- cbind.data.frame(round(x$MAP_parameters[1:ncol(s)], digits), means, medians, x$priors[colnames(s)])
   rownames(tbl) <- colnames(s)
-  colnames(tbl) <- c("Mean", "Median", "Priors")
+  colnames(tbl) <- c("MAP", "Mean", "Median", "Priors")
   cat(cli::style_underline(cli::col_cyan("\n\nModel Parameters:\n")))
   print(tbl)
 }
@@ -61,7 +61,9 @@ summary.btpc_MCMC <- function(object,
       cat(cli::style_underline(cli::col_cyan("\n\nModel Constants:")))
       cat("\n  ", names(object$constants), ": ", object$constants, sep = "")
     }
-    cat(cli::style_underline(cli::col_cyan("\n\nMCMC Results:")))
+    cat(cli::style_underline(cli::col_cyan("\n\nMax. A Post. Model Parameters:")), "\n")
+    print(round(object$MAP_parameters, 4))
+    cat(cli::style_underline(cli::col_cyan("\nMCMC Results:")))
     print(summary(object$samples))
   }
 
@@ -181,9 +183,11 @@ plot.btpc_MCMC <- function(x,
     print = print_summary
   )
 
-  ylim <- if (is.null(ylim))
+  ylim <- if (is.null(ylim)) {
     c(0, max(sm$upper_bounds, x$data$Trait))
-  else ylim
+  } else {
+    ylim
+  }
 
   plot(sm$temp_interval, sm$upper_bounds,
     type = "l", col = "blue", lty = 2,

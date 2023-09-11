@@ -62,6 +62,7 @@ Currently only used for model = 'pawar-shsch'.}
 \item \code{constants} - A named vector containing the constant values used, if the model includes constants. Otherwise, returns NULL.
 \item \code{uncomp_model} - Uncompiled version of the NIMBLE model. For internal use.
 \item \code{comp_model} - Compiled version of the NIMBLE model.
+\item \code{MAP_parameters} - The parameters of the highest density MCMC sample.
 }
 }
 \description{

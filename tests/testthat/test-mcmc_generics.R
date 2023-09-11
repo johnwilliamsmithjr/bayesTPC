@@ -161,11 +161,11 @@ test_that("MCMC methods output correctly", {
   expect_match(summary_bin, regexp = get_default_priors("binomial_glm_lin")[1], fixed = T)
   expect_match(summary_bin, regexp = get_default_priors("binomial_glm_lin")[2], fixed = T)
 
-  #checking different central summaries and interval types
+  # checking different central summaries and interval types
   median_hdi_90 <- summary(quad)
   mean_hdi_95 <- summary(quad, centralSummary = "mean", prob = .95)
   mean_quantile_90 <- summary(quad, summaryType = "quantile", centralSummary = "mean")
-  median_quantile_95 <- summary(quad, summaryType = "quantile", quantiles = c(.025,.975))
+  median_quantile_95 <- summary(quad, summaryType = "quantile", quantiles = c(.025, .975))
 
   quad_evals <- simplify2array(.mapply(
     FUN = get_model_function("quadratic"), dots = data.frame(quad$samples[, !colnames(quad$samples) %in% "sigma.sq"]),
@@ -176,23 +176,23 @@ test_that("MCMC methods output correctly", {
   quad_means <- matrixStats::rowMeans2(quad_evals)
   quad_hdi_90 <- apply(FUN = HDInterval::hdi, X = quad_evals, MARGIN = 1, credMass = .9)
   quad_hdi_95 <- apply(FUN = HDInterval::hdi, X = quad_evals, MARGIN = 1, credMass = .95)
-  quad_q_90 <- matrixStats::rowQuantiles(quad_evals, probs = c(.05,.95))
-  quad_q_95 <- matrixStats::rowQuantiles(quad_evals, probs = c(.025,.975))
+  quad_q_90 <- matrixStats::rowQuantiles(quad_evals, probs = c(.05, .95))
+  quad_q_95 <- matrixStats::rowQuantiles(quad_evals, probs = c(.025, .975))
 
   expect_equal(median_hdi_90$medians, quad_medians)
   expect_equal(mean_hdi_95$means, quad_means)
   expect_equal(mean_quantile_90$means, quad_means)
   expect_equal(median_quantile_95$medians, quad_medians)
 
-  expect_equal(median_hdi_90$lower_bounds, quad_hdi_90[1,])
-  expect_equal(median_hdi_90$upper_bounds, quad_hdi_90[2,])
-  expect_equal(mean_hdi_95$lower_bounds, quad_hdi_95[1,])
-  expect_equal(mean_hdi_95$upper_bounds, quad_hdi_95[2,])
+  expect_equal(median_hdi_90$lower_bounds, quad_hdi_90[1, ])
+  expect_equal(median_hdi_90$upper_bounds, quad_hdi_90[2, ])
+  expect_equal(mean_hdi_95$lower_bounds, quad_hdi_95[1, ])
+  expect_equal(mean_hdi_95$upper_bounds, quad_hdi_95[2, ])
 
-  expect_equal(mean_quantile_90$lower_bounds, quad_q_90[,1])
-  expect_equal(mean_quantile_90$upper_bounds, quad_q_90[,2])
-  expect_equal(median_quantile_95$lower_bounds, quad_q_95[,1])
-  expect_equal(median_quantile_95$upper_bounds, quad_q_95[,2])
+  expect_equal(mean_quantile_90$lower_bounds, quad_q_90[, 1])
+  expect_equal(mean_quantile_90$upper_bounds, quad_q_90[, 2])
+  expect_equal(median_quantile_95$lower_bounds, quad_q_95[, 1])
+  expect_equal(median_quantile_95$upper_bounds, quad_q_95[, 2])
   link <- summary(bin, type = "link")
   response <- summary(bin, type = "response")
 
@@ -206,7 +206,7 @@ test_that("MCMC methods output correctly", {
 
   expect_equal(link$medians, link_medians)
   expect_equal(response$medians, response_medians)
-  })
+})
 
 
 

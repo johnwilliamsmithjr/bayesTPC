@@ -309,11 +309,11 @@ print.btpc_model <- function(x, ...) {
 #' @export
 print.btpc_normal <- function(x, ...) {
   print.btpc_model(x)
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nPrior for Variance:")),"\n  sigma.sq ~ ", attr(x, "sigma.sq")))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nPrior for Variance:")), "\n  sigma.sq ~ ", attr(x, "sigma.sq")))
 }
 
 #' @export
 print.btpc_gamma <- function(x, ...) {
   print.btpc_model(x)
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nPrior for Shape:")),"\n  shape_par ~ ", attr(x, "shape_par")))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nPrior for Shape:")), "\n  shape_par ~ ", attr(x, "shape_par")))
 }
