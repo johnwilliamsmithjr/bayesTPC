@@ -1,5 +1,6 @@
 comment: false
-
+ignore: 
+ - "R/old_summaries.R"
 coverage:
   status:
     project:
