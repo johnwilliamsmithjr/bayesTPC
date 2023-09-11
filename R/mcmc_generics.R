@@ -1,8 +1,15 @@
-#' @export
-print.btpc_MCMC <- function(x, digits = 3, ...) {
+# helper for reused code
+print_MCMC_metadata <- function(x) {
   cat(paste0(cli::style_underline(cli::col_cyan("bayesTPC MCMC of Type:\n")), "  ", c(x$model_spec)))
   cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")), "  ", .link_string(x$model_spec), attr(x$model_spec, "formula"), " )"))
   cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Distribution:\n")), "  Trait[i] ~ ", .distribution_string(x$model_spec)))
+}
+
+#' @export
+print.btpc_MCMC <- function(x, digits = 3, ...) {
+  if (!"btpc_MCMC" %in% class(x)) stop("Unexpected type for parameter 'object'. Only use this method with the output of b_TPC().")
+
+  print_MCMC_metadata(x)
   s <- x$samples
   means <- round(matrixStats::colMeans2(s), digits)
   medians <- round(matrixStats::colMedians(s), digits)
@@ -28,6 +35,7 @@ print.btpc_MCMC <- function(x, digits = 3, ...) {
 #' @param type character, should the summaries be calculated for the link or the response?
 #'  Supported inputs are "response" and "link". Default is "response".
 #' @param burn numeric, initial number of iterations to be discarded as burn-in. Default is 0.
+#' @param print logical, should summary be printed? Default is TRUE.
 #' @param ... additional parameters, unused.
 #' @returns A list (invisible) containing the central summary and the bounds of the credible interval generated.
 summary.btpc_MCMC <- function(object,
@@ -38,22 +46,30 @@ summary.btpc_MCMC <- function(object,
                               quantiles = c(.05, .95),
                               burn = 0,
                               type = "response",
+                              print = TRUE,
                               ...) {
-
-  #input validation
+  # input validation
   if (!"btpc_MCMC" %in% class(object)) stop("Unexpected type for parameter 'object'. Only use this method with the output of b_TPC().")
+  if (!(summaryType %in% c("hdi", "quantile"))) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported.')
+  if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
 
-  cat(paste0(cli::style_underline(cli::col_cyan("bayesTPC MCMC of Type:\n")), "  ", c(object$model_spec)))
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")), "  ", .link_string(object$model_spec), attr(object$model_spec, "formula"), " )"))
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Distribution:\n")), "  Trait[i] ~ ", .distribution_string(object$model_spec)))
-  cat(cli::style_underline(cli::col_cyan("\n\nModel Priors:")))
-  cat(paste0("\n  ", names(object$priors), " ~ ", object$priors))
-  if (length(object$constants) > 0) {
-    cat(cli::style_underline(cli::col_cyan("\n\nModel Constants:")))
-    cat("\n  ", names(object$constants), ": ", object$constants, sep = "")
+  if (print) {
+    print_MCMC_metadata(object)
+    cat(cli::style_underline(cli::col_cyan("\n\nModel Priors:")))
+    cat(paste0("\n  ", names(object$priors), " ~ ", object$priors))
+    if (length(object$constants) > 0) {
+      cat(cli::style_underline(cli::col_cyan("\n\nModel Constants:")))
+      cat("\n  ", names(object$constants), ": ", object$constants, sep = "")
+    }
+    cat(cli::style_underline(cli::col_cyan("\n\nMCMC Results:")))
+    print(summary(object$samples))
   }
-  cat(cli::style_underline(cli::col_cyan("\n\nMCMC Results:")))
-  print(summary(object$samples))
+
+
+
+  if (is.null(temp_interval)) temp_interval <- seq(from = min(object$data$Temp), to = max(object$data$Temp), length.out = 1000)
+  tpc_fun <- get_model_function(object$model_spec)
+  max.ind <- nrow(object$samples)
 
   # assign constants
   MA <- list(Temp = temp_interval)
@@ -63,19 +79,8 @@ summary.btpc_MCMC <- function(object,
     }
   }
 
-  if (is.null(temp_interval)) temp_interval <- seq(from = min(object$data$Temp), to = max(object$data$Temp), length.out = 1000)
-  tpc_fun <- get_model_function(object$model_spec)
-  max.ind <- nrow(object$samples)
-
-  MA <- list(Temp = temp_interval)
-  if (length(object$constants) > 0) {
-    for (i in 1:length(object$constants)) {
-      MA[names(object$constants)[i]] <- object$constants[i]
-    }
-  }
-
   link_evals <- simplify2array(.mapply(
-    FUN = tpc_fun, dots = data.frame(object$samples[(burn + 1):max.ind, !colnames(object$samples) %in% "sigma.sq"]),
+    FUN = tpc_fun, dots = data.frame(object$samples[(burn + 1):max.ind, colnames(object$samples) != "sigma.sq" & colnames(object$samples) != "shape_par"]),
     MoreArgs = MA
   ))
 
@@ -91,7 +96,9 @@ summary.btpc_MCMC <- function(object,
       tpc_evals <- exp(link_evals)
     } else if ("btpc_reciprocal" %in% class(object$model_spec)) {
       tpc_evals <- 1 / link_evals
-    } #This error always gets caught earlier, redudant code.
+    } else { # the input should have this error checked anyway, but just in case
+      stop("Misconfigured Model Specification.")
+    }
   } else {
     stop("Invalid input for parameter 'type'. Supported options are 'link' and 'response'.")
   }
@@ -100,8 +107,6 @@ summary.btpc_MCMC <- function(object,
     centers <- matrixStats::rowMedians(tpc_evals)
   } else if (centralSummary == "mean") {
     centers <- matrixStats::rowMeans2(tpc_evals)
-  } else {
-    stop("Unsupported argument for 'centralSummary'. Currently only 'median' and 'mean' are supported.")
   }
 
   if (summaryType == "hdi") {
@@ -111,8 +116,6 @@ summary.btpc_MCMC <- function(object,
   } else if (summaryType == "quantile") {
     upper_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = quantiles[2])
     lower_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = quantiles[1])
-  } else {
-    stop("Unsupported argument for 'summaryType'. Currently only 'quantile' and 'hdi' are supported.")
   }
 
   output <- list(
@@ -142,10 +145,13 @@ summary.btpc_MCMC <- function(object,
 #' @param centralSummary character, central summary measure used. Currently supported options are "median" (default) and "mean".
 #' @param prob numeric, the credible mass used to compute the highest density interval. Used if summaryType = "hdi".
 #' @param quantiles length 2 numeric, quantiles used for a credible interval. Used if summaryType = "quantile".
+#' @param print_summary logical, should a summary be printed? Default is FALSE.
 #' @param burn numeric, initial number of iterations to be discarded as burn-in. Default is 0.
 #' @param type character, should the summaries be calculated for the link or the response?
 #'  Supported inputs are "response" and "link". Default is "response".
-#' @param ylab a title for the y axis.
+#' @param ylab a title for the y axis. Default is "Trait".
+#' @param xlab character, a title for the x-axis. Default is "Temperature (C)"
+#' @param ylim numeric, the limits for the y-axis.
 #' @param legend logical, should a legend be added to the plot? Default is TRUE.
 #' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
 #' @param ... additional parameters passed to `plot.default()`.
@@ -156,79 +162,42 @@ plot.btpc_MCMC <- function(x,
                            prob = .9,
                            quantiles = c(.05, .95),
                            burn = 0,
+                           print_summary = FALSE,
                            type = "response",
                            ylab = "Trait",
+                           xlab = "Temperature (C)",
+                           ylim = NULL,
                            legend = TRUE, legend_position = "bottomright",
                            ...) {
-  if (!"btpc_MCMC" %in% class(x)) stop("Unexpected type for parameter 'object'. Only use this method with the output of b_TPC().")
-
-  if (is.null(temp_interval)) temp_interval <- seq(from = min(x$data$Temp), to = max(x$data$Temp), length.out = 1000)
-  tpc_fun <- get_model_function(x$model_spec)
-  max.ind <- nrow(x$samples)
-
-  # assign constants
-  MA <- list(Temp = temp_interval)
-  if (length(x$constants) > 0) {
-    for (i in 1:length(x$constants)) {
-      MA[names(x$constants)[i]] <- x$constants[i]
-    }
-  }
-
-  link_evals <- simplify2array(.mapply(
-    FUN = tpc_fun, dots = data.frame(x$samples[(burn + 1):max.ind, !colnames(x$samples) %in% "sigma.sq"]),
-    MoreArgs = MA
-  ))
-
-  # transform link into response. I want to verify w/ Leah if this is theoretically sound
-  if (type == "link") {
-    tpc_evals <- link_evals
-  } else if (type == "response") {
-    if ("btpc_identity" %in% class(x$model_spec)) {
-      tpc_evals <- link_evals
-    } else if ("btpc_logit" %in% class(x$model_spec)) {
-      tpc_evals <- exp(link_evals) / (1 + exp(link_evals))
-    } else if ("btpc_log" %in% class(x$model_spec)) {
-      tpc_evals <- exp(link_evals)
-    } else if ("btpc_reciprocal" %in% class(x$model_spec)) {
-      tpc_evals <- 1 / link_evals
-    }
-  } else {
-    stop("Invalid input for parameter 'type'. Supported options are 'link' and 'response'.")
-  }
-
-
-  if (centralSummary == "median") {
-    centers <- matrixStats::rowMedians(tpc_evals)
-  } else if (centralSummary == "mean") {
-    centers <- matrixStats::rowMeans2(tpc_evals)
-  } else {
-    stop("Unsupported argument for 'centralSummary'. Currently only 'median' and 'mean' are supported.")
-  }
-
-  if (summaryType == "hdi") {
-    hdi_mat <- apply(FUN = HDInterval::hdi, X = tpc_evals, MARGIN = 1, credMass = prob)
-    upper_bounds <- hdi_mat[2, ]
-    lower_bounds <- hdi_mat[1, ]
-  } else if (summaryType == "quantile") {
-    upper_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = quantiles[2])
-    lower_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = quantiles[1])
-  } else {
-    stop("Unsupported argument for 'summaryType'. Currently only 'quantile' and 'hdi' are supported.")
-  }
-
-  plot(temp_interval, upper_bounds,
-    type = "l", col = "blue", lty = 2,
-    ylab = ylab, xlab = "Temperature (C)", ylim = c(0, max(upper_bounds, x$data$Trait)), ...
+  sm <- summary.btpc_MCMC(
+    object = x,
+    temp_interval = temp_interval,
+    summaryType = summaryType,
+    centralSummary = centralSummary,
+    prob = prob,
+    quantiles = quantiles,
+    burn = burn,
+    type = type,
+    print = print_summary
   )
-  graphics::points(temp_interval, lower_bounds, type = "l", col = "blue", lty = 2)
-  graphics::points(temp_interval, centers, type = "l", col = "red")
+
+  ylim <- if (is.null(ylim))
+    c(0, max(sm$upper_bounds, x$data$Trait))
+  else ylim
+
+  plot(sm$temp_interval, sm$upper_bounds,
+    type = "l", col = "blue", lty = 2,
+    ylab = ylab, xlab = xlab, ylim = ylim, ...
+  )
+  graphics::points(sm$temp_interval, sm$lower_bounds, type = "l", col = "blue", lty = 2)
+  graphics::points(sm$temp_interval, sm[[paste0(centralSummary, "s")]], type = "l", col = "red")
   if ("btpc_binomial" %in% class(x$model_spec)) {
-    plot(temp_interval, upper_bounds,
+    plot(sm$temp_interval, sm$upper_bounds,
       type = "l", col = "blue", lty = 2,
       ylab = paste0(ylab, " / n"), xlab = "Temperature (C)", ylim = c(0, 1.2), ...
     )
-    graphics::points(temp_interval, lower_bounds, type = "l", col = "blue", lty = 2)
-    graphics::points(temp_interval, centers, type = "l", col = "red")
+    graphics::points(sm$temp_interval, sm$lower_bounds, type = "l", col = "blue", lty = 2)
+    graphics::points(sm$temp_interval, sm[[paste0(centralSummary, "s")]], type = "l", col = "red")
     graphics::points(x$data$Temp, x$data$Trait / x$data$n, pch = 16, cex = .75)
   } else {
     graphics::points(x$data$Temp, x$data$Trait, pch = 16, cex = .75)
@@ -268,7 +237,6 @@ posterior_predictive <- function(TPC,
                                  quantiles = c(.05, .95),
                                  burn = 0,
                                  seed = NULL) {
-
   if (!"btpc_MCMC" %in% class(TPC)) stop("Unexpected type for parameter 'TPC'. Only use this method with the output of b_TPC().")
   if (!(is.null(seed))) {
     if (!(is.integer(seed))) stop('Argument "seed" must be integer valued')
@@ -289,9 +257,11 @@ posterior_predictive <- function(TPC,
   # each row is a temperature, each column is a different sample
   link_evals <- simplify2array(.mapply(
     FUN = tpc_fun,
-    dots = data.frame(TPC$samples[(burn + 1):max.ind,
-                                  colnames(TPC$samples) != "sigma.sq" &
-                                  colnames(TPC$samples) != "shape_par"]),
+    dots = data.frame(TPC$samples[
+      (burn + 1):max.ind,
+      colnames(TPC$samples) != "sigma.sq" &
+        colnames(TPC$samples) != "shape_par"
+    ]),
     MoreArgs = MA
   ))
 

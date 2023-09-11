@@ -12,8 +12,11 @@
   prob = 0.9,
   quantiles = c(0.05, 0.95),
   burn = 0,
+  print_summary = FALSE,
   type = "response",
   ylab = "Trait",
+  xlab = "Temperature (C)",
+  ylim = NULL,
   legend = TRUE,
   legend_position = "bottomright",
   ...
@@ -35,10 +38,16 @@ If no vector is provided, temp_interval is set as a sequence from the lowest obs
 
 \item{burn}{numeric, initial number of iterations to be discarded as burn-in. Default is 0.}
 
+\item{print_summary}{logical, should a summary be printed? Default is FALSE.}
+
 \item{type}{character, should the summaries be calculated for the link or the response?
 Supported inputs are "response" and "link". Default is "response".}
 
-\item{ylab}{a title for the y axis.}
+\item{ylab}{a title for the y axis. Default is "Trait".}
+
+\item{xlab}{character, a title for the x-axis. Default is "Temperature (C)"}
+
+\item{ylim}{numeric, the limits for the y-axis.}
 
 \item{legend}{logical, should a legend be added to the plot? Default is TRUE.}
 
