@@ -278,7 +278,8 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   return(out)
 }
 
-# runner for MAP_model()
+#' @import nimble
+#' @import methods
 nimMAP <- nimble::nimbleFunction(
   setup = function(fit) {
     # I want to do some crazy hackery to compile this on startup
@@ -308,7 +309,7 @@ nimMAP <- nimble::nimbleFunction(
 
 do_map <- function(fit) {
   # wrapper for nimMAP()
-  com <- compileNimble(nimMAP(fit))
+  com <- nimble::compileNimble(nimMAP(fit))
   out <- com$run()
   names(out) <- c(colnames(fit$samples), "log_prob")
   out
