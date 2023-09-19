@@ -21,7 +21,10 @@ test_that("get functions assign properly", {
   expect_equal(get_model_params("quadratic"), c("q", "T_max", "T_min"))
   expect_equal(get_model_params("stinner"), c("C", "k1", "k2", "T_opt"))
   # priors
-
+  dq <- c(q = "dunif(0, 1)", T_max = "dunif(25, 60)", T_min = "dunif(0, 24)")
+  ds <- c(C = "dunif(0, 1000)", k1 = "dunif(-100, 100)", k2 = "dunif(-10, 10)", T_opt = "dunif(15, 70)")
+  expect_equal(get_default_priors("quadratic"), dq)
+  expect_equal(get_default_priors("stinner"), ds)
   # constants
 
   # default spec
