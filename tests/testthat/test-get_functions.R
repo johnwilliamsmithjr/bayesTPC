@@ -32,4 +32,9 @@ test_that("get functions work", {
   expect_equal(get_model_constants("pawar_shsch"), c("T_ref"))
   expect_equal(get_default_constants("pawar_shsch"), c(T_ref = 20))
   # default spec
+  expect_equal(get_default_model_specification("quadratic"), model_list[["quadratic"]])
+  expect_equal(get_default_model_specification("briere"), model_list[["briere"]])
+
+  # all models
+  expect_equal(get_models(), names(model_list))
 })
