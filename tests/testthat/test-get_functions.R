@@ -8,7 +8,7 @@ test_that("get errors checked", {
   expect_error(get_default_model_specification("heeey"), regexp = "Unsupported model")
 })
 
-test_that("get functions assign properly", {
+test_that("get functions work", {
   ## These tests shouldn't ever really fail unless something goes really wrong
   ## This may be useful if/when i switch the model types from chars to lists
   # formula
@@ -26,6 +26,10 @@ test_that("get functions assign properly", {
   expect_equal(get_default_priors("quadratic"), dq)
   expect_equal(get_default_priors("stinner"), ds)
   # constants
+  expect_message(get_model_constants("quadratic"), regexp = "no associated constants.")
+  expect_message(get_default_constants("quadratic"), regexp = "no associated constants.")
 
+  expect_equal(get_model_constants("pawar_shsch"), c("T_ref"))
+  expect_equal(get_default_constants("pawar_shsch"), c(T_ref = 20))
   # default spec
 })

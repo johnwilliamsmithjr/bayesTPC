@@ -108,7 +108,7 @@ get_model_constants <- function(model) {
   if (length(consts) > 0) {
     return(consts)
   } else {
-    simpleMessage("Specified model has no associated constants.")
+    message("Specified model has no associated constants.")
   }
 }
 
@@ -125,7 +125,7 @@ get_default_constants <- function(model) {
   if (length(consts) > 0) {
     return(consts)
   } else {
-    simpleMessage("Specified model has no associated constants.")
+    message("Specified model has no associated constants.")
   }
 }
 
