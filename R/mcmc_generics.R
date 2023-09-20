@@ -7,7 +7,7 @@ print_MCMC_metadata <- function(x) {
     cat(cli::style_underline(cli::col_cyan("\n\nConstants:")))
     cat("\n  ", names(x$constants), " = ", x$constants, sep = "")
   }
-  }
+}
 
 #' @export
 print.btpc_MCMC <- function(x, digits = 3, ...) {
@@ -190,15 +190,15 @@ plot.btpc_MCMC <- function(x,
   }
 
   plot(sm$temp_interval, sm$upper_bounds,
-    type = "l", col = "blue", lty = 2,
-    ylab = ylab, xlab = xlab, ylim = ylim, ...
+       type = "l", col = "blue", lty = 2,
+       ylab = ylab, xlab = xlab, ylim = ylim, ...
   )
   graphics::points(sm$temp_interval, sm$lower_bounds, type = "l", col = "blue", lty = 2)
   graphics::points(sm$temp_interval, sm[[paste0(centralSummary, "s")]], type = "l", col = "red")
   if ("btpc_binomial" %in% class(x$model_spec)) {
     plot(sm$temp_interval, sm$upper_bounds,
-      type = "l", col = "blue", lty = 2,
-      ylab = paste0(ylab, " / n"), xlab = "Temperature (C)", ylim = c(0, 1.2), ...
+         type = "l", col = "blue", lty = 2,
+         ylab = paste0(ylab, " / n"), xlab = "Temperature (C)", ylim = c(0, 1.2), ...
     )
     graphics::points(sm$temp_interval, sm$lower_bounds, type = "l", col = "blue", lty = 2)
     graphics::points(sm$temp_interval, sm[[paste0(centralSummary, "s")]], type = "l", col = "red")
@@ -209,8 +209,8 @@ plot.btpc_MCMC <- function(x,
 
   if (legend) {
     graphics::legend(legend_position,
-      legend = c("Bounds", tools::toTitleCase(paste0(centralSummary, "s"))),
-      lty = c(2, 1), col = c("blue", "red")
+                     legend = c("Bounds", tools::toTitleCase(paste0(centralSummary, "s"))),
+                     lty = c(2, 1), col = c("blue", "red")
     )
   }
 }
@@ -306,53 +306,40 @@ posterior_predictive <- function(TPC,
       FUN = post_pred_draw, X = rbind(tpc_evals, TPC$samples[(burn + 1):max.ind, "shape_var"]),
       MARGIN = 2
     )
-  } else if ("btpc_poisson" %in% class(TPC$model_spec)) {
-    post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
-      return(stats::rpois(
-        n = length(X), lambda = X
-      )) # TODO verify if this is parameterized correctly
-    }
-    post_pred_samples <- apply(
-      FUN = post_pred_draw, X = tpc_evals,
-      MARGIN = 2
-    )
-  } else if ("btpc_bernoulli" %in% class(TPC$model_spec)) {
-    post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
-      return(stats::rbinom(
-        n = length(X), size = 1, prob = X
-      )) # TODO verify if this is parameterized correctly
-    }
-    post_pred_samples <- apply(
-      FUN = post_pred_draw, X = tpc_evals,
-      MARGIN = 2
-    )
-  } else if ("btpc_binomial" %in% class(TPC$model_spec)) {
-    post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
-      return(stats::rbinom(
-        n = length(X), size = 1, prob = X
-      )) # TODO verify if this is parameterized correctly
-    }
-    post_pred_samples <- apply(
-      FUN = post_pred_draw, X = tpc_evals,
-      MARGIN = 2
-    )
-  } else if ("bptc_exponential" %in% class(TPC$model_spec)) {
-    post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
-      return(stats::rexp(
-        n = length(X), rate = 1 / X # R parameterizes the exponential with mean = 1 / rate
-      )) # TODO verify if this is parameterized correctly
-    }
-    post_pred_samples <- apply(
-      FUN = post_pred_draw, X = tpc_evals,
-      MARGIN = 2
-    )
   } else {
-    # not sure this would be caught elsewhere
-    stop("Misconfigured Model Specification. If you see this error, please contact the package developers.")
+    if ("btpc_poisson" %in% class(TPC$model_spec)) {
+      post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
+        return(stats::rpois(
+          n = length(X), lambda = X
+        )) # TODO verify if this is parameterized correctly
+      }
+    } else if ("btpc_bernoulli" %in% class(TPC$model_spec)) {
+      post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
+        return(stats::rbinom(
+          n = length(X), size = 1, prob = X
+        )) # TODO verify if this is parameterized correctly
+      }
+    } else if ("btpc_binomial" %in% class(TPC$model_spec)) {
+      post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
+        return(stats::rbinom(
+          n = length(X), size = 1, prob = X
+        )) # TODO verify if this is parameterized correctly
+      }
+    } else if ("bptc_exponential" %in% class(TPC$model_spec)) {
+      post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
+        return(stats::rexp(
+          n = length(X), rate = 1 / X # R parameterizes the exponential with mean = 1 / rate
+        )) # TODO verify if this is parameterized correctly
+      }
+    } else {
+      # not sure this would be caught elsewhere
+      stop("Misconfigured Model Specification. If you see this error, please contact the package developers.")
+    }
+    post_pred_samples <- apply(
+      FUN = post_pred_draw, X = tpc_evals,
+      MARGIN = 2
+    )
   }
-
-
-
 
   tpc_ev <- matrixStats::rowMeans2(tpc_evals)
 
@@ -417,13 +404,13 @@ plot_prediction <- function(prediction, ylab = "Trait",
   }
   if ("btpc_binomial" %in% class(prediction$model_spec)) {
     plot(prediction$temp_interval, prediction$upper_bounds,
-      type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
-      ylab = paste0(ylab, " / n"), ylim = c(0, 1.2), ...
+         type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
+         ylab = paste0(ylab, " / n"), ylim = c(0, 1.2), ...
     )
   } else {
     plot(prediction$temp_interval, prediction$upper_bounds,
-      type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
-      ylab = ylab, ylim = c(0, max(max(prediction$upper_bounds), max(prediction$data$Trait))), ...
+         type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
+         ylab = ylab, ylim = c(0, max(max(prediction$upper_bounds), max(prediction$data$Trait))), ...
     )
   }
 
@@ -438,8 +425,8 @@ plot_prediction <- function(prediction, ylab = "Trait",
 
   if (legend) {
     graphics::legend(legend_position,
-      legend = c("Bounds", "Means", "Medians"),
-      lty = c(3, 2, 1), col = c("blue", "red", "blue")
+                     legend = c("Bounds", "Means", "Medians"),
+                     lty = c(3, 2, 1), col = c("blue", "red", "blue")
     )
   }
 }

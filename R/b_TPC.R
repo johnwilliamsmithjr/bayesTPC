@@ -282,11 +282,11 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 #' @import methods
 nimMAP <- nimble::nimbleFunction(
   setup = function(fit) {
-    # I want to do some crazy hackery to compile this on startup
-    # rather than every time it's run, but I do not know how nimble does this well enough
-    # maybe won't make the 1.0.0 release but maybe a 1.1 or 1.2
+    # I want to do some hackery to compile this on startup
+    # rather than every time it's run, but idk how nimble does this well enough
+    # maybe won't make the 1.0.0 release but maybe a 1.1 or 1.2 feature
     # maybe contact the nimble developers
-    model <- fit$uncomp_model # has to be uncompiled for some reason
+    model <- fit$uncomp_model # has to be uncompiled
     spl <- as.matrix(fit$samples)
     pars <- colnames(spl)
     b_pars <- numeric(length(pars))
@@ -305,7 +305,7 @@ nimMAP <- nimble::nimbleFunction(
     returnType(double(1))
     return(c(b_pars, b_lp))
   }
-)
+) #something here requires the methods package, i think its a nimble issue
 
 do_map <- function(fit) {
   # wrapper for nimMAP()
