@@ -19,8 +19,8 @@ get_web_data <- function(data_URL) {
 
 ask_for_ID <- function(td) {
   # need to check if session is interactive before prompting input
-  ID <- readline(prompt = "Enter a dataset ID: ")
-  if (!is.integer(ID) || ID < 1 || ID > td) {
+  suppressWarnings(ID <- as.integer(readline(prompt = "Enter a dataset ID: ")))
+  if (is.na(ID) || ID < 1 || ID > td) {
     stop(
       "The dataset ID ", ID,
       " is invalid or is out of range. Please choose a number between 1 and ", td, "."
@@ -32,17 +32,19 @@ ask_for_ID <- function(td) {
 
 #' Retreive a Dataset from VecTraits
 #'
-#' @param ID integer, the dataset to retrieve
+#' @param ID integer, the dataset to retrieve.
+#' @param check_interactive logical, should the user be prompted to input an ID if one isn't provided? Default is TRUE
 #'
 #' @return A dataframe containing the dataset in Vectraits corresponding to ID
 #' @export
 #'
-get_dataset <- function(ID = -1) {
+get_dataset <- function(ID = -1, check_interactive = TRUE) {
+  if (length(ID) != 1) stop("Invalid length for input 'ID'. If pulling multiple datasets, please use get_datasets() instead.")
   td <- as.integer(
     get_web_data("https://vectorbyte-qa.crc.nd.edu/portal/api/vectraits-explorer/?format=json")$data$count
   )
   if (!is.numeric(ID) || ID < 1 || ID > td) {
-    if (interactive()) {
+    if (interactive() && check_interactive) {
       dataset_ID <- ask_for_ID(td)
     } else {
       stop(
@@ -60,4 +62,24 @@ get_dataset <- function(ID = -1) {
     "/?format=json"
   ))
   return(dataset)
+}
+
+#' Retrieve multiple datasets from VecTraits
+#'
+#' @param IDS integer, the datasets to retrieve.
+#'
+#' @return A list of the datasets requested.
+#' @export
+get_datasets <- function(IDS) {
+  if(length(IDS) > 10) warning("Pulling a large number of datasets may take a while.")
+  out <- list()
+  for (i in 1:length(IDS)) {
+    cat("Retrieving dataset:",IDS[i],"\n")
+    out[[i]] <- get_dataset(IDS[i], check_interactive = F)
+  }
+  out
+}
+
+find_datasets <- function(KEYWORD = "") {
+
 }

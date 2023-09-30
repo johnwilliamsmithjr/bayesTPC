@@ -4,10 +4,12 @@
 \alias{get_dataset}
 \title{Retreive a Dataset from VecTraits}
 \usage{
-get_dataset(ID = -1)
+get_dataset(ID = -1, check_interactive = TRUE)
 }
 \arguments{
-\item{ID}{integer, the dataset to retrieve}
+\item{ID}{integer, the dataset to retrieve.}
+
+\item{check_interactive}{logical, should the user be prompted to input an ID if one isn't provided? Default is TRUE}
 }
 \value{
 A dataframe containing the dataset in Vectraits corresponding to ID
