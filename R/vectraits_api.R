@@ -19,7 +19,11 @@ get_web_data <- function(data_URL) {
 
 ask_for_ID <- function(td) {
   # need to check if session is interactive before prompting input
-  suppressWarnings(ID <- as.integer(readline(prompt = "Enter a dataset ID: ")))
+  c <- getOption("ask_dataset_ID.con", stdin()) #for testing. or really weird use cases ig
+  cat("Enter a dataset ID: ")
+  ID <- readLines(con = c, n = 1)
+  ID <- as.integer(ID)
+
   if (is.na(ID) || ID < 1 || ID > td) {
     stop(
       "The dataset ID ", ID,
@@ -48,7 +52,7 @@ get_dataset <- function(ID = -1, check_interactive = TRUE) {
       dataset_ID <- ask_for_ID(td)
     } else {
       stop(
-        "The dataset ID ", dataset_ID,
+        "The dataset ID ", ID,
         " is invalid or is out of range. Please choose a number between 1 and ", td, "."
       )
     }
@@ -61,7 +65,7 @@ get_dataset <- function(ID = -1, check_interactive = TRUE) {
     trunc(dataset_ID), #dont wanna throw an error for non-integer values
     "/?format=json"
   ))
-  return(dataset)
+  return(dataset[[1]])
 }
 
 #' Retrieve multiple datasets from VecTraits
@@ -80,6 +84,6 @@ get_datasets <- function(IDS) {
   out
 }
 
-find_datasets <- function(KEYWORD = "") {
-
-}
+# find_datasets <- function(KEYWORD = "") {
+#
+# }
