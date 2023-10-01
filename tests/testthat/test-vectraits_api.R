@@ -19,6 +19,7 @@ test_that("asking for ID works", {
 })
 
 test_that("fetching datasets works", {
+  skip_if_offline()
   skip_on_cran()
   skip_if_not(is_VecTraits_alive(), message = "VecTraits database is not available right now. API cannot be tested.")
 
@@ -30,6 +31,7 @@ test_that("fetching datasets works", {
   })
 
 test_that("bad website access is caught", {
+  skip_if_offline()
   skip_on_cran()
   #I know for a fact this page will never have anything on it :)
   expect_error(get_web_data("https://seansorek.github.io/broken"), regexp = "Data fetch failed.")
