@@ -70,6 +70,7 @@ test_that("MCMC methods errors checked", {
 })
 
 test_that("MCMC methods output correctly", {
+  skip_on_cran()
   withr::local_package("nimble")
 
   set.seed(12345)

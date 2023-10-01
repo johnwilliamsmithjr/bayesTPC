@@ -305,7 +305,7 @@ nimMAP <- nimble::nimbleFunction(
     returnType(double(1))
     return(c(b_pars, b_lp))
   }
-) #something here requires the methods package, i think its a nimble issue
+) # something here requires the methods package, i think its a nimble issue
 
 do_map <- function(fit) {
   # wrapper for nimMAP()
