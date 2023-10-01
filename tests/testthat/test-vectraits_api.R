@@ -57,13 +57,14 @@ test_that("fetching multiple datasets works", {
   expect_error(get_datasets(c(1,NA)), regexp = "is invalid or is out of range")
   expect_error(get_datasets(c(1,-1)), regexp = "is invalid or is out of range")
   expect_error(get_datasets(c(-1,1)), regexp = "is invalid or is out of range")
-
+  expect_warning(get_datasets(1:12), regexp = "Pulling a large number of datasets may take a while")
 
   load(testthat::test_path("example_data", "VT_1.rda"))
   load(testthat::test_path("example_data", "VT_2.rda"))
 
   expect_equal(get_datasets(1)[[1]], VT_1)
   expect_equal(get_datasets(2)[[1]], VT_2)
+
   ds <- get_datasets(c(1,2))
   expect_equal(ds[[1]], VT_1)
   expect_equal(ds[[2]], VT_2)
