@@ -1,3 +1,6 @@
+# Sean Sorek 10/1/23
+
+
 test_that("asking for ID works", {
   f <- file()
   lines <- c(NA,-1,0,1,2,100,101,1000,"are you over twenty-one?")
