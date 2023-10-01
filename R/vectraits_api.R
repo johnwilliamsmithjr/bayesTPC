@@ -47,7 +47,8 @@ get_dataset <- function(ID = -1, check_interactive = TRUE) {
   td <- as.integer(
     get_web_data("https://vectorbyte-qa.crc.nd.edu/portal/api/vectraits-explorer/?format=json")$data$count
   )
-  if (!is.numeric(ID) || ID < 1 || ID > td) {
+
+  if (!is.numeric(ID) || is.na(ID) || ID < 1 || ID > td) {
     if (interactive() && check_interactive) {
       dataset_ID <- ask_for_ID(td)
     } else {
@@ -75,6 +76,7 @@ get_dataset <- function(ID = -1, check_interactive = TRUE) {
 #' @return A list of the datasets requested.
 #' @export
 get_datasets <- function(IDS) {
+  if (length(IDS) < 1) stop("Input 'IDS' must have at least length 1.")
   if(length(IDS) > 10) warning("Pulling a large number of datasets may take a while.")
   out <- list()
   for (i in 1:length(IDS)) {
