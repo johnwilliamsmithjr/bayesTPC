@@ -325,7 +325,7 @@ posterior_predictive <- function(TPC,
           n = length(X), size = 1, prob = X
         )) # TODO verify if this is parameterized correctly
       }
-    } else if ("bptc_exponential" %in% class(TPC$model_spec)) {
+    } else if ("btpc_exponential" %in% class(TPC$model_spec)) {
       post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
         return(stats::rexp(
           n = length(X), rate = 1 / X # R parameterizes the exponential with mean = 1 / rate
