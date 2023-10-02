@@ -1,7 +1,7 @@
 Type: Package
 Package: bayesTPC
 Title: bayesTPC
-Version: 0.6.1
+Version: 0.7.0
 Authors@R: c( person("John W.", "Smith", email = "john.smith20@montana.edu", role = c("aut", "cre")),
 	person("Sean", "Sorek", email = "sssorek1@gmail.com", role = "aut"))
 Maintainer: John W. Smith <john.smith20@montana.edu>
@@ -16,7 +16,9 @@ Imports:
     matrixStats,
     nimble,
     truncnorm,
-	methods
+    methods,
+    httr,
+    jsonlite
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3

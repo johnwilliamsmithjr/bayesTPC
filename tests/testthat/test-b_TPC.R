@@ -96,6 +96,7 @@ test_that("b_TPC catches errors", {
 })
 
 test_that("b_TPC parameters work", {
+  skip_on_cran()
   withr::local_package("nimble")
   set.seed(12345)
   N <- 16
