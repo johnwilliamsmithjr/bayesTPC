@@ -198,11 +198,11 @@ validate.btpc_normal <- function(x) {
 }
 
 #' @export
-validate.btpc_poisson <- function(x) {
+validate.btpc_gamma <- function(x) {
   x <- validate.btpc_model(x)
   var <- attr(x, "shape_par")
   if (length(var) == 0) {
-    cat("Using default prior for model variance.\n")
+    cat("Using default prior for shape parameter.\n")
     attr(x, "shape_par") <- "dexp(1)"
   }
 
