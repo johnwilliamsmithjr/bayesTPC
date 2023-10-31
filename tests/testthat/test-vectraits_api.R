@@ -2,20 +2,20 @@
 
 test_that("asking for ID works", {
   f <- file()
-  lines <- c(NA,-1,0,1,2,100,101,1000,"are you over twenty-one?")
+  lines <- c(NA, -1, 0, 1, 2, 100, 101, 1000, "are you over twenty-one?")
   coll <- paste(lines, collapse = "\n")
-  write(coll,f)
+  write(coll, f)
 
   withr::local_options(list(ask_dataset_ID.con = f))
 
-  suppressWarnings(expect_error(ask_for_ID(100), "is invalid or is out of range")) #NA
+  suppressWarnings(expect_error(ask_for_ID(100), "is invalid or is out of range")) # NA
   expect_error(ask_for_ID(100), regexp = "is invalid or is out of range") #-1
-  expect_error(ask_for_ID(100), regexp = "is invalid or is out of range") #0
+  expect_error(ask_for_ID(100), regexp = "is invalid or is out of range") # 0
   expect_equal(ask_for_ID(100), 1)
   expect_equal(ask_for_ID(100), 2)
   expect_equal(ask_for_ID(100), 100)
-  expect_error(ask_for_ID(100), regexp = "is invalid or is out of range") #101
-  expect_error(ask_for_ID(100), regexp = "is invalid or is out of range") #1000
+  expect_error(ask_for_ID(100), regexp = "is invalid or is out of range") # 101
+  expect_error(ask_for_ID(100), regexp = "is invalid or is out of range") # 1000
 
   close(f)
 })
@@ -26,7 +26,7 @@ test_that("fetching datasets works", {
   skip_if_not(is_VecTraits_alive(), message = "VecTraits database is not available right now. API cannot be tested.")
 
 
-  expect_error(get_dataset(c(1,2)), regexp = "If pulling multiple datasets")
+  expect_error(get_dataset(c(1, 2)), regexp = "If pulling multiple datasets")
   load(testthat::test_path("example_data", "VT_1.rda"))
   expect_equal(get_dataset(1), VT_1)
 
@@ -37,12 +37,12 @@ test_that("fetching datasets works", {
   expect_error(get_dataset(NA_real_, check_interactive = F), regexp = "is invalid or is out of range")
   expect_error(get_dataset(NaN, check_interactive = F), regexp = "is invalid or is out of range")
   httr::set_config(httr::config(ssl_verifypeer = TRUE))
-  })
+})
 
 test_that("bad website access is caught", {
   httr::set_config(httr::config(ssl_verifypeer = FALSE))
   skip_on_cran()
-  #I know for a fact this page will never have anything on it :)
+  # I know for a fact this page will never have anything on it :)
   expect_error(get_web_data("https://seansorek.github.io/broken"), regexp = "Data fetch failed.")
   httr::set_config(httr::config(ssl_verifypeer = TRUE))
 })
@@ -54,9 +54,9 @@ test_that("fetching multiple datasets works", {
 
   expect_error(get_datasets(NA), regexp = "is invalid or is out of range")
   expect_error(get_datasets(c()), regexp = "must have at least length 1")
-  expect_error(get_datasets(c(1,NA)), regexp = "is invalid or is out of range")
-  expect_error(get_datasets(c(1,-1)), regexp = "is invalid or is out of range")
-  expect_error(get_datasets(c(-1,1)), regexp = "is invalid or is out of range")
+  expect_error(get_datasets(c(1, NA)), regexp = "is invalid or is out of range")
+  expect_error(get_datasets(c(1, -1)), regexp = "is invalid or is out of range")
+  expect_error(get_datasets(c(-1, 1)), regexp = "is invalid or is out of range")
   expect_warning(get_datasets(1:12), regexp = "Pulling a large number of datasets may take a while")
 
   load(testthat::test_path("example_data", "VT_1.rda"))
@@ -65,7 +65,7 @@ test_that("fetching multiple datasets works", {
   expect_equal(get_datasets(1)[[1]], VT_1)
   expect_equal(get_datasets(2)[[1]], VT_2)
 
-  ds <- get_datasets(c(1,2))
+  ds <- get_datasets(c(1, 2))
   expect_equal(ds[[1]], VT_1)
   expect_equal(ds[[2]], VT_2)
   httr::set_config(httr::config(ssl_verifypeer = TRUE))

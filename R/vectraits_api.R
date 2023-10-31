@@ -66,18 +66,26 @@ get_dataset <- function(ID = -1, check_interactive = TRUE) {
     trunc(dataset_ID), #dont wanna throw an error for non-integer values
     "/?format=json"
   ))
+  class(dataset[[1]]) <- c("data.frame","Vectraits_dataset")
   return(dataset[[1]])
 }
 
 #' Retrieve multiple datasets from VecTraits
 #'
 #' @param IDS integer, the datasets to retrieve.
-#'
+#' @param safety logical, should an error be thrown if too many datasets are retreived?. Default is TRUE.
 #' @return A list of the datasets requested.
 #' @export
-get_datasets <- function(IDS) {
+get_datasets <- function(IDS, safety = TRUE) {
   if (length(IDS) < 1) stop("Input 'IDS' must have at least length 1.")
-  if(length(IDS) > 10) warning("Pulling a large number of datasets may take a while.")
+  if(length(IDS) > 10) {
+    if (safety) {
+      stop("Attempt to retreive too many datasets. Either set safety = FALSE or retreive fewer datasets.")
+    } else {
+      warning("Pulling a large number of datasets may take a while.\n", immediate. = TRUE)
+    }
+
+  }
   out <- list()
   for (i in 1:length(IDS)) {
     cat("Retrieving dataset:",IDS[i],"\n")
@@ -86,6 +94,35 @@ get_datasets <- function(IDS) {
   out
 }
 
-# find_datasets <- function(KEYWORD = "") {
-#
-# }
+
+#' Searches and retrieves Vectraits datasets
+#'
+#' @param keywords character, one or more search terms.
+#' @param safety logical, should an error be thrown if too many datasets are retreived?. Default is TRUE.
+#'
+#' @return A list of all datasets matching the search terms provided.
+#' @export
+find_datasets <- function(keywords, safety = TRUE) {
+  stopifnot(is.character(keywords))
+  stopifnot(length(keywords) > 0)
+
+  set_search <- get_web_data(
+    paste(
+      c(
+        "https://vectorbyte.crc.nd.edu/portal/api/vectraits-explorer/?format=json&keywords=",
+        gsub(" ", "%20", paste(keywords, collapse = "%20"))
+      ),
+      collapse = ""
+    )
+  )
+
+  if (as.character(set_search)[1] == "Data fetch failed.") {
+    stop(
+      paste0(
+        "HTTP Error: ",set_search$HTTPcode,
+        ". This could be because the search term entered was too general (too many results)."))
+  }
+  cat(paste0(length(set_search$ids)," datasets found. Attempting to retreive.\n\n"))
+  return(get_datasets(set_search$ids, safety))
+
+}
