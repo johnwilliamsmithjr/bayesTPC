@@ -8,13 +8,11 @@ new_btpc_model <- function(name = character(),
                            class = character(), # for subclassing support
                            ...) {
   # forcing explicit types
-  stopifnot(is.character(name))
-  stopifnot(is.character(parameters))
-  stopifnot(is.expression(formula))
-  stopifnot(is.double(constants))
-  stopifnot(is.character(link))
-  stopifnot(is.character(distribution))
-  stopifnot(is.character(class))
+  stopifnot("Model name must be a string" = is.character(name))
+  stopifnot("Model priors must be written as strings" = is.character(parameters))
+  stopifnot("Model formula must be an expression" = is.expression(formula))
+  stopifnot("Model constants must be numeric" = is.double(constants))
+
 
 
   structure(name,
@@ -26,6 +24,8 @@ new_btpc_model <- function(name = character(),
     parameters = parameters,
     formula = formula,
     constants = constants,
+    link = link,
+    distribution = distribution,
     ...
   )
 }
@@ -79,15 +79,7 @@ specify_model <- function(name = character(),
                           link = "identity",
                           distribution = "normal",
                           ...) {
-  supported_links <- c("identity", "log", "logit", "reciprocal")
-  supported_dist <- c("normal", "poisson", "bernoulli", "binomial", "exponential", "gamma")
 
-  if (!link %in% supported_links) {
-    stop("Unsupported link function.")
-  }
-  if (!distribution %in% supported_dist) {
-    stop("Unsupported distribution.")
-  }
 
   x <- new_btpc_model(name, parameters, formula, constants, link, distribution, ...)
   x <- validate(x)
@@ -97,7 +89,7 @@ specify_model <- function(name = character(),
   utils::assignInMyNamespace("model_list", model_list)
   cat(paste0(
     "Model type '", name, "' can now be accessed using other bayesTPC functions. ",
-    "Reload the package to reset back to defaults.\n"
+    "Restart R to reset back to defaults.\n"
   ))
 }
 
@@ -112,7 +104,8 @@ validate.btpc_model <- function(x) {
   parameters <- attr(x, "parameters")
   formula <- attr(x, "formula")
   constants <- attr(x, "constants")
-
+  link <- attr(x, "link")
+  distribution <- attr(x, "distribution")
   # This is gonna be the workhorse for input validation, since we want user model specification support.
   # S3 has no built in input validation, so this mostly just covers obvious edge cases.
 
@@ -126,7 +119,7 @@ validate.btpc_model <- function(x) {
   # could the model list be stored as an environment? or is that too overcomplicated?
 
   if (name %in% model_list) {
-    stop("Model must have unique name. To remove all user-defined models, reload 'bayesTPC'.")
+    stop("Model must have unique name. To remove all user-defined models, restart R.")
   }
   # parameters
   if (length(parameters) == 0) {
@@ -146,22 +139,7 @@ validate.btpc_model <- function(x) {
   }
 
   # how do u check if the priors are correctly written????
-  # constants
-  if (length(constants) > 0) {
-    const_names <- names(constants)
-
-    if (is.null(const_names)) {
-      stop("'constants' vector must be named.")
-    }
-    if (any(vapply(const_names, function(x) {
-      x == ""
-    }, TRUE))) {
-      stop("All model constants must be named.")
-    }
-    if (length(const_names) != length(unique(const_names))) {
-      stop("Model constants must have unique names.")
-    }
-  }
+  # it will break once nimble tries to run, but i'd prefer it checked here
 
   # formula
   if (length(formula) == 0) {
@@ -180,6 +158,43 @@ validate.btpc_model <- function(x) {
   }
   if (!all(formula_vars %in% c("Temp", par_names, names(constants)))) {
     stop("One or more variables in the model formula is not named as a parameter or a constant.")
+  }
+
+  # constants
+  if (length(constants) > 0) {
+    const_names <- names(constants)
+
+    if (is.null(const_names)) {
+      stop("'constants' vector must be named.")
+    }
+    if (any(vapply(const_names, function(x) {
+      x == "" #idk why i wrote this like this
+    }, TRUE))) {
+      stop("All model constants must be named.")
+    }
+    if (length(const_names) != length(unique(const_names))) {
+      stop("Model constants must have unique names.")
+    }
+    if (!all(const_names %in% formula_vars)) {
+      # this could be a warning but I want to be strict here.
+      stop("One or more constants are not included in the model formula.")
+    }
+  }
+
+  if (length(link) != 1) {
+    stop("Model must have one and only one link function")
+  }
+  if (length(distribution) != 1) {
+    stop("Model must have one and only one distribution")
+  }
+  supported_links <- c("identity", "log", "logit", "reciprocal")
+  supported_dist <- c("normal", "poisson", "bernoulli", "binomial", "exponential", "gamma")
+
+  if (!link %in% supported_links) {
+    stop("Unsupported link function.")
+  }
+  if (!distribution %in% supported_dist) {
+    stop("Unsupported distribution.")
   }
 
   return(x)
