@@ -1,5 +1,5 @@
-# Sean Sorek 9/30/2023
-# Based on code written by ???
+# Sean Sorek 11/7/2023
+# Based on code written by Wesley McGinn
 
 get_web_data <- function(data_URL) {
   if (!exists("webDataLibrariesOpen")) {
@@ -103,8 +103,8 @@ get_datasets <- function(IDS, safety = TRUE) {
 #' @return A list of all datasets matching the search terms provided.
 #' @export
 find_datasets <- function(keywords, safety = TRUE) {
-  stopifnot(is.character(keywords))
-  stopifnot(length(keywords) > 0)
+  stopifnot("Invalid keyword" = is.character(keywords))
+  stopifnot("Keyword must be provided" = length(keywords) > 0)
 
   set_search <- get_web_data(
     paste(

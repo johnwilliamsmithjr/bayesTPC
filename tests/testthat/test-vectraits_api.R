@@ -57,7 +57,8 @@ test_that("fetching multiple datasets works", {
   expect_error(get_datasets(c(1, NA)), regexp = "is invalid or is out of range")
   expect_error(get_datasets(c(1, -1)), regexp = "is invalid or is out of range")
   expect_error(get_datasets(c(-1, 1)), regexp = "is invalid or is out of range")
-  expect_warning(get_datasets(1:12), regexp = "Pulling a large number of datasets may take a while")
+  expect_error(get_datasets(1:12, T), regexp = "Attempt to retreive too many datasets")
+  expect_warning(get_datasets(1:12, F), regexp = "Pulling a large number of datasets may take a while")
 
   load(testthat::test_path("example_data", "VT_1.rda"))
   load(testthat::test_path("example_data", "VT_2.rda"))
@@ -69,4 +70,9 @@ test_that("fetching multiple datasets works", {
   expect_equal(ds[[1]], VT_1)
   expect_equal(ds[[2]], VT_2)
   httr::set_config(httr::config(ssl_verifypeer = TRUE))
+})
+
+test_that("Dataset searching works",{
+  expect_error(find_datasets(3), regexp = "Invalid keyword")
+  expect_error(find_datasets(character()), regexp = "Keyword must be provided")
 })
