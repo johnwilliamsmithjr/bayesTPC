@@ -17,14 +17,14 @@ get_web_data <- function(data_URL) {
 }
 
 
-ask_for_ID <- function(td) {
+ask_for_ID <- function(max_id) {
   # need to check if session is interactive before prompting input
   c <- getOption("ask_dataset_ID.con", stdin()) #for testing. or really weird use cases ig
   cat("Enter a dataset ID: ")
   ID <- readLines(con = c, n = 1)
   ID <- as.integer(ID)
 
-  if (is.na(ID) || ID < 1 || ID > td) {
+  if (is.na(ID) || ID < 1 || ID > max_id) {
     stop(
       "The dataset ID ", ID,
       " is invalid or is out of range. Please choose a number between 1 and ", td, "."
