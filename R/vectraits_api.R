@@ -116,12 +116,7 @@ find_datasets <- function(keywords, safety = TRUE) {
     )
   )
 
-  if (as.character(set_search)[1] == "Data fetch failed.") {
-    stop(
-      paste0(
-        "HTTP Error: ",set_search$HTTPcode,
-        ". This could be because the search term entered was too general (too many results)."))
-  }
+
   cat(paste0(length(set_search$ids)," datasets found. Attempting to retreive.\n\n"))
   return(get_datasets(set_search$ids, safety))
 

@@ -73,6 +73,18 @@ test_that("fetching multiple datasets works", {
 })
 
 test_that("Dataset searching works",{
+  #this test may flake
+  httr::set_config(httr::config(ssl_verifypeer = FALSE))
+  skip_on_cran()
+  skip_if_not(is_VecTraits_alive(), message = "VecTraits database is not available right now. API cannot be tested.")
+
   expect_error(find_datasets(3), regexp = "Invalid keyword")
   expect_error(find_datasets(character()), regexp = "Keyword must be provided")
-})
+
+
+
+  expect_output(amer <- find_datasets("Americanum", F), regexp = "datasets found")
+  expect_error(find_datasets("sojbgsidkhgbf"), regexp = "Data fetch failed")
+  expect_gte(length(amer), 4) #so the test doesn't fail when more lone star datasets are added
+  httr::set_config(httr::config(ssl_verifypeer = TRUE))
+  })
