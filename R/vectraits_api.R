@@ -27,7 +27,7 @@ ask_for_ID <- function(max_id) {
   if (is.na(ID) || ID < 1 || ID > max_id) {
     stop(
       "The dataset ID ", ID,
-      " is invalid or is out of range. Please choose a number between 1 and ", td, "."
+      " is invalid or is out of range. Please choose a number between 1 and ", max_id, "."
     )
   }
   ID
