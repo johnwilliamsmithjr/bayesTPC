@@ -107,3 +107,40 @@ test_that("bad model specification", {
                              distribution = "nonsense"),
                regexp = "Unsupported distribution")
   })
+
+test_that("validate special cases work", {
+
+  expect_error(validate("garbage"), regexp = "Misconfigured Model Specification")
+  #normal
+  expect_output(specify_model("my_cool_new_normal_model",
+                              parameters = c(a = "dunif(0,1)", b = "dunif(0,2)"),
+                              formula =expression(a*Temp/c + b*d),
+                              constants = c(c = 3, d = 4), link = "identity",
+                              distribution = "normal"),
+                regexp = "Using default prior for model variance")
+  expect_equal(attr(get_default_model_specification("my_cool_new_normal_model"), "sigma.sq"),"dexp(1)")
+
+  #gamma
+  expect_output(specify_model("my_cool_new_gamma_model",
+                                   parameters = c(a = "dunif(0,1)", b = "dunif(0,2)"),
+                                   formula =expression(a*Temp/c + b*d),
+                                   constants = c(c = 3, d = 4), link = "identity",
+                                   distribution = "gamma"),
+                regexp = "Using default prior for shape parameter")
+  expect_equal(attr(get_default_model_specification("my_cool_new_gamma_model"), "shape_par"),"dexp(1)")
+
+})
+
+test_that("bad change of priors / constants", {
+  expect_error(change_priors("garbage", c(garbage = "garb")), regexp = "Invalid type for model")
+  expect_error(change_constants("garbage", c(garbage = "garb")), regexp = "Invalid type for model")
+
+  def_quad <- get_default_model_specification("quadratic")
+  ps <- get_default_model_specification("pawar_shsch")
+
+  expect_error(change_priors(def_quad, c(a = 1,b = 2,c = 3)), regexp = "Invalid type for new priors")
+  expect_error(change_constants(def_quad, c(a = "a",b = "b",c = "c")), regexp = "Invalid type for new constants")
+
+  expect_error(change_priors(def_quad, c("a","b","c")), regexp = "New priors must be named")
+  expect_error(change_constants(def_quad, c(1,2,3)), regexp = "New constants must be named")
+})

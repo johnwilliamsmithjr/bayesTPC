@@ -250,8 +250,12 @@ change_priors <- function(model, priors) {
     stop("Invalid type for new priors.")
   }
   params_to_change <- names(priors)
+  if(is.null(params_to_change)) {
+    stop("New priors must be named.")
+  }
+
   current_priors <- attr(model, "parameters")
-  if ("sigma.sq" %in% params_to_change) { # TODO add gamma shape parameter
+  if ("sigma.sq" %in% params_to_change) {
     if (!all(params_to_change %in% c(names(current_priors), "sigma.sq"))) {
       stop("Attempting to change prior of non-existent parameter.")
     }
@@ -259,6 +263,15 @@ change_priors <- function(model, priors) {
     current_priors[names(model_priors)] <- unlist(model_priors)
     attr(model, "parameters") <- current_priors
     attr(model, "sigma.sq") <- priors["sigma.sq"]
+    return(model)
+  } else if ("shape_par" %in% params_to_change) {
+    if (!all(params_to_change %in% c(names(current_priors), "shape_par"))) {
+      stop("Attempting to change prior of non-existent parameter.")
+    }
+    model_priors <- priors[names(priors) != "shape_par"]
+    current_priors[names(model_priors)] <- unlist(model_priors)
+    attr(model, "parameters") <- current_priors
+    attr(model, "shape_par") <- priors["shape_par"]
     return(model)
   } else {
     if (!all(params_to_change %in% names(current_priors))) {
@@ -290,6 +303,10 @@ change_constants <- function(model, constants) {
   }
 
   constants_to_change <- names(constants)
+  if(is.null(constants_to_change)) {
+    stop("New constants must be named.")
+  }
+
   current_constants <- attr(model, "constants")
 
   if (length(current_constants) == 0) {
