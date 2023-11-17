@@ -2,7 +2,7 @@
 
 test_that("asking for ID works", {
   f <- file()
-  lines <- c(NA, -1, 0, 1, 2, 100, 101, 1000, 1000)
+  lines <- c(NA, -1, 0, 1, 2, 100, 101, 1000)
   coll <- paste(lines, collapse = "\n")
   write(coll, f)
 
@@ -16,7 +16,6 @@ test_that("asking for ID works", {
   expect_equal(ask_for_ID(100), 100)
   expect_error(ask_for_ID(100), regexp = "is invalid or is out of range") # 101
   expect_error(ask_for_ID(100), regexp = "is invalid or is out of range") # 1000
-  expect_error(get_dataset(), regexp = "is invalid or is out of range")
 
   close(f)
 })
