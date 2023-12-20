@@ -131,7 +131,7 @@ test_that("validate special cases work", {
 
 })
 
-test_that("bad change of priors / constants", {
+test_that("change of priors / constants", {
   expect_error(change_priors("garbage", c(garbage = "garb")), regexp = "Invalid type for model")
   expect_error(change_constants("garbage", c(garbage = "garb")), regexp = "Invalid type for model")
 
@@ -146,6 +146,8 @@ test_that("bad change of priors / constants", {
 
   expect_error(change_priors(def_quad, c(a = 1,b = 2,c = 3)), regexp = "Invalid type for new priors")
   expect_error(change_constants(ps, c(a = "a",b = "b",c = "c")), regexp = "Invalid type for new constants")
+  expect_error(change_constants(def_quad, c(q = 2)), regexp = "model without constants")
+  expect_error(change_constants(ps, c(k = 1)), regexp = "existent")
 
   expect_error(change_priors(def_quad, c("a","b","c")), regexp = "New priors must be named")
   expect_error(change_priors(def_quad, c(q = "a","b","c")), regexp = "All new priors")
@@ -156,6 +158,11 @@ test_that("bad change of priors / constants", {
 
   expect_error(change_priors(def_quad, c(sigma.sq = "dexp(5)",k = "dnorm(0,1)")), regexp = "existent")
   expect_error(change_priors(def_quad, c(k = "dnorm(0,1)")), regexp = "existent")
-  expect_error(change_priors(gam, c(k = "dnorm(0,1)")), regexp = "existent")
+  expect_error(change_priors(gam, c(shape_par = "dexp(5)",k = "dnorm(0,1)")), regexp = "existent")
 
-  })
+  expect_equal(attr(gam, "shape_par"),expected = "dexp(1)")
+  gam2 <- change_priors(gam, c(shape_par = "dexp(5)"))
+  expect_equal(attr(gam, "shape_par"),expected = "dexp(1)")
+  expect_equal(attr(gam2, "shape_par"),expected = "dexp(5)")
+})
+

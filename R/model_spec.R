@@ -271,7 +271,8 @@ change_priors <- function(model, priors) {
     model_priors <- priors[names(priors) != "sigma.sq"]
     current_priors[names(model_priors)] <- unlist(model_priors)
     attr(model, "parameters") <- current_priors
-    attr(model, "sigma.sq") <- priors["sigma.sq"]
+    sig <- priors["sigma.sq"]; attributes(sig) <- NULL
+    attr(model, "sigma.sq") <- sig
     return(model)
   } else if ("shape_par" %in% params_to_change) {
     if (!all(params_to_change %in% c(names(current_priors), "shape_par"))) {
@@ -280,7 +281,8 @@ change_priors <- function(model, priors) {
     model_priors <- priors[names(priors) != "shape_par"]
     current_priors[names(model_priors)] <- unlist(model_priors)
     attr(model, "parameters") <- current_priors
-    attr(model, "shape_par") <- priors["shape_par"]
+    sp <- priors["shape_par"]; attributes(sp) <- NULL
+    attr(model, "shape_par") <- sp
     return(model)
   } else {
     if (!all(params_to_change %in% names(current_priors))) {
@@ -311,11 +313,11 @@ change_constants <- function(model, constants) {
     stop("Invalid type for new constants.")
   }
 
+  current_constants <- attr(model, "constants")
   constants_to_change <- names(constants)
   if(is.null(constants_to_change)) {
     stop("New constants must be named.")
   }
-
   if (any(vapply(constants_to_change, function(x) {
     x == ""
   }, TRUE))) {
@@ -324,15 +326,19 @@ change_constants <- function(model, constants) {
   if (length(constants_to_change) != length(unique(constants_to_change))) {
     stop("New constants must have unique names.")
   }
-
-  current_constants <- attr(model, "constants")
-
   if (length(current_constants) == 0) {
     stop("Attempting to change constants for a model without constants.")
   }
   if (!all(constants_to_change %in% names(current_constants))) {
     stop("Attempting to change non-existent constant.")
   }
+
+
+
+
+
+
+
   current_constants[constants_to_change] <- unlist(constants)
   attr(model, "constants") <- current_constants
   return(model)
