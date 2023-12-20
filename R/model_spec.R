@@ -91,6 +91,7 @@ specify_model <- function(name = character(),
     "Model type '", name, "' can now be accessed using other bayesTPC functions. ",
     "Restart R to reset back to defaults.\n"
   ))
+  x
 }
 
 ## Model Validation ================================================
@@ -254,6 +255,14 @@ change_priors <- function(model, priors) {
     stop("New priors must be named.")
   }
 
+  if (any(vapply(params_to_change, function(x) {
+    x == ""
+  }, TRUE))) {
+    stop("All new priors must be named.")
+  }
+  if (length(params_to_change) != length(unique(params_to_change))) {
+    stop("New priors must have unique names.")
+  }
   current_priors <- attr(model, "parameters")
   if ("sigma.sq" %in% params_to_change) {
     if (!all(params_to_change %in% c(names(current_priors), "sigma.sq"))) {
@@ -305,6 +314,15 @@ change_constants <- function(model, constants) {
   constants_to_change <- names(constants)
   if(is.null(constants_to_change)) {
     stop("New constants must be named.")
+  }
+
+  if (any(vapply(constants_to_change, function(x) {
+    x == ""
+  }, TRUE))) {
+    stop("All new constants must be named.")
+  }
+  if (length(constants_to_change) != length(unique(constants_to_change))) {
+    stop("New constants must have unique names.")
   }
 
   current_constants <- attr(model, "constants")

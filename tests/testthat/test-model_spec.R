@@ -137,10 +137,25 @@ test_that("bad change of priors / constants", {
 
   def_quad <- get_default_model_specification("quadratic")
   ps <- get_default_model_specification("pawar_shsch")
+  bin <- get_default_model_specification("binomial_glm_lin")
+  gam <- specify_model("cooler_gamma_model",
+                             parameters = c(a = "dunif(0,1)", b = "dunif(0,2)"),
+                             formula =expression(a*Temp/c + b*d),
+                             constants = c(c = 3, d = 4), link = "identity",
+                             distribution = "gamma")
 
   expect_error(change_priors(def_quad, c(a = 1,b = 2,c = 3)), regexp = "Invalid type for new priors")
-  expect_error(change_constants(def_quad, c(a = "a",b = "b",c = "c")), regexp = "Invalid type for new constants")
+  expect_error(change_constants(ps, c(a = "a",b = "b",c = "c")), regexp = "Invalid type for new constants")
 
   expect_error(change_priors(def_quad, c("a","b","c")), regexp = "New priors must be named")
-  expect_error(change_constants(def_quad, c(1,2,3)), regexp = "New constants must be named")
-})
+  expect_error(change_priors(def_quad, c(q = "a","b","c")), regexp = "All new priors")
+  expect_error(change_priors(def_quad, c(q = "a",q= "b")), regexp = "have unique")
+  expect_error(change_constants(ps, c(1,2,3)), regexp = "New constants must be named")
+  expect_error(change_constants(ps, c(T_ref = 1,2,3)), regexp = "All new constants")
+  expect_error(change_constants(ps, c(T_ref = 1, T_ref= 2)), regexp = "have unique")
+
+  expect_error(change_priors(def_quad, c(sigma.sq = "dexp(5)",k = "dnorm(0,1)")), regexp = "existent")
+  expect_error(change_priors(def_quad, c(k = "dnorm(0,1)")), regexp = "existent")
+  expect_error(change_priors(gam, c(k = "dnorm(0,1)")), regexp = "existent")
+
+  })
