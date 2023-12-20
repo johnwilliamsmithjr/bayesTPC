@@ -166,3 +166,14 @@ test_that("change of priors / constants", {
   expect_equal(attr(gam2, "shape_par"),expected = "dexp(5)")
 })
 
+test_that("printing models work", {
+  def_quad <- get_default_model_specification("quadratic")
+  gam <- get_default_model_specification("cooler_gamma_model")
+  expect_output(print(def_quad), regexp = "quadratic")
+  expect_output(print(def_quad), regexp = "Model Formula")
+  expect_output(print(def_quad), regexp = "Variance")
+
+  expect_output(print(gam), regexp = "cooler_gamma_model")
+  expect_output(print(gam), regexp = "Model Formula")
+  expect_output(print(gam), regexp = "Shape")
+})
