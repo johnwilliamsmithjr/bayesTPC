@@ -4,7 +4,7 @@ Title: bayesTPC
 Version: 1.0.0
 Authors@R: c( person("John W.", "Smith", email = "john.smith20@montana.edu", role = "aut"),
 	person("Sean", "Sorek", email = "sssorek1@gmail.com", role = c("aut", "cre")))
-Maintainer: John W. Smith <john.smith20@montana.edu>
+Maintainer: Sean Sorek <sssorek1@gmail.com>
 Description: An R package for fitting mathematical models that describe
     thermal performance curves.
 License: GPL-3
