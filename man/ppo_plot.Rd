@@ -22,6 +22,3 @@ Create a prior-posterior overlap plot from output of \code{\link[=b_TPC]{b_TPC()
 \details{
 Function to create a prior-posterior overlap plot. This is useful in determining the impact that the choice of prior distribution has on the analyses.
 }
-\examples{
-## need data to set up example here. placeholder for now
-}

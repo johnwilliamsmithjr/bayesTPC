@@ -1,3 +1,5 @@
+# Sean Sorek
+
 test_that("configure_model catches errors", {
   # bad model specification
   expect_error(configure_model(model = NULL), regexp = "view implemented")

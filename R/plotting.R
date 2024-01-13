@@ -1,3 +1,5 @@
+# John W. Smith
+
 #' Wrapper for coda::traceplot()
 #'
 #' Wrapper for coda::traceplot() that can both directly accept samples of object type `mcmc` or `mcmc.list` as well as an object of class `list` with an element `samples` that is of class `mcmc` or `mcmc.list`.
@@ -9,8 +11,6 @@
 #' @param thin Integer, thinning interval used to generate traceplots.  Default is 1.
 #' @param ... additional graphical parameters to be passed as arguments to coda::traceplot.
 #' @return Returns invisible(NULL) and creates trace plots for MCMC parameters.
-#' @examples
-#' ## need data to set up example here. placeholder for now
 traceplot <- function(object, burn = 0, thin = 1, ...) {
   ## checks to see if samples are contained in list object
   if (is.list(object)) if (is.null(object$samples)) stop('Object of class list must have element "samples"')
@@ -49,8 +49,6 @@ traceplot <- function(object, burn = 0, thin = 1, ...) {
 #' @param ... additional graphical parameters to be passed as arguments to [IDPmisc::ipairs()].
 #'  For additional information, try `?IDPmisc::ipairs`.
 #' @return Returns invisible(NULL) and creates pairs plots for MCMC parameters.
-#' @examples
-#' ## need data to set up example here. placeholder for now
 bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
                             ztransf = function(x) {
                               x[x < 1] <- 1
@@ -101,8 +99,6 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #' @param burn Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot. Default is 0.
 #' @param seq.length Integer, length of sequence used to evaluate prior density. Default is 100.
 #' @return Returns invisible(NULL) and creates a prior posterior overlap plot, with the prior density shown using a red line and the posterior density shown using a blue dashed line.
-#' @examples
-#' ## need data to set up example here. placeholder for now
 ppo_plot <- function(model, burn = 0, seq.length = 100) {
   ## extract model parameters and sort alphabetically
   ppo_parameters <- sort(names(model$priors)[names(model$priors) != "sigma.sq"])

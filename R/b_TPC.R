@@ -1,3 +1,5 @@
+# Sean Sorek & John W. Smith
+
 # Helper for b_TPC
 check_data <- function(data) {
   ## data checks to make sure there are values for Temp and Trait

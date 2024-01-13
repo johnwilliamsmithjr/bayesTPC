@@ -1,3 +1,5 @@
+# Sean Sorek
+
 test_that("bad model specification", {
   # model name
   expect_error(specify_model(), regexp = "must have a name")

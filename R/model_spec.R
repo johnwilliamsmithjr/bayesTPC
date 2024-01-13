@@ -1,3 +1,5 @@
+# Sean Sorek
+
 ## Model Creation ================================
 new_btpc_model <- function(name = character(),
                            parameters = character(), # names are parameters, values are priors
@@ -139,9 +141,6 @@ validate.btpc_model <- function(x) {
     stop("Model parameters must have unique names.")
   }
 
-  # how do u check if the priors are correctly written????
-  # it will break once nimble tries to run, but i'd prefer it checked here
-
   # formula
   if (length(formula) == 0) {
     stop("Model specification must have a formula.")
@@ -169,7 +168,7 @@ validate.btpc_model <- function(x) {
       stop("'constants' vector must be named.")
     }
     if (any(vapply(const_names, function(x) {
-      x == "" #idk why i wrote this like this
+      x == ""
     }, TRUE))) {
       stop("All model constants must be named.")
     }

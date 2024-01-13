@@ -1,3 +1,5 @@
+# Sean Sorek
+
 test_that("get errors checked", {
   expect_error(get_formula("heeey"), regexp = "Unsupported model")
   expect_error(get_model_params("heeey"), regexp = "Unsupported model")

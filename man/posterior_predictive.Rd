@@ -42,6 +42,3 @@ Provide thermal performance curve posterior predictive summaries using output fr
 \details{
 This function returns various summaries of the output of the thermal performance curve posterior predictive model samples, generated using MCMC samples from the object returned by \code{b_TPC()}.
 }
-\examples{
-## need data to set up example here. placeholder for now
-}

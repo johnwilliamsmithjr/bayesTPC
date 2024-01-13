@@ -73,7 +73,6 @@ test_that("fetching multiple datasets works", {
 })
 
 test_that("Dataset searching works",{
-  #this test may flake
   httr::set_config(httr::config(ssl_verifypeer = FALSE))
   skip_on_cran()
   skip_if_not(is_VecTraits_alive(), message = "VecTraits database is not available right now. API cannot be tested.")

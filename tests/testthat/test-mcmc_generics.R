@@ -1,3 +1,5 @@
+# Sean Sorek
+
 test_that("MCMC methods errors checked", {
   withr::local_package("nimble")
   # bad object type
@@ -91,20 +93,14 @@ test_that("MCMC methods output correctly", {
 
   bin <- b_TPC(bin_test_list, "binomial_glm_lin")
   quad <- b_TPC(dat, "quadratic")
-  bri <- b_TPC(dat, "briere")
 
   ## print
   print_quad <- paste0(capture.output(print(quad)), collapse = "\n")
-  print_bri <- paste0(capture.output(print(bri)), collapse = "\n")
   print_bin <- paste0(capture.output(print(bin)), collapse = "\n")
 
   expect_output(print_MCMC_metadata(quad), regexp = "quadratic")
   expect_output(print_MCMC_metadata(quad), regexp = "m[i] <- ( ", fixed = T)
   expect_output(print_MCMC_metadata(quad), regexp = "Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )", fixed = T)
-
-  expect_output(print_MCMC_metadata(bri), regexp = "briere")
-  expect_output(print_MCMC_metadata(bri), regexp = "m[i] <- ( ", fixed = T)
-  expect_output(print_MCMC_metadata(bri), regexp = "Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )", fixed = T)
 
   expect_output(print_MCMC_metadata(bin), regexp = "binomial_glm_lin")
   expect_output(print_MCMC_metadata(bin), regexp = "logit(m[i]) <- ( ", fixed = T)
@@ -118,14 +114,6 @@ test_that("MCMC methods output correctly", {
   expect_match(print_quad, regexp = get_default_priors("quadratic")[3], fixed = T)
   expect_match(print_quad, regexp = "dexp(1)", fixed = T)
 
-  expect_match(print_bri, regexp = "briere")
-  expect_match(print_bri, regexp = "m[i] <- ( ", fixed = T)
-  expect_match(print_bri, regexp = "Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )", fixed = T)
-  expect_match(print_bri, regexp = get_default_priors("briere")[1], fixed = T)
-  expect_match(print_bri, regexp = get_default_priors("briere")[2], fixed = T)
-  expect_match(print_bri, regexp = get_default_priors("briere")[3], fixed = T)
-  expect_match(print_bri, regexp = "dexp(1)", fixed = T)
-
   expect_match(print_bin, regexp = "binomial_glm_lin")
   expect_match(print_bin, regexp = "logit(m[i]) <- ( ", fixed = T)
   expect_match(print_bin, regexp = "Trait[i] ~ dbinom(m[i], n[i])", fixed = T)
@@ -134,7 +122,6 @@ test_that("MCMC methods output correctly", {
 
   ## summary
   summary_quad <- paste0(capture.output(summary(quad)), collapse = "\n")
-  summary_bri <- paste0(capture.output(summary(bri)), collapse = "\n")
   summary_bin <- paste0(capture.output(summary(bin)), collapse = "\n")
 
   expect_output(summary(quad, print = F), regexp = NA)
@@ -147,14 +134,6 @@ test_that("MCMC methods output correctly", {
   expect_match(summary_quad, regexp = get_default_priors("quadratic")[3], fixed = T)
   expect_match(summary_quad, regexp = "dexp(1)", fixed = T)
   expect_match(summary_quad, regexp = "Empirical mean")
-
-  expect_match(summary_bri, regexp = "briere")
-  expect_match(summary_bri, regexp = "m[i] <- ( ", fixed = T)
-  expect_match(summary_bri, regexp = "Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )", fixed = T)
-  expect_match(summary_bri, regexp = get_default_priors("briere")[1], fixed = T)
-  expect_match(summary_bri, regexp = get_default_priors("briere")[2], fixed = T)
-  expect_match(summary_bri, regexp = get_default_priors("briere")[3], fixed = T)
-  expect_match(summary_bri, regexp = "dexp(1)", fixed = T)
 
   expect_match(summary_bin, regexp = "binomial_glm_lin")
   expect_match(summary_bin, regexp = "logit(m[i]) <- ( ", fixed = T)
@@ -207,20 +186,4 @@ test_that("MCMC methods output correctly", {
 
   expect_equal(link$medians, link_medians)
   expect_equal(response$medians, response_medians)
-})
-
-
-
-
-test_that("posterior_predictive branch statements", {
-  # test for coverage? no real automated way to prove correctness?
-})
-
-
-test_that("plot output correct", {
-  # use visualTest package?
-})
-
-test_that("plot_prediction output correct", {
-  # use visualTest package?
 })

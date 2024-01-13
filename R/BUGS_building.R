@@ -1,3 +1,5 @@
+# Sean Sorek & John W. Smith
+
 .link_string <- function(model) {
   UseMethod(".link_string")
 }

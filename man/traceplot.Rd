@@ -24,6 +24,3 @@ Wrapper for coda::traceplot() that can both directly accept samples of object ty
 \details{
 This is a wrapper to create trace plots using coda's \code{traceplot()} function.
 }
-\examples{
-## need data to set up example here. placeholder for now
-}

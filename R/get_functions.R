@@ -1,3 +1,5 @@
+# Sean Sorek
+
 #' Get Model Formula
 #'
 #' Returns the formula for a specified model.

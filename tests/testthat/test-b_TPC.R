@@ -1,3 +1,5 @@
+# Sean Sorek
+
 test_that("bad data is caught", {
   set.seed(12345)
   N <- 16

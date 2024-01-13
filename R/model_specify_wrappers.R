@@ -1,3 +1,5 @@
+# Sean Sorek
+
 #' Specify a Bernoulli model
 #'
 #' Creates an object with the required formatting to be fit using other `bayesTPC` functions.

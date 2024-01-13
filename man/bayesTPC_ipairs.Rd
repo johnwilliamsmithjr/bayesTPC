@@ -36,6 +36,3 @@ Wrapper for IDPmisc() that can both directly accept samples of object type \code
 \details{
 This is a wrapper to create pairs plots using IDPmisc's \code{ipairs()} function.
 }
-\examples{
-## need data to set up example here. placeholder for now
-}
