@@ -17,6 +17,9 @@ those without experience in Bayesian methods. To this end, **bayesTPC**
 contains a simple model specification format, BUGS configuration
 helpers, end-to-end model fitting methods, and model diagnostics.
 
+For a detailed introduction, visit
+[this](https://seansorek.github.io/bayesTPC/pages/intro.html) tutorial.
+
 ## Installation
 
 You can install the development version of **bayesTPC** from
