@@ -34,7 +34,7 @@ remotes::install_github("johnwilliamsmithjr/bayesTPC")
 ### Models
 
 `bayesTPC` offers many pre-configured TPC models. We can use
-`get_models()`.
+`get_models()` to view all implemented models.
 
 ``` r
 get_models()
@@ -98,12 +98,11 @@ immutable, the modified models must be stored again.
 
 ### Summaries
 
-The fit object returned by `b_TPC()` have can be summarized in multiple
-ways. `summary()` gives a detailed summary of the MCMC results, and
-`plot()` shows the fit given by the center (mean or median) and bounding
-(95% quantiles or hdi) MCMC samples. Similarly, `posterior_predictive()`
-and `plot_prediction()` take samples of the posterior to predict new
-values.
+The fit object returned by `b_TPC()` can be summarized in multiple ways.
+`summary()` gives a detailed summary of the MCMC results, and `plot()`
+shows the fit given by the center (mean or median) and bounding (95%
+quantiles or hdi) MCMC samples. Similarly, `posterior_predictive()` and
+`plot_prediction()` take samples of the posterior to predict new values.
 
 ### Diagnostics
 
