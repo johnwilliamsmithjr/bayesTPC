@@ -4,7 +4,7 @@
 \alias{ppo_plot}
 \title{Prior-Posterior Overlap Plot}
 \usage{
-ppo_plot(model, burn = 0, seq.length = 100)
+ppo_plot(model, burn = 0, seq.length = 100, legend = TRUE)
 }
 \arguments{
 \item{model}{List, usually output from \code{b_TPC()}. \code{ppo_plot} expects this list to have entries "samples", of class \code{mcmc} or \code{numeric} and "priors", with class \code{list} and entries that match the corresponding model parameters.}
@@ -12,6 +12,8 @@ ppo_plot(model, burn = 0, seq.length = 100)
 \item{burn}{Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot. Default is 0.}
 
 \item{seq.length}{Integer, length of sequence used to evaluate prior density. Default is 100.}
+
+\item{legend}{Logical, should a legend be included? Default is TRUE.}
 }
 \value{
 Returns invisible(NULL) and creates a prior posterior overlap plot, with the prior density shown using a red line and the posterior density shown using a blue dashed line.

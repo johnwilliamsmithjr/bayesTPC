@@ -98,8 +98,9 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #' @param model List, usually output from `b_TPC()`. `ppo_plot` expects this list to have entries "samples", of class `mcmc` or `numeric` and "priors", with class `list` and entries that match the corresponding model parameters.
 #' @param burn Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot. Default is 0.
 #' @param seq.length Integer, length of sequence used to evaluate prior density. Default is 100.
+#' @param legend Logical, should a legend be included? Default is TRUE.
 #' @return Returns invisible(NULL) and creates a prior posterior overlap plot, with the prior density shown using a red line and the posterior density shown using a blue dashed line.
-ppo_plot <- function(model, burn = 0, seq.length = 100) {
+ppo_plot <- function(model, burn = 0, seq.length = 100, legend = TRUE) {
   ## extract model parameters and sort alphabetically
   ppo_parameters <- sort(names(model$priors)[names(model$priors) != "sigma.sq"])
   ## if sigma.sq is in the mcmc sample list, add it as the
