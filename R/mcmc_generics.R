@@ -60,6 +60,7 @@ summary.btpc_MCMC <- function(object,
   if (!"btpc_MCMC" %in% class(object)) stop("Unexpected type for parameter 'object'. Only use this method with the output of b_TPC().")
   if (!(summaryType %in% c("hdi", "quantile"))) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported.')
   if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
+  if (is.null(temp_interval)) temp_interval <- seq(from = min(object$data$Temp), to = max(object$data$Temp), length.out = 1000)
   if (!is.numeric(temp_interval)) stop('Parameter `temp_interval` must be numeric.')
 
   if (print) {
@@ -74,7 +75,7 @@ summary.btpc_MCMC <- function(object,
 
 
 
-  if (is.null(temp_interval)) temp_interval <- seq(from = min(object$data$Temp), to = max(object$data$Temp), length.out = 1000)
+
   tpc_fun <- get_model_function(object$model_spec)
   max.ind <- nrow(object$samples)
 
