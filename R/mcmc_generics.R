@@ -3,8 +3,10 @@
 # helper for reused code
 print_MCMC_metadata <- function(x) {
   cat(paste0(cli::style_underline(cli::col_cyan("bayesTPC MCMC of Type:\n")), "  ", c(x$model_spec)))
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nFormula:\n")), "  ", .link_string(x$model_spec), attr(x$model_spec, "formula"), " )"))
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nDistribution:\n")), "  Trait[i] ~ ", .distribution_string(x$model_spec)))
+  formula_string_wrapped <- paste(strwrap(paste0(.link_string(x$model_spec), attr(x$model_spec, "formula")), width = options()$width, simplify = F)[[1]], collapse = "\n")
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nFormula:\n")), "  ",formula_string_wrapped, " )"))
+  dist_string_wrapped <- paste(strwrap(paste0("  Trait[i] ~ ",.distribution_string(x$model_spec)), width = options()$width, simplify = F)[[1]], collapse = "\n")
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nDistribution:\n")),dist_string_wrapped))
   if (length(x$constants) > 0) {
     cat(cli::style_underline(cli::col_cyan("\n\nConstants:")))
     cat("\n  ", names(x$constants), " = ", x$constants, sep = "")
@@ -58,6 +60,7 @@ summary.btpc_MCMC <- function(object,
   if (!"btpc_MCMC" %in% class(object)) stop("Unexpected type for parameter 'object'. Only use this method with the output of b_TPC().")
   if (!(summaryType %in% c("hdi", "quantile"))) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported.')
   if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
+  if (!is.numeric(temp_interval)) stop('Parameter `temp_interval` must be numeric.')
 
   if (print) {
     print_MCMC_metadata(object)

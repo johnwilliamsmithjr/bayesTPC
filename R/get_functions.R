@@ -171,7 +171,7 @@ get_models <- function() {
 #' # compare to example in get_formula()
 #' quadratic_function <- get_model_function("quadratic")
 #' quadratic_function(q = .75, T_max = 35, T_min = 10, Temp = c(15, 20, 25, 30))
-get_model_function <- function(model) {
+get_model_function <- function(model) { #if you could enter a fit and get the model function it would be nice
   if (!("btpc_model" %in% class(model))) {
     if (!(model %in% model_list)) {
       stop("Unsupported model, use get_models() to view implemented models.")
