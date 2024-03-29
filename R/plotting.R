@@ -99,8 +99,9 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #' @param burn Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot. Default is 0.
 #' @param seq.length Integer, length of sequence used to evaluate prior density. Default is 100.
 #' @param legend Logical, should a legend be included? Default is TRUE.
+#' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
 #' @return Returns invisible(NULL) and creates a prior posterior overlap plot, with the prior density shown using a red line and the posterior density shown using a blue dashed line.
-ppo_plot <- function(model, burn = 0, seq.length = 100, legend = TRUE) {
+ppo_plot <- function(model, burn = 0, seq.length = 100, legend = TRUE, legend_position = "topleft") {
   ## extract model parameters and sort alphabetically
   ppo_parameters <- sort(names(model$priors)[names(model$priors) != "sigma.sq"])
   ## if sigma.sq is in the mcmc sample list, add it as the
@@ -155,7 +156,7 @@ ppo_plot <- function(model, burn = 0, seq.length = 100, legend = TRUE) {
     )
     graphics::points(posterior_approx, type = "l", col = "blue", lwd = 2, lty = 2)
     if (legend) {
-      graphics::legend("topleft",
+      graphics::legend(legend_position,
                        legend = c("Prior", "Posterior"), col = c("red", "blue"),
                        lty = c(1, 2), lwd = c(2, 2)
       )
