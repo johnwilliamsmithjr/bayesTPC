@@ -154,9 +154,12 @@ ppo_plot <- function(model, burn = 0, seq.length = 100, legend = TRUE) {
       main = paste0("Prior-Posterior Overlap Plot for ", param_list[i])
     )
     graphics::points(posterior_approx, type = "l", col = "blue", lwd = 2, lty = 2)
-    graphics::legend("topleft",
-      legend = c("Prior", "Posterior"), col = c("red", "blue"),
-      lty = c(1, 2), lwd = c(2, 2)
-    )
+    if (legend) {
+      graphics::legend("topleft",
+                       legend = c("Prior", "Posterior"), col = c("red", "blue"),
+                       lty = c(1, 2), lwd = c(2, 2)
+      )
+    }
+
   }
 }

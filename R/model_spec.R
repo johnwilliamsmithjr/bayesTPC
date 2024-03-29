@@ -349,8 +349,10 @@ change_constants <- function(model, constants) {
 #' @export
 print.btpc_model <- function(x, ...) {
   cat(paste0(cli::style_underline(cli::col_cyan("bayesTPC Model Specification of Type:\n")), "  ", c(x)))
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")), "  ", .link_string(x), attr(x, "formula"), " )"))
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Distribution:\n")), "  Trait[i] ~ ", .distribution_string(x)))
+  formula_string_wrapped <- paste(strwrap(paste0(.link_string(x), attr(x, "formula")), width = options()$width, simplify = F)[[1]], collapse = "\n")
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nFormula:\n")), "  ",formula_string_wrapped, " )"))
+  dist_string_wrapped <- paste(strwrap(paste0("  Trait[i] ~ ",.distribution_string(x)), width = options()$width, simplify = F)[[1]], collapse = "\n")
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nDistribution:\n")),dist_string_wrapped))
   cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Parameters and Priors:"))))
   params <- attr(x, "parameters")
   cat(paste0("\n  ", names(params), " ~ ", params))
