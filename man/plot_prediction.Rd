@@ -15,7 +15,7 @@ plot_prediction(
 \arguments{
 \item{prediction}{\code{btpc_prediction}, output from \code{\link[=posterior_predictive]{posterior_predictive()}}.}
 
-\item{ylab}{a title for the y-axis. Default is "Trait".}
+\item{ylab}{character, a title for the y-axis. Default is "Trait".}
 
 \item{legend}{logical, should a legend be added to the plot? Default is TRUE.}
 

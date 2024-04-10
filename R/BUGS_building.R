@@ -106,9 +106,8 @@
 #'
 #' @export
 #' @details This function returns a character string of the full `nimble` model for a user-specified thermal performance curve and prior distributions.
-#' @param model A string specifying the model name, or a btpc_model object.
-#'  If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
-#'  Use [get_models()] to view all options.
+#' @param model character or `btpc_model`. If a character, a string specifying the model name. Otherwise, a model specification.
+#' If a string is provided, the default values are used if the model is implemented. Use [get_models()] to view all options.
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL).
 #'  Elements of the list should correspond to model parameters, and written using nimble logic.
 #'  For parameters not specified in the list, default priors are used.

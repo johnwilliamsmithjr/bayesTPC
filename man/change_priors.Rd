@@ -7,9 +7,9 @@
 change_priors(model, priors)
 }
 \arguments{
-\item{model}{Object of type \code{btpc_model}. The specification to be changed.}
+\item{model}{\code{btpc_model}, The specification to be changed.}
 
-\item{priors}{named character. The names should correspond to the parameters to change, and the values should be the new desired priors.}
+\item{priors}{named character, The names should correspond to the parameters to change, and the values should be the new desired priors.}
 }
 \value{
 Returns the modified model. Does not change the default values of any registered model type.

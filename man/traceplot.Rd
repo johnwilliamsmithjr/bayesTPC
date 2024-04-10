@@ -7,11 +7,11 @@
 traceplot(object, burn = 0, thin = 1, ...)
 }
 \arguments{
-\item{object}{Either an object of class \code{mcmc} or \code{mcmc.list} OR an object of class \code{list} which contains an element called \code{samples} that is of class \code{mcmc} or \code{mcmc.list}.}
+\item{object}{\code{mcmc}, \code{mcmc.list}, or \code{list}. If a list, must contain an element called \code{samples} that is of class \code{mcmc} or \code{mcmc.list}.}
 
-\item{burn}{Integer, number of samples to discard as burn-in before creating traceplot. Default is 0.}
+\item{burn}{integer, number of samples to discard as burn-in before creating traceplot. Default is 0.}
 
-\item{thin}{Integer, thinning interval used to generate traceplots.  Default is 1.}
+\item{thin}{integer, thinning interval used to generate traceplots.  Default is 1.}
 
 \item{...}{additional graphical parameters to be passed as arguments to coda::traceplot.}
 }

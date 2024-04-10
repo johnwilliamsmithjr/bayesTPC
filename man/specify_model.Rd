@@ -17,19 +17,19 @@ specify_model(
 \arguments{
 \item{name}{character, The desired name of the model specification.}
 
-\item{parameters}{named character vector. The names should correspond to the parameters being fit,
+\item{parameters}{named character, the names should correspond to the parameters being fit,
 and the values should be the prior distributions to be drawn from for each respective parameter.
 Uniform distributions should be used unless there is good reason to draw from another.}
 
-\item{formula}{expression. The actual formula being fit.
+\item{formula}{expression, The actual formula being fit.
 Must include 'Temp' to represent temperature and all specified parameters and constants}
 
-\item{constants}{optional double. Represents any terms in the formula that should not be fit.}
+\item{constants}{optional double, Represents any terms in the formula that should not be fit.}
 
-\item{link}{character. A link function between the model fit and the trait values.
+\item{link}{character, A link function between the model fit and the trait values.
 Currently supported options are: 'identity', 'log', 'logit', and 'reciprocal'. Default is 'identity'.}
 
-\item{distribution}{character. The distribution used to calculate likelihoods.
+\item{distribution}{character, The distribution used to calculate likelihoods.
 Currently supported options are: 'normal', 'poisson', 'bernoulli', 'binomial', 'exponential', and 'gamma'. Default is 'normal'.}
 
 \item{...}{Additional model specification attributes.

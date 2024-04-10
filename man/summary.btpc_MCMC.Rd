@@ -20,16 +20,16 @@
 \arguments{
 \item{object}{\code{btpc_MCMC}, object output from performing MCMC using the \code{bTPC} function.}
 
-\item{temp_interval}{numeric vector, reference values to use to compute values of the thermal performance curve.
+\item{temp_interval}{numeric, reference values to use to compute values of the thermal performance curve.
 If no vector is provided, temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1,000 equally spaced points.}
 
-\item{summaryType}{character, type of summary used. Currently supported options are "quantile" and "hdi" (default).}
+\item{summaryType}{character, Determines what method is used to create credible intervals. Currently supported options are "quantile" and "hdi" (default).}
 
 \item{centralSummary}{character, central summary measure used. Currently supported options are "median" (default) and "mean".}
 
 \item{prob}{numeric, the credible mass used to compute the highest density interval. Used if summaryType = "hdi".}
 
-\item{quantiles}{length 2 numeric, quantiles used for a credible interval. Used if summaryType = "quantile".}
+\item{quantiles}{numeric, quantiles used for a credible interval. Used if summaryType = "quantile".}
 
 \item{burn}{numeric, initial number of iterations to be discarded as burn-in. Default is 0.}
 

@@ -7,8 +7,7 @@
 get_default_model_specification(model)
 }
 \arguments{
-\item{model}{A string, naming either a default or user-implemented model in \code{bayesTPC}.
-Use \code{\link[=get_models]{get_models()}} to view all options.}
+\item{model}{character or \code{btpc_model}. Use \code{\link[=get_models]{get_models()}} to view all options.}
 }
 \value{
 A \code{btpc_model} object containing the model type, formula, parameters and respective priors,

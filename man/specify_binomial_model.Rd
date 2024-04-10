@@ -15,14 +15,14 @@ specify_binomial_model(
 \arguments{
 \item{name}{character, The desired name of the model specification.}
 
-\item{parameters}{named character vector. The names should correspond to the parameters being fit,
+\item{parameters}{named character, the names should correspond to the parameters being fit,
 and the values should be the prior distributions to be drawn from for each respective parameter.
 Uniform distributions should be used unless there is good reason to draw from another.}
 
-\item{formula}{expression. The actual formula being fit.
+\item{formula}{expression, The actual formula being fit.
 Must include 'Temp' to represent temperature and all specified parameters and constants}
 
-\item{constants}{optional double. Represents any terms in the formula that should not be fit.}
+\item{constants}{optional double, Represents any terms in the formula that should not be fit.}
 
 \item{...}{Additional model specification attributes. Unused by other functions.}
 }

@@ -42,15 +42,15 @@ new_btpc_model <- function(name = character(),
 #'
 #'  This model type should be used for counts of binary results.
 #' @param name character, The desired name of the model specification.
-#' @param parameters named character vector. The names should correspond to the parameters being fit,
+#' @param parameters named character, the names should correspond to the parameters being fit,
 #'   and the values should be the prior distributions to be drawn from for each respective parameter.
 #'   Uniform distributions should be used unless there is good reason to draw from another.
-#' @param formula expression. The actual formula being fit.
+#' @param formula expression, The actual formula being fit.
 #'   Must include 'Temp' to represent temperature and all specified parameters and constants
-#' @param constants optional double. Represents any terms in the formula that should not be fit.
-#' @param link character. A link function between the model fit and the trait values.
+#' @param constants optional double, Represents any terms in the formula that should not be fit.
+#' @param link character, A link function between the model fit and the trait values.
 #'   Currently supported options are: 'identity', 'log', 'logit', and 'reciprocal'. Default is 'identity'.
-#' @param distribution character. The distribution used to calculate likelihoods.
+#' @param distribution character, The distribution used to calculate likelihoods.
 #'   Currently supported options are: 'normal', 'poisson', 'bernoulli', 'binomial', 'exponential', and 'gamma'. Default is 'normal'.
 #' @param ... Additional model specification attributes.
 #'   If distribution is 'normal' or 'gamma', one can include an attribute named
@@ -239,8 +239,8 @@ validate.default <- function(x) {
 #' @details `bayesTPC` does not verify if priors specified are compatible with NIMBLE's dialect of BUGS.
 #'   All available distributions and formatting are provided on the
 #'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
-#' @param model Object of type `btpc_model`. The specification to be changed.
-#' @param priors named character. The names should correspond to the parameters to change, and the values should be the new desired priors.
+#' @param model `btpc_model`, The specification to be changed.
+#' @param priors named character, The names should correspond to the parameters to change, and the values should be the new desired priors.
 #' @returns Returns the modified model. Does not change the default values of any registered model type.
 change_priors <- function(model, priors) {
   if (!("btpc_model" %in% class(model))) {
@@ -301,8 +301,8 @@ change_priors <- function(model, priors) {
 #' @details `bayesTPC` does not verify if constants specified are compatible with NIMBLE's dialect of BUGS.
 #'   All available distributions and formatting are provided on the
 #'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
-#' @param model Object of type `btpc_model`. The specification to be changed.
-#' @param constants named character. The names should correspond to the constants to change, and the values should be the new desired constants.
+#' @param model `btpc_model`, The specification to be changed.
+#' @param constants named character, The names should correspond to the constants to change, and the values should be the new desired constants.
 #' @returns Returns the modified model. Does not change the default values of any registered model type.
 change_constants <- function(model, constants) {
   if (!("btpc_model" %in% class(model))) {

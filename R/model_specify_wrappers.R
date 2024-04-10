@@ -9,13 +9,7 @@
 #'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
 #'
 #'  This model type should be used for data with a binary result.
-#' @param name character, The desired name of the model specification.
-#' @param parameters named character vector. The names should correspond to the parameters being fit,
-#'   and the values should be the prior distributions to be drawn from for each respective parameter.
-#'   Uniform distributions should be used unless there is good reason to draw from another.
-#' @param formula expression. The actual formula being fit.
-#'   Must include 'Temp' to represent temperature and all specified parameters and constants
-#' @param constants optional double. Represents any terms in the formula that should not be fit.
+#' @inheritParams specify_model
 #' @param ... Additional model specification attributes. Unused by other functions.
 #' @returns Returns an object of type `btpc_bernoulli_model`, which can then be used in other `bayesTPC` functions.
 #'   The model name is also registered, and so can be accessed using by passing only the name into functions.
@@ -59,13 +53,7 @@ specify_bernoulli_model <- function(name = character(),
 #'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
 #'
 #'  This model type should be used for counts of binary results.
-#' @param name character, The desired name of the model specification.
-#' @param parameters named character vector. The names should correspond to the parameters being fit,
-#'   and the values should be the prior distributions to be drawn from for each respective parameter.
-#'   Uniform distributions should be used unless there is good reason to draw from another.
-#' @param formula expression. The actual formula being fit.
-#'   Must include 'Temp' to represent temperature and all specified parameters and constants
-#' @param constants optional double. Represents any terms in the formula that should not be fit.
+#' @inheritParams specify_model
 #' @param ... Additional model specification attributes. Unused by other functions.
 #' @returns Returns an object of type `btpc_binomial_model`, which can then be used in other `bayesTPC` functions.
 #'   The model name is also registered, and so can be accessed using by passing only the name into functions.
@@ -108,7 +96,7 @@ specify_binomial_model <- function(name = character(),
 #' @details `bayesTPC` does not verify if the priors specified are compatible with NIMBLE's dialect of BUGS.
 #'   All available distributions and formatting are provided on the
 #'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
-#' @inheritParams specify_binomial_model
+#' @inheritParams specify_model
 #' @param sigma.sq optional character. The desired prior for the model variance.
 #'   If not provided, a Student t distribution with with mu = 0, tau = 1/20, and df = 1 is used.
 #' @returns Returns an object of type `btpc_normal_model`, which can then be used in other `bayesTPC` functions.

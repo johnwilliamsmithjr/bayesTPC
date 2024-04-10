@@ -12,7 +12,3 @@ get_models()
 \description{
 Returns the names of all implemented models in \code{bayesTPC}.
 }
-\examples{
-
-get_models()
-}

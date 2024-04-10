@@ -16,19 +16,21 @@ specify_normal_model(
 \arguments{
 \item{name}{character, The desired name of the model specification.}
 
-\item{parameters}{named character vector. The names should correspond to the parameters being fit,
+\item{parameters}{named character, the names should correspond to the parameters being fit,
 and the values should be the prior distributions to be drawn from for each respective parameter.
 Uniform distributions should be used unless there is good reason to draw from another.}
 
-\item{formula}{expression. The actual formula being fit.
+\item{formula}{expression, The actual formula being fit.
 Must include 'Temp' to represent temperature and all specified parameters and constants}
 
-\item{constants}{optional double. Represents any terms in the formula that should not be fit.}
+\item{constants}{optional double, Represents any terms in the formula that should not be fit.}
 
 \item{sigma.sq}{optional character. The desired prior for the model variance.
 If not provided, a Student t distribution with with mu = 0, tau = 1/20, and df = 1 is used.}
 
-\item{...}{Additional model specification attributes. Unused by other functions.}
+\item{...}{Additional model specification attributes.
+If distribution is 'normal' or 'gamma', one can include an attribute named
+'sigma.sq' or 'shape_par' respectively to choose a non-default prior.}
 }
 \value{
 Returns an object of type \code{btpc_normal_model}, which can then be used in other \code{bayesTPC} functions.

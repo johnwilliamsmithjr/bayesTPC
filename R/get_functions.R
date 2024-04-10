@@ -7,9 +7,8 @@
 #' @export
 #' @details `get_formula()` is best used to investigate specifics of a model before using it.
 #'  It can be used to evaluate models, but it is better practice to use the output of [get_model_function()] for direct model evaluation.
-#' @param model A string specifying the model name, or a btpc_model object.
-#' If a string is provided, the default values are provided if the model is implemented. If the model is not implemented, an error occurs.
-#' Use [get_models()] to view all options.
+#' @param model character or `btpc_model`. Use [get_models()] to view all options.
+#'
 #' @returns `get_formula()` returns the formula for the provided model as an expression.
 #'
 #'  `get_formulas()` returns a named list containing all models and their respective formulas as expressions.
@@ -48,7 +47,8 @@ get_formula <- function(model) {
 #'  All available distributions and formatting are provided on the
 #'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
 #'
-#' @inheritParams get_formula
+#' @param model character or `btpc_model`. If a character, a string specifying the model name. Otherwise, a model specification.
+#' If a string is provided, the default values are used if the model is implemented. Use [get_models()] to view all options.
 #' @returns `get_model_params()` returns a character vector containing all required parameters for the model provided.
 #'
 #'  `get_default_priors()` returns a named numeric vector of all default prior distributions sampled from if none are provided.
@@ -84,7 +84,7 @@ get_default_priors <- function(model) {
 #' @export
 #' @details Using this function is only necessary if the model being fit has constant values.
 #'  Currently, the only implemented model with constants is 'pawar-shsch'.
-#' @inheritParams get_formula
+#' @inheritParams get_model_params
 #' @returns If the specified model does not contain constants, both `get_model_constants()` and `get_default_constants()` only output a message and return nothing.
 #'
 #' Otherwise, `get_model_constants()` returns a character vector containing all required constants for the model provided,
@@ -143,9 +143,6 @@ get_formulas <- function() {
 #'
 #' @export
 #' @returns `get_models()` returns a character vector of all implemented models in `bayesTPC`.
-#' @examples
-#'
-#' get_models()
 get_models <- function() {
   nm <- vapply(model_list, c, character(1))
   names(nm) <- NULL
@@ -199,8 +196,7 @@ get_model_function <- function(model) { #if you could enter a fit and get the mo
 #' Returns the full details of an implemented model.
 #'
 #' @export
-#' @param model A string, naming either a default or user-implemented model in `bayesTPC`.
-#'   Use [get_models()] to view all options.
+#' @inheritParams get_formula
 #' @returns A `btpc_model` object containing the model type, formula, parameters and respective priors,
 #'   constants and respective default values if applicable, and variance prior if applicable.
 get_default_model_specification <- function(model) {

@@ -7,9 +7,7 @@
 get_model_function(model)
 }
 \arguments{
-\item{model}{A string specifying the model name, or a btpc_model object.
-If a string is provided, the default values are provided if the model is implemented. If the model is not implemented, an error occurs.
-Use \code{\link[=get_models]{get_models()}} to view all options.}
+\item{model}{character or \code{btpc_model}. Use \code{\link[=get_models]{get_models()}} to view all options.}
 }
 \value{
 \code{get_model_function} returns a function that evaluates the implemented formula of the specified model.

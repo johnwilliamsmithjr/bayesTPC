@@ -34,12 +34,12 @@ print.btpc_MCMC <- function(x, digits = 3, ...) {
 #' @export
 #' @details This function returns various summaries of the output of the thermal performance curve model, generated using MCMC samples from the object returned by `b_TPC()`.
 #' @param object `btpc_MCMC`, object output from performing MCMC using the `bTPC` function.
-#' @param temp_interval numeric vector, reference values to use to compute values of the thermal performance curve.
+#' @param temp_interval numeric, reference values to use to compute values of the thermal performance curve.
 #'  If no vector is provided, temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1,000 equally spaced points.
-#' @param summaryType character, type of summary used. Currently supported options are "quantile" and "hdi" (default).
+#' @param summaryType character, Determines what method is used to create credible intervals. Currently supported options are "quantile" and "hdi" (default).
 #' @param centralSummary character, central summary measure used. Currently supported options are "median" (default) and "mean".
 #' @param prob numeric, the credible mass used to compute the highest density interval. Used if summaryType = "hdi".
-#' @param quantiles length 2 numeric, quantiles used for a credible interval. Used if summaryType = "quantile".
+#' @param quantiles numeric, quantiles used for a credible interval. Used if summaryType = "quantile".
 #' @param type character, should the summaries be calculated for the link or the response?
 #'  Supported inputs are "response" and "link". Default is "response".
 #' @param burn numeric, initial number of iterations to be discarded as burn-in. Default is 0.
@@ -62,6 +62,10 @@ summary.btpc_MCMC <- function(object,
   if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
   if (is.null(temp_interval)) temp_interval <- seq(from = min(object$data$Temp), to = max(object$data$Temp), length.out = 1000)
   if (!is.numeric(temp_interval)) stop('Parameter `temp_interval` must be numeric.')
+  if (!is.numeric(burn) || length(burn) != 1) {
+    warning("Unsupported argument for parameter `burn`. Default value of 0 is used.")
+    burn <- 0
+  }
 
   if (print) {
     print_MCMC_metadata(object)
@@ -104,7 +108,8 @@ summary.btpc_MCMC <- function(object,
       tpc_evals <- exp(link_evals)
     } else if ("btpc_reciprocal" %in% class(object$model_spec)) {
       tpc_evals <- 1 / link_evals
-    } else { # the input should have this error checked anyway, but just in case
+    } else {
+      # this error check is redundant, but is here just in case.
       stop("Misconfigured Model Specification.")
     }
   } else {
@@ -118,10 +123,15 @@ summary.btpc_MCMC <- function(object,
   }
 
   if (summaryType == "hdi") {
-    hdi_mat <- apply(FUN = HDInterval::hdi, X = tpc_evals, MARGIN = 1, credMass = prob)
+    if (length(prob) < 1) stop("Probability must be provided for summaryType = 'hdi'.")
+    if (length(prob) > 1) warning("Only the first value in parameter `prob` is used to calculate the credible interval.")
+    hdi_mat <- apply(FUN = HDInterval::hdi, X = tpc_evals, MARGIN = 1, credMass = prob[1])
     upper_bounds <- hdi_mat[2, ]
     lower_bounds <- hdi_mat[1, ]
   } else if (summaryType == "quantile") {
+    if (length(quantiles) < 2) stop("Two quantiles must be provided to calculate credible interval.")
+    if (length(quantiles) > 2) warning("Only the first two values in parameter `quantiles` are used to calculate the credible interval.")
+    if (!all(quantiles < 1 & quantiles > 0)) stop("Quantiles must be between 0 and 1.")
     upper_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = quantiles[2])
     lower_bounds <- matrixStats::rowQuantiles(tpc_evals, probs = quantiles[1])
   }
@@ -146,18 +156,10 @@ summary.btpc_MCMC <- function(object,
 #'
 #' Plots thermal performance curve summaries using output from [b_TPC()]'s nimble MCMC.
 #' @export
+#' @inheritParams summary.btpc_MCMC
 #' @param x `btpc_MCMC`, object output from performing MCMC using the `bTPC` function.
-#' @param temp_interval numeric vector, reference values to use to compute values of the thermal performance curve.
-#'  If no vector is provided, temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1,000 equally spaced points.
-#' @param summaryType character, type of summary used. Currently supported options are "quantile" and "hdi" (default).
-#' @param centralSummary character, central summary measure used. Currently supported options are "median" (default) and "mean".
-#' @param prob numeric, the credible mass used to compute the highest density interval. Used if summaryType = "hdi".
-#' @param quantiles length 2 numeric, quantiles used for a credible interval. Used if summaryType = "quantile".
-#' @param print_summary logical, should a summary be printed? Default is FALSE.
-#' @param burn numeric, initial number of iterations to be discarded as burn-in. Default is 0.
-#' @param type character, should the summaries be calculated for the link or the response?
-#'  Supported inputs are "response" and "link". Default is "response".
-#' @param ylab a title for the y axis. Default is "Trait".
+#' @param print_summary logical, should summary be printed? Default is TRUE.
+#' @param ylab character, a title for the y axis. Default is "Trait".
 #' @param xlab character, a title for the x-axis. Default is "Temperature (C)"
 #' @param ylim numeric, the limits for the y-axis.
 #' @param legend logical, should a legend be added to the plot? Default is TRUE.
@@ -228,13 +230,7 @@ plot.btpc_MCMC <- function(x,
 #' @export
 #' @details This function returns various summaries of the output of the thermal performance curve posterior predictive model samples, generated using MCMC samples from the object returned by `b_TPC()`.
 #' @param TPC `btpc_MCMC`, object output from performing MCMC using the `bTPC` function.
-#' @param temp_interval vector, reference values to use to compute values of the thermal performance curve.
-#'  If no vector is provided, temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1,000 equally spaced points.
-#' @param summaryType character, type of summary used. Currently supported options are "quantile" and "hdi" (default option).
-#' @param centralSummary character, central summary measure used. Currently supported options are "median" (default) and "mean".
-#' @param prob numeric, the credible mass used to compute the highest density interval. Used if summaryType = "hdi".
-#' @param quantiles length 2 numeric, quantiles used for a credible interval. Used if summaryType = "quantile".
-#' @param burn numeric, initial number of iterations to be discarded as burn-in. Default is 0.
+#' @inheritParams summary.btpc_MCMC
 #' @param seed integer, seed value to be used. Useful for ensuring that results are reproducible. Default is NULL.
 #' @returns A list containing the central summary and the bounds of the credible interval generated by the posterior samples.
 posterior_predictive <- function(TPC,
@@ -355,11 +351,16 @@ posterior_predictive <- function(TPC,
     stop("Unsupported argument for 'centralSummary'. Currently only 'median' and 'mean' are supported.")
   }
 
-  if (summaryType == "hdi") { # also can be optimized. god this function is slow
-    hdi_mat <- apply(FUN = HDInterval::hdi, X = post_pred_samples, MARGIN = 1, credMass = prob)
+  if (summaryType == "hdi") { #later remove dependency on HDInterval with optimized sorting algorithm
+    if (length(prob) < 1) stop("Probability must be provided for summaryType = 'hdi'.")
+    if (length(prob) > 1) warning("Only the first value in parameter `prob` is used to calculate the credible interval.")
+    hdi_mat <- apply(FUN = HDInterval::hdi, X = post_pred_samples, MARGIN = 1, credMass = prob[1])
     upper_bounds <- hdi_mat[2, ]
     lower_bounds <- hdi_mat[1, ]
   } else if (summaryType == "quantile") {
+    if (length(quantiles) < 2) stop("Two quantiles must be provided to calculate credible interval.")
+    if (length(quantiles) > 2) warning("Only the first two values in parameter `quantiles` are used to calculate the credible interval.")
+    if (!all(quantiles < 1 & quantiles > 0)) stop("Quantiles must be between 0 and 1.")
     upper_bounds <- matrixStats::rowQuantiles(post_pred_samples, probs = quantiles[2])
     lower_bounds <- matrixStats::rowQuantiles(post_pred_samples, probs = quantiles[1])
   } else {
@@ -397,7 +398,7 @@ posterior_predictive <- function(TPC,
 #'
 #' @export
 #' @param prediction `btpc_prediction`, output from [posterior_predictive()].
-#' @param ylab a title for the y-axis. Default is "Trait".
+#' @param ylab character, a title for the y-axis. Default is "Trait".
 #' @param legend logical, should a legend be added to the plot? Default is TRUE.
 #' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
 #' @param ... additional parameters passed to [plot.default()].

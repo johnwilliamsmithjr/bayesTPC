@@ -13,13 +13,13 @@ ppo_plot(
 )
 }
 \arguments{
-\item{model}{List, usually output from \code{b_TPC()}. \code{ppo_plot} expects this list to have entries "samples", of class \code{mcmc} or \code{numeric} and "priors", with class \code{list} and entries that match the corresponding model parameters.}
+\item{model}{list, usually output from \code{b_TPC()}. \code{ppo_plot} expects this list to have entries "samples", of class \code{mcmc} or \code{numeric} and "priors", with class \code{list} and entries that match the corresponding model parameters.}
 
-\item{burn}{Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot. Default is 0.}
+\item{burn}{integer, number of samples to discard as burn-in before creating prior-posterior overlap plot. Default is 0.}
 
-\item{seq.length}{Integer, length of sequence used to evaluate prior density. Default is 100.}
+\item{seq.length}{integer, length of sequence used to evaluate prior density. Default is 100.}
 
-\item{legend}{Logical, should a legend be included? Default is TRUE.}
+\item{legend}{logical, should a legend be included? Default is TRUE.}
 
 \item{legend_position}{character, position of the legend. Only used if legend = TRUE. Default is "bottomright".}
 }
@@ -30,5 +30,5 @@ Returns invisible(NULL) and creates a prior posterior overlap plot, with the pri
 Create a prior-posterior overlap plot from output of \code{\link[=b_TPC]{b_TPC()}}.
 }
 \details{
-Function to create a prior-posterior overlap plot. This is useful in determining the impact that the choice of prior distribution has on the analyses.
+Creates a prior-posterior overlap plot. This is useful in determining the impact that the choice of prior distribution has on the analyses.
 }

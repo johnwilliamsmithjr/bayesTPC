@@ -58,14 +58,13 @@ check_data <- function(data) {
 #'  Users seeking to interact with the fitted model should use `comp_model`.
 #' @param data list, with expected entries "Trait" (corresponding to the trait being modeled by the thermal performance curve)
 #'  and "Temp" (corresponding to the temperature in Celsius that the trait is being measured at).
-#' @param model A string specifying the model name, or a btpc_model object.
-#'  If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
-#'  Use [get_models()] to view all options.
+#' @param model character or `btpc_model`. If a character, a string specifying the model name. Otherwise, a model specification.
+#' If a string is provided, the default values are used if the model is implemented. Use [get_models()] to view all options.
 #' @param priors list, optional input specifying prior distributions for parameters (default = NULL).
 #'  Elements of the list should correspond to model parameters,
 #'  and written using NIMBLE logic. For parameters not specified in the list, default priors are used.
 #'  Use [get_default_priors()] to view default values.
-#' @param samplerType character string, specifying the sampling method used during the MCMC.
+#' @param samplerType character, specifying the sampling method used during the MCMC.
 #'  Currently, supported options are:
 #'  * Random Walk Metropolis ('RW')
 #'  * Blocked Random Walk Metropolis ('RW_block')
@@ -77,7 +76,7 @@ check_data <- function(data) {
 #' @param constants optional list, constants to be provided to model. If constants are needed and not provided, constant values are used.
 #'  Currently only used for model = 'pawar-shsch'.
 #' @param verbose logical, determines whether to print additional information, Default is FALSE.
-#' @param ... Additional parameters to be passed to nimble during MCMC configuration and sampling.
+#' @param ... Additional parameters passed to nimble during MCMC configuration and sampling.
 #' @return `b_TPC` returns a list containing entries:
 #'  * `samples` - `mcmc.list` containing posterior samples of parameters for corresponding model.
 #'  * `mcmc` -  `nimbleModel` object corresponding to model being fit.

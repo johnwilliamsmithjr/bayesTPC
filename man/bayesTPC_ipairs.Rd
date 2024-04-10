@@ -16,11 +16,11 @@ bayesTPC_ipairs(
 )
 }
 \arguments{
-\item{x}{Either an object of class \code{mcmc} or \code{matrix} OR an object of class \code{list} which contains an element called \code{samples} that is of class \code{mcmc} or \code{matrix}.}
+\item{x}{\code{mcmc}, \code{matrix}, or \code{list}. If a list, must contain an element called \code{samples} that is of class \code{mcmc} or \code{matrix}.}
 
-\item{burn}{Integer, number of samples to discard as burn-in before creating pairs plot. Default is 0.}
+\item{burn}{integer, number of samples to discard as burn-in before creating traceplot. Default is 0.}
 
-\item{thin}{Integer, thinning interval used to generate pairs plots. Default is 1.}
+\item{thin}{integer, thinning interval used to generate traceplots.  Default is 1.}
 
 \item{ztransf}{Function, used to transform the counts per pixel in \code{\link[IDPmisc:ipairs]{IDPmisc::ipairs()}}.}
 

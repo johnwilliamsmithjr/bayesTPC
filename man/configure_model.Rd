@@ -7,9 +7,8 @@
 configure_model(model, priors = NULL, constants = NULL, verbose = T)
 }
 \arguments{
-\item{model}{A string specifying the model name, or a btpc_model object.
-If a string is provided, the default model formula is provided if the model is implemented. If the model is not implemented, an error occurs.
-Use \code{\link[=get_models]{get_models()}} to view all options.}
+\item{model}{character or \code{btpc_model}. If a character, a string specifying the model name. Otherwise, a model specification.
+If a string is provided, the default values are used if the model is implemented. Use \code{\link[=get_models]{get_models()}} to view all options.}
 
 \item{priors}{list, optional input specifying prior distributions for parameters (default = NULL).
 Elements of the list should correspond to model parameters, and written using nimble logic.

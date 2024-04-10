@@ -7,9 +7,9 @@
 change_constants(model, constants)
 }
 \arguments{
-\item{model}{Object of type \code{btpc_model}. The specification to be changed.}
+\item{model}{\code{btpc_model}, The specification to be changed.}
 
-\item{constants}{named character. The names should correspond to the constants to change, and the values should be the new desired constants.}
+\item{constants}{named character, The names should correspond to the constants to change, and the values should be the new desired constants.}
 }
 \value{
 Returns the modified model. Does not change the default values of any registered model type.

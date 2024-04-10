@@ -6,9 +6,9 @@
 #'
 #' @export
 #' @details This is a wrapper to create trace plots using coda's `traceplot()` function.
-#' @param object Either an object of class `mcmc` or `mcmc.list` OR an object of class `list` which contains an element called `samples` that is of class `mcmc` or `mcmc.list`.
-#' @param burn Integer, number of samples to discard as burn-in before creating traceplot. Default is 0.
-#' @param thin Integer, thinning interval used to generate traceplots.  Default is 1.
+#' @param object `mcmc`, `mcmc.list`, or `list`. If a list, must contain an element called `samples` that is of class `mcmc` or `mcmc.list`.
+#' @param burn integer, number of samples to discard as burn-in before creating traceplot. Default is 0.
+#' @param thin integer, thinning interval used to generate traceplots.  Default is 1.
 #' @param ... additional graphical parameters to be passed as arguments to coda::traceplot.
 #' @return Returns invisible(NULL) and creates trace plots for MCMC parameters.
 traceplot <- function(object, burn = 0, thin = 1, ...) {
@@ -42,9 +42,8 @@ traceplot <- function(object, burn = 0, thin = 1, ...) {
 #'
 #' @export
 #' @details This is a wrapper to create pairs plots using IDPmisc's `ipairs()` function.
-#' @param x Either an object of class `mcmc` or `matrix` OR an object of class `list` which contains an element called `samples` that is of class `mcmc` or `matrix`.
-#' @param burn Integer, number of samples to discard as burn-in before creating pairs plot. Default is 0.
-#' @param thin Integer, thinning interval used to generate pairs plots. Default is 1.
+#' @param x `mcmc`, `matrix`, or `list`. If a list, must contain an element called `samples` that is of class `mcmc` or `matrix`.
+#' @inheritParams traceplot
 #' @param ztransf Function, used to transform the counts per pixel in [IDPmisc::ipairs()].
 #' @param ... additional graphical parameters to be passed as arguments to [IDPmisc::ipairs()].
 #'  For additional information, try `?IDPmisc::ipairs`.
@@ -94,11 +93,11 @@ bayesTPC_ipairs <- function(x, burn = 0, thin = 1,
 #' Create a prior-posterior overlap plot from output of [b_TPC()].
 #'
 #' @export
-#' @details Function to create a prior-posterior overlap plot. This is useful in determining the impact that the choice of prior distribution has on the analyses.
-#' @param model List, usually output from `b_TPC()`. `ppo_plot` expects this list to have entries "samples", of class `mcmc` or `numeric` and "priors", with class `list` and entries that match the corresponding model parameters.
-#' @param burn Integer, number of samples to discard as burn-in before creating prior-posterior overlap plot. Default is 0.
-#' @param seq.length Integer, length of sequence used to evaluate prior density. Default is 100.
-#' @param legend Logical, should a legend be included? Default is TRUE.
+#' @details Creates a prior-posterior overlap plot. This is useful in determining the impact that the choice of prior distribution has on the analyses.
+#' @param model list, usually output from `b_TPC()`. `ppo_plot` expects this list to have entries "samples", of class `mcmc` or `numeric` and "priors", with class `list` and entries that match the corresponding model parameters.
+#' @param burn integer, number of samples to discard as burn-in before creating prior-posterior overlap plot. Default is 0.
+#' @param seq.length integer, length of sequence used to evaluate prior density. Default is 100.
+#' @param legend logical, should a legend be included? Default is TRUE.
 #' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
 #' @return Returns invisible(NULL) and creates a prior posterior overlap plot, with the prior density shown using a red line and the posterior density shown using a blue dashed line.
 ppo_plot <- function(model, burn = 0, seq.length = 100, legend = TRUE, legend_position = "topleft") {
