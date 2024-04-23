@@ -3,13 +3,6 @@
 
 # bayesTPC: An accessible interface to fit Bayesian thermal performance curves in R.
 
-<!-- badges: start -->
-
-[![R-CMD-check](https://github.com/johnwilliamsmithjr/bayesTPC/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/johnwilliamsmithjr/bayesTPC/actions/workflows/R-CMD-check.yaml)
-[![Codecov test
-coverage](https://codecov.io/gh/johnwilliamsmithjr/bayesTPC/branch/master/graph/badge.svg)](https://app.codecov.io/gh/johnwilliamsmithjr/bayesTPC?branch=master)
-<!-- badges: end -->
-
 **bayesTPC** is an R package to help conveniently fit common thermal
 performance models using Bayesian MCMC. We provide functionality to
 substitute for or supplement BUGS modelling workflows, especially for
@@ -17,8 +10,7 @@ those without experience in Bayesian methods. To this end, **bayesTPC**
 contains a simple model specification format, BUGS configuration
 helpers, end-to-end model fitting methods, and model diagnostics.
 
-For a detailed introduction, visit
-[this](https://seansorek.github.io/bayesTPC/pages/intro.html) tutorial.
+For a detailed introduction, visit this tutorial.
 
 ## Installation
 
@@ -53,10 +45,11 @@ get_default_model_specification("briere")
 #>   briere
 #> 
 #> Model Formula:
-#>   m[i] <- ( q * Temp * (Temp - T_min) * sqrt((T_max > Temp) * abs(T_max - Temp)) * (T_max > Temp) * (Temp > T_min) )
+#>   m[i] <- ( q * Temp * (Temp - T_min) * sqrt((T_max > Temp) * abs(T_max - Temp))
+#> * (T_max > Temp) * (Temp > T_min) )
 #> 
 #> Model Distribution:
-#>   Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )
+#> Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )
 #> 
 #> Model Parameters and Priors:
 #>   q ~ dunif(0, 1) 
