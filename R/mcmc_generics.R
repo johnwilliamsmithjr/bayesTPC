@@ -96,7 +96,6 @@ summary.btpc_MCMC <- function(object,
     MoreArgs = MA
   ))
 
-  # transform link into response. I want to verify w/ Leah if this is theoretically sound
   if (type == "link") {
     tpc_evals <- link_evals
   } else if (type == "response") {
