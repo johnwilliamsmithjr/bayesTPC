@@ -98,7 +98,7 @@ specify_binomial_model <- function(name = character(),
 #'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
 #' @inheritParams specify_model
 #' @param sigma.sq optional character. The desired prior for the model variance.
-#'   If not provided, a Student t distribution with with mu = 0, tau = 1/20, and df = 1 is used.
+#'   If not provided, an exponential distribution with rate = 1 is used.
 #' @returns Returns an object of type `btpc_normal_model`, which can then be used in other `bayesTPC` functions.
 #'   The model name is also registered, and so can be accessed using by passing only the name into functions.
 #'   However, user-defined models are not saved between sessions, and will be reset whenever the package is reloaded.

@@ -26,7 +26,7 @@ Must include 'Temp' to represent temperature and all specified parameters and co
 \item{constants}{optional double, Represents any terms in the formula that should not be fit.}
 
 \item{sigma.sq}{optional character. The desired prior for the model variance.
-If not provided, a Student t distribution with with mu = 0, tau = 1/20, and df = 1 is used.}
+If not provided, an exponential distribution with rate = 1 is used.}
 
 \item{...}{Additional model specification attributes.
 If distribution is 'normal' or 'gamma', one can include an attribute named
