@@ -24,7 +24,7 @@ and "Temp" (corresponding to the temperature in Celsius that the trait is being 
 \item{model}{character or \code{btpc_model}. If a character, a string specifying the model name. Otherwise, a model specification.
 If a string is provided, the default values are used if the model is implemented. Use \code{\link[=get_models]{get_models()}} to view all options.}
 
-\item{priors}{list, optional input specifying prior distributions for parameters (default = NULL).
+\item{priors}{named list or character, optional input specifying prior distributions for parameters (default = NULL).
 Elements of the list should correspond to model parameters,
 and written using NIMBLE logic. For parameters not specified in the list, default priors are used.
 Use \code{\link[=get_default_priors]{get_default_priors()}} to view default values.}
@@ -44,7 +44,7 @@ Currently, supported options are:
 
 \item{burn}{optional integer, number of initial MCMC iterations to be discarded as burn-in. Default is burn = 0.}
 
-\item{constants}{optional list, constants to be provided to model. If constants are needed and not provided, constant values are used.
+\item{constants}{optional named list or numeric, constants to be provided to model. If constants are needed and not provided, constant values are used.
 Currently only used for model = 'pawar-shsch'.}
 
 \item{verbose}{logical, determines whether to print additional information, Default is FALSE.}

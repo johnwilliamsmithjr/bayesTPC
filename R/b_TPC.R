@@ -60,7 +60,7 @@ check_data <- function(data) {
 #'  and "Temp" (corresponding to the temperature in Celsius that the trait is being measured at).
 #' @param model character or `btpc_model`. If a character, a string specifying the model name. Otherwise, a model specification.
 #' If a string is provided, the default values are used if the model is implemented. Use [get_models()] to view all options.
-#' @param priors list, optional input specifying prior distributions for parameters (default = NULL).
+#' @param priors named list or character, optional input specifying prior distributions for parameters (default = NULL).
 #'  Elements of the list should correspond to model parameters,
 #'  and written using NIMBLE logic. For parameters not specified in the list, default priors are used.
 #'  Use [get_default_priors()] to view default values.
@@ -73,7 +73,7 @@ check_data <- function(data) {
 #' @param niter integer, number of MCMC iterations to perform (default is niter = 10000).
 #' @param inits optional list, initial parameter values to be provided to nimble MCMC.
 #' @param burn optional integer, number of initial MCMC iterations to be discarded as burn-in. Default is burn = 0.
-#' @param constants optional list, constants to be provided to model. If constants are needed and not provided, constant values are used.
+#' @param constants optional named list or numeric, constants to be provided to model. If constants are needed and not provided, constant values are used.
 #'  Currently only used for model = 'pawar-shsch'.
 #' @param verbose logical, determines whether to print additional information, Default is FALSE.
 #' @param ... Additional parameters passed to nimble during MCMC configuration and sampling.
@@ -124,13 +124,10 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
       stop("Unsupported model. Use get_models() to view implemented models.")
     }
   }
-
   if (!(samplerType %in% c("RW", "RW_block", "AF_slice", "slice"))) {
     stop("Unsupported option for input samplerType. Currently only RW, RW_block, slice, and AF_slice are supported.")
   }
-
   data.nimble <- check_data(data)
-
 
   # prep for cleanup
   original_environmental_objects <- force(ls(envir = .GlobalEnv))
@@ -138,7 +135,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   user_verbose <- verbose # avoid quoting mishaps
   nimble::nimbleOptions(verbose = user_verbose)
 
-  # removes superflous environmental objects
+  # removes superfluous environmental objects
   on.exit({
     # remove random objects from global environment
     rm(list = base::setdiff(ls(envir = .GlobalEnv), original_environmental_objects), envir = .GlobalEnv)
@@ -157,36 +154,12 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     # const.list$n = unlist(data['n'])
   }
 
-  # change priors if necessary - this will become a helper function for b_TPC and configure_model
-  if (!is.null(priors)) {
-    if (!is.list(priors)) stop("Unexpected type for argument 'priors'. Priors must be given as a list.")
-    if (length(priors) == 0) {
-      stop("Prior list cannot be empty. To use default priors, use priors = NULL.")
-    }
-    if (is.null(names(priors))) {
-      stop("Prior list must be named.")
-    }
-
-    model <- change_priors(model, unlist(priors))
-  }
-
-  # change constants if necessary
-  if (!is.null(constants)) {
-    if (!is.list(constants)) stop("Unexpected type for argument 'constants'. Contants must be given as a list.")
-    if (length(constants) == 0) {
-      stop("Constant list cannot be empty. To use default priors, use priors = NULL.")
-    }
-    if (is.null(names(constants))) {
-      stop("Constant list must be named.")
-    }
-
-    model <- change_constants(model, unlist(constants))
-  }
+  # Error checking is done in change_priors() and change_constants()
+  if (!is.null(priors)) model <- change_priors(model, unlist(priors))
+  if (!is.null(constants)) model <- change_constants(model, unlist(constants))
 
   cat(cli::style_underline(cli::col_cyan("Creating NIMBLE model:\n")))
-  if (!verbose) {
-    cat(" - Configuring model.\n")
-  }
+  if (!verbose) cat(" - Configuring model.\n")
   # handles the density function, priors, and constants
   inits.list <- .check_inits(inits)
   const.list <- .configure_constants(model, data.nimble$N)
@@ -200,16 +173,12 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     data = data.nimble$data, inits = inits.list
   )
 
-  if (!verbose) {
-    cat(" - Compiling model.\n")
-  }
+  if (!verbose) cat(" - Compiling model.\n")
   nimTPCmod_compiled <- nimble::compileNimble(nimTPCmod)
 
   cat(cli::style_underline(cli::col_cyan("\nCreating MCMC:\n")))
 
-  if (!verbose) {
-    cat(" - Configuring MCMC.\n")
-  }
+  if (!verbose) cat(" - Configuring MCMC.\n")
   # no printing because sampler hasn't changed yet, can be confusing
   mcmcConfig <- nimble::configureMCMC(nimTPCmod, print = F)
 
@@ -243,9 +212,8 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   mcmcConfig$enableWAIC <- TRUE
   mcmc <- nimble::buildMCMC(mcmcConfig)
-  if (!verbose) {
-    cat(" - Compiling MCMC.\n")
-  }
+
+  if (!verbose) cat(" - Compiling MCMC.\n")
   tpc_mcmc <- nimble::compileNimble(mcmc, project = nimTPCmod_compiled)
   if (!verbose) {
     cat(" - Running MCMC.\n")
@@ -257,12 +225,8 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
 
   prior_out <- attr(model, "parameters")
 
-  if ("btpc_normal" %in% class(model)) { # TODO remove hard-coding
-    prior_out["sigma.sq"] <- attr(model, "sigma.sq")
-  }
-  if ("btpc_gamma" %in% class(model)) {
-    prior_out["shape_par"] <- attr(model, "shape_par")
-  }
+  if ("btpc_normal" %in% class(model)) prior_out["sigma.sq"] <- attr(model, "sigma.sq")
+  if ("btpc_gamma" %in% class(model)) prior_out["shape_par"] <- attr(model, "shape_par")
 
   cat(cli::style_underline(cli::col_cyan("\nConfiguring Output:\n")))
 

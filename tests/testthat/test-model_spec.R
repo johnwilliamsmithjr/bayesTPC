@@ -158,6 +158,11 @@ test_that("change of priors / constants", {
   expect_error(change_constants(ps, c(T_ref = 1,2,3)), regexp = "All new constants")
   expect_error(change_constants(ps, c(T_ref = 1, T_ref= 2)), regexp = "have unique")
 
+  expect_equal(change_priors(def_quad, priors = list()), def_quad)
+  expect_equal(change_priors(def_quad, priors = c()), def_quad)
+  expect_equal(change_constants(def_quad, constants = list()), def_quad)
+  expect_equal(change_constants(def_quad, constants = c()), def_quad)
+
   expect_error(change_priors(def_quad, c(sigma.sq = "dexp(5)",k = "dnorm(0,1)")), regexp = "existent")
   expect_error(change_priors(def_quad, c(k = "dnorm(0,1)")), regexp = "existent")
   expect_error(change_priors(gam, c(shape_par = "dexp(5)",k = "dnorm(0,1)")), regexp = "existent")

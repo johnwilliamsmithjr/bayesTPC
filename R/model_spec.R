@@ -246,9 +246,15 @@ change_priors <- function(model, priors) {
   if (!("btpc_model" %in% class(model))) {
     stop("Invalid type for model.")
   }
+
+  if (length(priors) == 0) {
+    return(model)
+  }
+
   if (!is.character(priors)) {
     stop("Invalid type for new priors.")
   }
+
   params_to_change <- names(priors)
   if(is.null(params_to_change)) {
     stop("New priors must be named.")
@@ -308,6 +314,11 @@ change_constants <- function(model, constants) {
   if (!("btpc_model" %in% class(model))) {
     stop("Invalid type for model.")
   }
+
+  if (length(constants) == 0) {
+    return(model)
+  }
+
   if (!is.double(constants)) {
     stop("Invalid type for new constants.")
   }

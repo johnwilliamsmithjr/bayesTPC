@@ -85,16 +85,6 @@ test_that("b_TPC catches errors", {
   # misc errors
   expect_error(b_TPC(dat, model = "quadratic", sampler = "something silly"), regexp = "Currently only RW")
   expect_error(b_TPC(dat, model = "binomial_glm_lin"), regexp = "must have a variable called 'n'")
-
-  # bad priors
-  expect_error(b_TPC(dat, model = "quadratic", priors = list()), regexp = "cannot be empty")
-  expect_error(b_TPC(dat, model = "quadratic", priors = c(q = "dunif(0,.5)")), regexp = "Unexpected type")
-  expect_error(b_TPC(dat, model = "quadratic", priors = list("dunif(0,.5)")), regexp = "must be named")
-
-  # bad constants
-  expect_error(b_TPC(dat, model = "quadratic", constants = list()), regexp = "cannot be empty")
-  expect_error(b_TPC(dat, model = "quadratic", constants = c(q = 10)), regexp = "Unexpected type")
-  expect_error(b_TPC(dat, model = "quadratic", constants = list(10)), regexp = "must be named")
 })
 
 test_that("b_TPC parameters work", {
