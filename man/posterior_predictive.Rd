@@ -16,7 +16,7 @@ posterior_predictive(
 )
 }
 \arguments{
-\item{TPC}{\code{btpc_MCMC}, object output from performing MCMC using the \code{bTPC} function.}
+\item{TPC}{\code{btpc_MCMC}, object output from performing MCMC using the \code{b_TPC} function.}
 
 \item{temp_interval}{numeric, reference values to use to compute values of the thermal performance curve.
 If no vector is provided, temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1,000 equally spaced points.}

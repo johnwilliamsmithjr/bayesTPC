@@ -69,6 +69,13 @@ test_that("MCMC methods errors checked", {
 
   ## plot_prediction
   expect_error(plot_prediction("heeeey"), regexp = "should be the output of")
+
+  ## hist
+
+  expect_error(hist.btpc_MCMC("not a model"), regexp = "output of b")
+  expect_error(hist.btpc_MCMC(quad, burn = "hehe"), regexp = "Parameter 'burn' must be numeric")
+  expect_error(hist.btpc_MCMC(quad, burn = 100000), regexp = "Parameter 'burn' must be smaller than")
+  expect_error(hist.btpc_MCMC(quad, plot = "not_logical"))
 })
 
 test_that("MCMC methods output correctly", {
@@ -186,4 +193,11 @@ test_that("MCMC methods output correctly", {
 
   expect_equal(link$medians, link_medians)
   expect_equal(response$medians, response_medians)
+
+  ## hist
+
+  expect_no_error(hist.btpc_MCMC(quad))
+  expect_no_error(hist.btpc_MCMC(quad, burn = 1000))
+  expect_invisible(hist.btpc_MCMC(quad))
+  expect_visible(hist.btpc_MCMC(quad, plot = F))
 })
