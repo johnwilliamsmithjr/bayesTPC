@@ -13,12 +13,12 @@ change_priors(x, priors)
 \method{change_priors}{btpc_model}(x, priors)
 }
 \arguments{
-\item{priors}{named character, The names should correspond to the parameters to change, and the values should be the new desired priors.}
+\item{x}{\code{btpc_model} or \code{btpc_likelihood}, The specification to be changed.}
 
-\item{model}{\code{btpc_model}, The specification to be changed.}
+\item{priors}{named character, The names should correspond to the parameters to change, and the values should be the new desired priors.}
 }
 \value{
-Returns the modified model. Does not change the default values of any registered model type.
+Returns the modified model/likelihood. Does not change the default values of any registered model/likelihood type.
 }
 \description{
 Intended to be used to change the priors of an already existing model.

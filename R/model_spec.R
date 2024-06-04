@@ -329,7 +329,7 @@ validate.default <- function(x) {
 #' @details `bayesTPC` does not verify if priors specified are compatible with NIMBLE's dialect of BUGS.
 #'   All available distributions and formatting are provided on the
 #'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
-#' @param model `btpc_model` or `btpc_likelihood`, The specification to be changed.
+#' @param x `btpc_model` or `btpc_likelihood`, The specification to be changed.
 #' @param priors named character, The names should correspond to the parameters to change, and the values should be the new desired priors.
 #' @returns Returns the modified model/likelihood. Does not change the default values of any registered model/likelihood type.
 change_priors <- function(x, priors) {
@@ -337,13 +337,14 @@ change_priors <- function(x, priors) {
 }
 
 #' @rdname change_priors
+#' @export
 change_priors.btpc_model <- function(x, priors) {
   if (!("btpc_model" %in% class(x))) {
     stop("Invalid type for model.")
   }
 
   if (length(priors) == 0) {
-    return(model)
+    return(x)
   }
 
   if (!is.character(priors)) {
@@ -393,9 +394,9 @@ change_priors.btpc_model <- function(x, priors) {
     return(x)
   }
 }
-
+#' @export
 change_priors.default <- function(x, priors) {
-  stop("Misconfigured Specification")
+  stop("Invalid type of specification.")
 }
 
 #' Change constants of pre-specified model

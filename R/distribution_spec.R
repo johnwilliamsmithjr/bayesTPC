@@ -60,6 +60,7 @@ validate.btpc_likelihood <- function(x) {
 
   # parameters
   if (length(parameters) > 0) {
+    par_names <- names(parameters)
     if (is.null(par_names)) stop("'llh_parameters' vector must be named.")
     if (any(vapply(par_names, function(x) x == "", TRUE))) stop("All likelihood parameters must be named.")
     if (length(par_names) != length(unique(par_names))) stop("Likelihood parameters must have unique names.")
@@ -82,6 +83,7 @@ validate.btpc_likelihood <- function(x) {
 ## Modifying Likelihoods =============================================
 
 #' @rdname change_priors
+#' @export
 change_priors.btpc_likelihood <- function(x, priors) {
   if (!("btpc_likelihood" %in% class(x))) {
     stop("Invalid type for model.")

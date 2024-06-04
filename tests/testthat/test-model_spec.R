@@ -134,8 +134,8 @@ test_that("validate special cases work", {
 })
 
 test_that("change of priors / constants", {
-  expect_error(change_priors("garbage", c(garbage = "garb")), regexp = "Invalid type for model")
-  expect_error(change_constants("garbage", c(garbage = "garb")), regexp = "Invalid type for model")
+  expect_error(change_priors("garbage", c(garbage = "garb")), regexp = "Invalid type")
+  expect_error(change_constants("garbage", c(garbage = "garb")), regexp = "Invalid type")
 
   def_quad <- get_default_model_specification("quadratic")
   ps <- get_default_model_specification("pawar_shsch")
