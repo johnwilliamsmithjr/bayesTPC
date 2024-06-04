@@ -91,7 +91,7 @@ specify_model <- function(name = character(),
   utils::assignInMyNamespace("model_list", model_list)
   cat(paste0(
     "Model type '", name, "' can now be accessed using other bayesTPC functions. ",
-    "Restart R to reset back to defaults.\n"
+    "Use `reset_models()` to reset back to defaults.\n"
   ))
   x
 }
@@ -251,7 +251,7 @@ validate.btpc_model <- function(x) {
   # name
   if (length(name) == 0) stop("Model specification must have a name.")
   if (length(name) != 1) stop("Model specification must only have one name.")
-  if (name %in% model_list) stop("Model must have unique name. To remove all user-defined models, restart R.")
+  if (name %in% model_list) stop("Model must have unique name. To remove all user-defined models, use reset_models().")
 
   # parameters
   if (length(parameters) == 0) stop("Model specification must have parameters.")
@@ -329,11 +329,16 @@ validate.default <- function(x) {
 #' @details `bayesTPC` does not verify if priors specified are compatible with NIMBLE's dialect of BUGS.
 #'   All available distributions and formatting are provided on the
 #'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
-#' @param model `btpc_model`, The specification to be changed.
+#' @param model `btpc_model` or `btpc_likelihood`, The specification to be changed.
 #' @param priors named character, The names should correspond to the parameters to change, and the values should be the new desired priors.
-#' @returns Returns the modified model. Does not change the default values of any registered model type.
-change_priors <- function(model, priors) {
-  if (!("btpc_model" %in% class(model))) {
+#' @returns Returns the modified model/likelihood. Does not change the default values of any registered model/likelihood type.
+change_priors <- function(x, priors) {
+  UseMethod("change_priors")
+}
+
+#' @rdname change_priors
+change_priors.btpc_model <- function(x, priors) {
+  if (!("btpc_model" %in% class(x))) {
     stop("Invalid type for model.")
   }
 
@@ -358,35 +363,39 @@ change_priors <- function(model, priors) {
   if (length(params_to_change) != length(unique(params_to_change))) {
     stop("New priors must have unique names.")
   }
-  current_priors <- attr(model, "parameters")
+  current_priors <- attr(x, "parameters")
   if ("sigma.sq" %in% params_to_change) {
     if (!all(params_to_change %in% c(names(current_priors), "sigma.sq"))) {
       stop("Attempting to change prior of non-existent parameter.")
     }
     model_priors <- priors[names(priors) != "sigma.sq"]
     current_priors[names(model_priors)] <- unlist(model_priors)
-    attr(model, "parameters") <- current_priors
+    attr(x, "parameters") <- current_priors
     sig <- priors["sigma.sq"]; attributes(sig) <- NULL
-    attr(model, "sigma.sq") <- sig
-    return(model)
+    attr(x, "sigma.sq") <- sig
+    return(x)
   } else if ("shape_par" %in% params_to_change) {
     if (!all(params_to_change %in% c(names(current_priors), "shape_par"))) {
       stop("Attempting to change prior of non-existent parameter.")
     }
     model_priors <- priors[names(priors) != "shape_par"]
     current_priors[names(model_priors)] <- unlist(model_priors)
-    attr(model, "parameters") <- current_priors
+    attr(x, "parameters") <- current_priors
     sp <- priors["shape_par"]; attributes(sp) <- NULL
-    attr(model, "shape_par") <- sp
-    return(model)
+    attr(x, "shape_par") <- sp
+    return(x)
   } else {
     if (!all(params_to_change %in% names(current_priors))) {
       stop("Attempting to change prior of non-existent parameter.")
     }
     current_priors[params_to_change] <- unlist(priors)
-    attr(model, "parameters") <- current_priors
-    return(model)
+    attr(x, "parameters") <- current_priors
+    return(x)
   }
+}
+
+change_priors.default <- function(x, priors) {
+  stop("Misconfigured Specification")
 }
 
 #' Change constants of pre-specified model

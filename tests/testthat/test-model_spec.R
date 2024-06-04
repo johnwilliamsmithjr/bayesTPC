@@ -206,4 +206,4 @@ test_that("removing models works", {
 
   expect_error(remove_model("quadratic"), regexp = "Only user")
   expect_error(remove_model("not a model"), regexp = "Attempting to remove non")
-  })
+})
