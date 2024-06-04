@@ -184,3 +184,26 @@ test_that("printing models work", {
   expect_output(print(gam), regexp = "Model Formula")
   expect_output(print(gam), regexp = "Shape")
 })
+
+test_that("removing models works", {
+  expect_true("cooler_gamma_model" %in% get_models())
+
+  remove_model("cooler_gamma_model")
+
+  expect_false("cooler_gamma_model" %in% get_models())
+
+  gam <- specify_model("cooler_gamma_model",
+                       parameters = c(a = "dunif(0,1)", b = "dunif(0,2)"),
+                       formula =expression(a*Temp/c + b*d),
+                       constants = c(c = 3, d = 4), link = "identity",
+                       distribution = "gamma")
+
+  expect_true("cooler_gamma_model" %in% get_models())
+
+  reset_models()
+
+  expect_false("cooler_gamma_model" %in% get_models())
+
+  expect_error(remove_model("quadratic"), regexp = "Only user")
+  expect_error(remove_model("not a model"), regexp = "Attempting to remove non")
+  })

@@ -96,6 +96,142 @@ specify_model <- function(name = character(),
   x
 }
 
+## Wrappers ========================================================
+
+#' Specify a Bernoulli model
+#'
+#' Creates an object with the required formatting to be fit using other `bayesTPC` functions.
+#' @export
+#' @details `bayesTPC` does not verify if the priors specified are compatible with NIMBLE's dialect of BUGS.
+#'   All available distributions and formatting are provided on the
+#'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
+#'
+#'  This model type should be used for data with a binary result.
+#' @inheritParams specify_model
+#' @param ... Additional model specification attributes. Unused by other functions.
+#' @returns Returns an object of type `btpc_bernoulli_model`, which can then be used in other `bayesTPC` functions.
+#'   The model name is also registered, and so can be accessed using by passing only the name into functions.
+#'   However, user-defined models are not saved between sessions, and will be reset whenever the package is reloaded.
+#' @examples
+#' my_name <- "my_model"
+#' my_formula <- expression(a * Temp^c + b)
+#' my_parameters <- c(a = "dunif(0,1)", b = "dnorm(0,1)")
+#' my_constants <- c(c = 1.5)
+#'
+#' \dontrun{
+#' my_model <- specify_bernoulli_model(
+#'   name = my_name,
+#'   parameters = my_parameters,
+#'   formula = my_formula,
+#'   constants = my_constants
+#' )
+#' }
+specify_bernoulli_model <- function(name = character(),
+                                    parameters = character(), # names are parameters, values are priors
+                                    formula = expression(),
+                                    constants = double(), # names are constant names, values are default values
+                                    ...) {
+  specify_model(
+    name = name,
+    parameters = parameters,
+    formula = formula,
+    constants = constants,
+    link = "logit",
+    distribution = "bernoulli",
+    ...
+  )
+}
+
+#' Specify a binomial model
+#'
+#' Creates an object with the required formatting to be fit using other `bayesTPC` functions.
+#' @export
+#' @details `bayesTPC` does not verify if the priors specified are compatible with NIMBLE's dialect of BUGS.
+#'   All available distributions and formatting are provided on the
+#'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
+#'
+#'  This model type should be used for counts of binary results.
+#' @inheritParams specify_model
+#' @param ... Additional model specification attributes. Unused by other functions.
+#' @returns Returns an object of type `btpc_binomial_model`, which can then be used in other `bayesTPC` functions.
+#'   The model name is also registered, and so can be accessed using by passing only the name into functions.
+#'   However, user-defined models are not saved between sessions, and will be reset whenever the package is reloaded.
+#' @examples
+#' my_name <- "my_model"
+#' my_formula <- expression(a * Temp^c + b)
+#' my_parameters <- c(a = "dunif(0,1)", b = "dnorm(0,1)")
+#' my_constants <- c(c = 1.5)
+#'
+#' \dontrun{
+#' my_model <- specify_binomial_model(
+#'   name = my_name,
+#'   parameters = my_parameters,
+#'   formula = my_formula,
+#'   constants = my_constants
+#' )
+#' }
+specify_binomial_model <- function(name = character(),
+                                   parameters = character(), # names are parameters, values are priors
+                                   formula = expression(),
+                                   constants = double(), # names are constant names, values are default values
+                                   ...) {
+  specify_model(
+    name = name,
+    parameters = parameters,
+    formula = formula,
+    constants = constants,
+    link = "logit",
+    distribution = "binomial",
+    ...
+  )
+}
+
+#' Specify model with normally distributed error
+#'
+#' Creates an object with the required formatting to be fit using other `bayesTPC` functions.
+#'
+#' @export
+#' @details `bayesTPC` does not verify if the priors specified are compatible with NIMBLE's dialect of BUGS.
+#'   All available distributions and formatting are provided on the
+#'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
+#' @inheritParams specify_model
+#' @param sigma.sq optional character. The desired prior for the model variance.
+#'   If not provided, an exponential distribution with rate = 1 is used.
+#' @returns Returns an object of type `btpc_normal_model`, which can then be used in other `bayesTPC` functions.
+#'   The model name is also registered, and so can be accessed using by passing only the name into functions.
+#'   However, user-defined models are not saved between sessions, and will be reset whenever the package is reloaded.
+#' @examples
+#' my_name <- "my_model"
+#' my_formula <- expression(a * Temp^c + b)
+#' my_parameters <- c(a = "dunif(0,1)", b = "dnorm(0,1)")
+#' my_constants <- c(c = 1.5)
+#'
+#' \dontrun{
+#' my_model <- specify_normal_model(
+#'   name = my_name,
+#'   parameters = my_parameters,
+#'   formula = my_formula,
+#'   constants = my_constants
+#' )
+#' }
+specify_normal_model <- function(name = character(),
+                                 parameters = character(), # names are parameters, values are priors
+                                 formula = expression(),
+                                 constants = double(), # names are constant names, values are default values
+                                 sigma.sq = "dexp(1)",
+                                 ...) {
+  specify_model(
+    name = name,
+    parameters = parameters,
+    formula = formula,
+    constants = constants,
+    link = "identity",
+    distribution = "normal",
+    sigma.sq = sigma.sq,
+    ...
+  )
+}
+
 ## Model Validation ================================================
 validate <- function(x) {
   UseMethod("validate")
@@ -113,89 +249,43 @@ validate.btpc_model <- function(x) {
   # S3 has no built in input validation, so this mostly just covers obvious edge cases.
 
   # name
-  if (length(name) == 0) {
-    stop("Model specification must have a name.")
-  }
-  if (length(name) != 1) {
-    stop("Model specification must only have one name.")
-  }
-  # could the model list be stored as an environment? or is that too overcomplicated?
+  if (length(name) == 0) stop("Model specification must have a name.")
+  if (length(name) != 1) stop("Model specification must only have one name.")
+  if (name %in% model_list) stop("Model must have unique name. To remove all user-defined models, restart R.")
 
-  if (name %in% model_list) {
-    stop("Model must have unique name. To remove all user-defined models, restart R.")
-  }
   # parameters
-  if (length(parameters) == 0) {
-    stop("Model specification must have parameters.")
-  }
+  if (length(parameters) == 0) stop("Model specification must have parameters.")
   par_names <- names(parameters)
-  if (is.null(par_names)) {
-    stop("'parameters' vector must be named.")
-  }
-  if (any(vapply(par_names, function(x) {
-    x == ""
-  }, TRUE))) {
-    stop("All model parameters must be named.")
-  }
-  if (length(par_names) != length(unique(par_names))) {
-    stop("Model parameters must have unique names.")
-  }
+  if (is.null(par_names)) stop("'parameters' vector must be named.")
+  if (any(vapply(par_names, function(x) x == "", TRUE))) stop("All model parameters must be named.")
+  if (length(par_names) != length(unique(par_names))) stop("Model parameters must have unique names.")
 
   # formula
-  if (length(formula) == 0) {
-    stop("Model specification must have a formula.")
-  }
-  if (length(formula) > 1) {
-    stop("Model specification can only have one formula.")
-  }
+  if (length(formula) == 0) stop("Model specification must have a formula.")
+  if (length(formula) > 1)  stop("Model specification can only have one formula.")
   formula_vars <- all.vars(formula) # extract all variables from formula
-  if (!"Temp" %in% formula_vars) {
-    stop("Model specification formula must contain variable 'Temp'.")
-  }
-  if (!all(par_names %in% formula_vars)) {
-    # this could be a warning but I want to be strict here.
-    stop("One or more parameters are not included in the model formula.")
-  }
-  if (!all(formula_vars %in% c("Temp", par_names, names(constants)))) {
-    stop("One or more variables in the model formula is not named as a parameter or a constant.")
-  }
+  if (!"Temp" %in% formula_vars) stop("Model specification formula must contain variable 'Temp'.")
+  if (!all(par_names %in% formula_vars)) stop("One or more parameters are not included in the model formula.")
+  if (!all(formula_vars %in% c("Temp", par_names, names(constants)))) stop("One or more variables in the model formula is not named as a parameter or a constant.")
 
   # constants
   if (length(constants) > 0) {
     const_names <- names(constants)
 
-    if (is.null(const_names)) {
-      stop("'constants' vector must be named.")
-    }
-    if (any(vapply(const_names, function(x) {
-      x == ""
-    }, TRUE))) {
-      stop("All model constants must be named.")
-    }
-    if (length(const_names) != length(unique(const_names))) {
-      stop("Model constants must have unique names.")
-    }
-    if (!all(const_names %in% formula_vars)) {
-      # this could be a warning but I want to be strict here.
-      stop("One or more constants are not included in the model formula.")
-    }
+    if (is.null(const_names)) stop("'constants' vector must be named.")
+    if (any(vapply(const_names, function(x) x == "", TRUE))) stop("All model constants must be named.")
+    if (length(const_names) != length(unique(const_names))) stop("Model constants must have unique names.")
+    if (!all(const_names %in% formula_vars)) stop("One or more constants are not included in the model formula.")
   }
 
-  if (length(link) != 1) {
-    stop("Model must have one and only one link function")
-  }
-  if (length(distribution) != 1) {
-    stop("Model must have one and only one distribution")
-  }
+  # link/dist
+  if (length(link) != 1) stop("Model must have one and only one link function")
+  if (length(distribution) != 1) stop("Model must have one and only one distribution")
+
   supported_links <- c("identity", "log", "logit", "reciprocal")
   supported_dist <- c("normal", "poisson", "bernoulli", "binomial", "exponential", "gamma")
-
-  if (!link %in% supported_links) {
-    stop("Unsupported link function.")
-  }
-  if (!distribution %in% supported_dist) {
-    stop("Unsupported distribution.")
-  }
+  if (!link %in% supported_links) stop("Unsupported link function.")
+  if (!distribution %in% supported_dist) stop("Unsupported distribution.")
 
   return(x)
 }
@@ -343,19 +433,42 @@ change_constants <- function(model, constants) {
     stop("Attempting to change non-existent constant.")
   }
 
-
-
-
-
-
-
   current_constants[constants_to_change] <- unlist(constants)
   attr(model, "constants") <- current_constants
   return(model)
 }
 
+## Removing Models ==================================================
 
-## Methods
+
+#' Removing User-defined models
+#'
+#' Removes one or all user-defined models accessible to other `bayesTPC` functions. `remove_model()` only removes one specific model, while `reset_models()` removes **all** user-defined models.
+#' @param name character, the name of the model to be removed
+#' @export
+remove_model <- function(name) {
+  if(!name %in% model_list) {
+    stop("Attempting to remove non-existent model.")
+  }
+
+  if (name %in% immutable_model_list) {
+    stop("Only user-defined models can be removed.")
+  }
+
+  ## REMOVE IN FUNCTION ENVIRONMENT
+  model_list[[name]] <- NULL
+
+  ## UPDATE PACKAGE ENVIRONMENT
+  utils::assignInMyNamespace("model_list", model_list)
+  cat("Model '",name,"' has been removed and can no longer be accessed by other bayesTPC functions.", sep = "")
+}
+
+#' @rdname remove_model
+reset_models <- function() {
+  utils::assignInMyNamespace("model_list", immutable_model_list)
+  cat("All user-defined models have been removed.")
+}
+## Methods ==========================================================
 
 #' @export
 print.btpc_model <- function(x, ...) {

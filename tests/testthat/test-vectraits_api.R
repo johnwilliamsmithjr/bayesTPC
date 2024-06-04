@@ -81,9 +81,8 @@ test_that("Dataset searching works",{
   expect_error(find_VB_datasets(character()), regexp = "Keyword must be provided")
 
 
-
   expect_output(amer <- find_VB_datasets("Americanum", F), regexp = "datasets found")
   expect_error(find_VB_datasets("sojbgsidkhgbf"), regexp = "Data fetch failed")
   expect_gte(length(amer), 4) #so the test doesn't fail when more lone star datasets are added
   httr::set_config(httr::config(ssl_verifypeer = TRUE))
-  })
+})
