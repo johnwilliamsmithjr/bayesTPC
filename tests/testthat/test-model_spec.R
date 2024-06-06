@@ -114,22 +114,20 @@ test_that("validate special cases work", {
 
   expect_error(validate("garbage"), regexp = "Misconfigured Model Specification")
   #normal
-  expect_output(specify_model("my_cool_new_normal_model",
+  expect_no_error(specify_model("my_cool_new_normal_model",
                               parameters = c(a = "dunif(0,1)", b = "dunif(0,2)"),
                               formula =expression(a*Temp/c + b*d),
                               constants = c(c = 3, d = 4), link = "identity",
-                              distribution = "normal"),
-                regexp = "Using default prior for model variance")
-  expect_equal(attr(get_default_model_specification("my_cool_new_normal_model"), "sigma.sq"),"dexp(1)")
+                              distribution = "normal"))
+  expect_equal(attr(attr(get_default_model_specification("my_cool_new_normal_model"), "distribution"), "llh_parameters"),c(sigma.sq = "dexp(1)"))
 
   #gamma
-  expect_output(specify_model("my_cool_new_gamma_model",
+  expect_no_error(specify_model("my_cool_new_gamma_model",
                                    parameters = c(a = "dunif(0,1)", b = "dunif(0,2)"),
                                    formula =expression(a*Temp/c + b*d),
                                    constants = c(c = 3, d = 4), link = "identity",
-                                   distribution = "gamma"),
-                regexp = "Using default prior for shape parameter")
-  expect_equal(attr(get_default_model_specification("my_cool_new_gamma_model"), "shape_par"),"dexp(1)")
+                                   distribution = "gamma"))
+  expect_equal(attr(attr(get_default_model_specification("my_cool_new_gamma_model"), "distribution"), "llh_parameters"),c(shape_par = "dexp(1)"))
 
 })
 
@@ -167,10 +165,10 @@ test_that("change of priors / constants", {
   expect_error(change_priors(def_quad, c(k = "dnorm(0,1)")), regexp = "existent")
   expect_error(change_priors(gam, c(shape_par = "dexp(5)",k = "dnorm(0,1)")), regexp = "existent")
 
-  expect_equal(attr(gam, "shape_par"),expected = "dexp(1)")
+  expect_equal(attr(attr(gam, "distribution"), "llh_parameters"),c(shape_par = "dexp(1)"))
   gam2 <- change_priors(gam, c(shape_par = "dexp(5)"))
-  expect_equal(attr(gam, "shape_par"),expected = "dexp(1)")
-  expect_equal(attr(gam2, "shape_par"),expected = "dexp(5)")
+  expect_equal(attr(attr(gam, "distribution"), "llh_parameters"),c(shape_par = "dexp(1)"))
+  expect_equal(attr(attr(gam2, "distribution"), "llh_parameters"),c(shape_par = "dexp(5)"))
 })
 
 test_that("printing models work", {
@@ -178,11 +176,11 @@ test_that("printing models work", {
   gam <- get_default_model_specification("cooler_gamma_model")
   expect_output(print(def_quad), regexp = "quadratic")
   expect_output(print(def_quad), regexp = "Model Formula")
-  expect_output(print(def_quad), regexp = "Variance")
+  expect_output(print(def_quad), regexp = "sigma.sq", fixed = T)
 
   expect_output(print(gam), regexp = "cooler_gamma_model")
   expect_output(print(gam), regexp = "Model Formula")
-  expect_output(print(gam), regexp = "Shape")
+  expect_output(print(gam), regexp = "shape")
 })
 
 test_that("removing models works", {

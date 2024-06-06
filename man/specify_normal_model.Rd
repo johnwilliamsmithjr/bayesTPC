@@ -9,7 +9,7 @@ specify_normal_model(
   parameters = character(),
   formula = expression(),
   constants = double(),
-  sigma.sq = "dexp(1)",
+  dist_parameters = c(sigma.sq = "dexp(1)"),
   ...
 )
 }
@@ -25,12 +25,12 @@ Must include 'Temp' to represent temperature and all specified parameters and co
 
 \item{constants}{optional double, Represents any terms in the formula that should not be fit.}
 
-\item{sigma.sq}{optional character. The desired prior for the model variance.
-If not provided, an exponential distribution with rate = 1 is used.}
-
 \item{...}{Additional model specification attributes.
 If distribution is 'normal' or 'gamma', one can include an attribute named
 'sigma.sq' or 'shape_par' respectively to choose a non-default prior.}
+
+\item{sigma.sq}{optional character. The desired prior for the model variance.
+If not provided, an exponential distribution with rate = 1 is used.}
 }
 \value{
 Returns an object of type \code{btpc_normal_model}, which can then be used in other \code{bayesTPC} functions.

@@ -90,58 +90,75 @@ change_priors.btpc_likelihood <- function(x, priors) {
   }
 
   if (length(priors) == 0) {
-    return(model)
+    return(x)
   }
 
-  if (!is.character(priors)) {
-    stop("Invalid type for new priors.")
-  }
-
+  priors_error_check(priors)
   params_to_change <- names(priors)
-  if(is.null(params_to_change)) {
-    stop("New priors must be named.")
+  current_priors <- attr(x, "llh_parameters")
+
+  if(!all(params_to_change %in% names(current_priors))) {
+    stop("Attempting to change prior of non-existent parameter.")
   }
 
-  if (any(vapply(params_to_change, function(x) {
-    x == ""
-  }, TRUE))) {
-    stop("All new priors must be named.")
+  current_priors[names(priors)] <- unlist(priors)
+  attr(x, "llh_parameters") <- current_priors
+  return(x)
+}
+
+#' @rdname change_constants
+#' @export
+change_constants.btpc_likelihood <- function(x, constants) {
+  if (!("btpc_likelihood" %in% class(x))) {
+    stop("Invalid type for likelihood.")
   }
-  if (length(params_to_change) != length(unique(params_to_change))) {
-    stop("New priors must have unique names.")
+
+  if (length(constants) == 0) {
+    return(x)
   }
-  current_priors <- attr(model, "parameters")
-  if ("sigma.sq" %in% params_to_change) {
-    if (!all(params_to_change %in% c(names(current_priors), "sigma.sq"))) {
-      stop("Attempting to change prior of non-existent parameter.")
-    }
-    model_priors <- priors[names(priors) != "sigma.sq"]
-    current_priors[names(model_priors)] <- unlist(model_priors)
-    attr(model, "parameters") <- current_priors
-    sig <- priors["sigma.sq"]; attributes(sig) <- NULL
-    attr(model, "sigma.sq") <- sig
-    return(model)
-  } else if ("shape_par" %in% params_to_change) {
-    if (!all(params_to_change %in% c(names(current_priors), "shape_par"))) {
-      stop("Attempting to change prior of non-existent parameter.")
-    }
-    model_priors <- priors[names(priors) != "shape_par"]
-    current_priors[names(model_priors)] <- unlist(model_priors)
-    attr(model, "parameters") <- current_priors
-    sp <- priors["shape_par"]; attributes(sp) <- NULL
-    attr(model, "shape_par") <- sp
-    return(model)
-  } else {
-    if (!all(params_to_change %in% names(current_priors))) {
-      stop("Attempting to change prior of non-existent parameter.")
-    }
-    current_priors[params_to_change] <- unlist(priors)
-    attr(model, "parameters") <- current_priors
-    return(model)
+
+  constants_error_check(constants)
+  params_to_change <- names(constants)
+  current_constants <- attr(x, "llh_constants")
+
+  if(!all(params_to_change %in% names(current_constants))) {
+    stop("Attempting to change prior of non-existent constant.")
   }
+
+  current_constants[names(constants)] <- unlist(constants)
+  attr(x, "llh_constants") <- current_constants
+  return(x)
 }
 
 ## Removing Likelihoods ==============================================
+
+#' Removing User-Defined Likelihoods
+#'
+#' Removes one or all user-defined likelihoods accessible to other `bayesTPC` functions. `remove_likelihood()` only removes one specific likelihood, while `reset_likelihoods()` removes **all** user-defined likelihoods.
+#' @param name character, the name of the likelihood to be removed
+#' @export
+remove_likelihood <- function(name) {
+  if(!name %in% llh_list) {
+    stop("Attempting to remove non-existent likelihood.")
+  }
+
+  if (name %in% immutable_llh_list) {
+    stop("Only user-defined likelihoods can be removed.")
+  }
+
+  ## REMOVE IN FUNCTION ENVIRONMENT
+  llh_list[[name]] <- NULL
+
+  ## UPDATE PACKAGE ENVIRONMENT
+  utils::assignInMyNamespace("llh_list", llh_list)
+  cat("Likelihood '",name,"' has been removed and can no longer be accessed by other bayesTPC functions.", sep = "")
+}
+
+#' @rdname remove_likelihood
+reset_likelihoods <- function() {
+  utils::assignInMyNamespace("llh_list", immutable_llh_list)
+  cat("All user-defined likelihoods have been removed.")
+}
 
 ## Methods
 

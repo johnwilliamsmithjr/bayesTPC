@@ -11,6 +11,8 @@ specify_model(
   constants = double(),
   link = "identity",
   distribution = "normal",
+  dist_parameters = character(),
+  dist_constants = double(),
   ...
 )
 }

@@ -284,7 +284,7 @@ posterior_predictive <- function(TPC,
     stop("Misconfigured Model Specification. If you see this error, please contact the package developers.")
   }
 
-  # draw from posterior sample, will make this into a switch when i have time
+  # draw from posterior sample, will use generic when I have time
   if ("btpc_normal" %in% class(TPC$model_spec)) {
     post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
       return(truncnorm::rtruncnorm(

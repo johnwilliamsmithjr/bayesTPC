@@ -221,14 +221,13 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     cat(cli::style_underline(cli::col_cyan("\nProgress:\n")))
   }
   tpc_mcmc$run(niter, nburnin = burn, ...)
-  samples <- coda::as.mcmc(as.matrix(tpc_mcmc$mvSamples)) # TODO theres a way to do this in nimble
-
-  prior_out <- attr(model, "parameters")
-
-  if ("btpc_normal" %in% class(model)) prior_out["sigma.sq"] <- attr(model, "sigma.sq")
-  if ("btpc_gamma" %in% class(model)) prior_out["shape_par"] <- attr(model, "shape_par")
 
   cat(cli::style_underline(cli::col_cyan("\nConfiguring Output:\n")))
+  samples <- coda::as.mcmc(as.matrix(tpc_mcmc$mvSamples)) # TODO theres a way to do this in nimble
+
+  prior_out <- c(attr(model, "parameters"), attr(attr(model, "distribution"), "llh_parameters"))
+
+
 
   out <- list(
     samples = samples, mcmc = tpc_mcmc, data = data.nimble$data,

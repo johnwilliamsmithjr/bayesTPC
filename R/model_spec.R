@@ -6,7 +6,7 @@ new_btpc_model <- function(name = character(),
                            formula = expression(),
                            constants = double(), # names are constant names, values are default values
                            link = character(),
-                           distribution = character(),
+                           distribution = character(), #character or btpc_likelihood
                            class = character(), # for subclassing support
                            ...) {
   # forcing explicit types
@@ -18,11 +18,9 @@ new_btpc_model <- function(name = character(),
 
 
   structure(name,
-    class = c(
-      paste0("btpc_", distribution),
-      paste0("btpc_", link),
-      "btpc_model"
-    ),
+    class = c("btpc_model",
+              paste0("btpc_", link),
+              paste0("btpc_", c(distribution))),
     parameters = parameters,
     formula = formula,
     constants = constants,
@@ -80,11 +78,15 @@ specify_model <- function(name = character(),
                           constants = double(),
                           link = "identity",
                           distribution = "normal",
+                          dist_parameters = character(),
+                          dist_constants = double(),
                           ...) {
 
 
   x <- new_btpc_model(name, parameters, formula, constants, link, distribution, ...)
-  x <- validate(x)
+  x <- validate(x) #adds the default llh priors
+  x <- change_priors(x, dist_parameters) #set to user llh priors :)
+  x <- change_constants(x, dist_constants)
 
   # add to model list. lets us check that model has been input validated
   model_list[[name]] <- x
@@ -218,7 +220,7 @@ specify_normal_model <- function(name = character(),
                                  parameters = character(), # names are parameters, values are priors
                                  formula = expression(),
                                  constants = double(), # names are constant names, values are default values
-                                 sigma.sq = "dexp(1)",
+                                 dist_parameters = c(sigma.sq = "dexp(1)"),
                                  ...) {
   specify_model(
     name = name,
@@ -227,7 +229,7 @@ specify_normal_model <- function(name = character(),
     constants = constants,
     link = "identity",
     distribution = "normal",
-    sigma.sq = sigma.sq,
+    dist_parameters = dist_parameters,
     ...
   )
 }
@@ -283,9 +285,13 @@ validate.btpc_model <- function(x) {
   if (length(distribution) != 1) stop("Model must have one and only one distribution")
 
   supported_links <- c("identity", "log", "logit", "reciprocal")
-  supported_dist <- c("normal", "poisson", "bernoulli", "binomial", "exponential", "gamma")
   if (!link %in% supported_links) stop("Unsupported link function.")
-  if (!distribution %in% supported_dist) stop("Unsupported distribution.")
+  if (!distribution %in% llh_list) stop("Unsupported distribution.")
+
+  if (!"btpc_likelihood" %in% class(distribution)) {
+    distribution <- llh_list[[distribution]]
+    attr(x, "distribution") <- distribution
+  }
 
   return(x)
 }
@@ -321,6 +327,26 @@ validate.default <- function(x) {
 
 ## Changing Models ======================================================
 
+priors_error_check <- function(priors) {
+  if (!is.character(priors)) {
+    stop("Invalid type for new priors.")
+  }
+
+  params_to_change <- names(priors)
+  if(is.null(params_to_change)) {
+    stop("New priors must be named.")
+  }
+
+  if (any(vapply(params_to_change, function(x) {
+    x == ""
+  }, TRUE))) {
+    stop("All new priors must be named.")
+  }
+  if (length(params_to_change) != length(unique(params_to_change))) {
+    stop("New priors must have unique names.")
+  }
+}
+
 #' Change priors of pre-specified model
 #'
 #' Intended to be used to change the priors of an already existing model.
@@ -339,61 +365,37 @@ change_priors <- function(x, priors) {
 #' @rdname change_priors
 #' @export
 change_priors.btpc_model <- function(x, priors) {
-  if (!("btpc_model" %in% class(x))) {
-    stop("Invalid type for model.")
-  }
+  if (!("btpc_model" %in% class(x))) stop("Invalid type for model.")
+  if (is.null(priors)) return(x)
+  if (length(priors) == 0) return(x)
 
-  if (length(priors) == 0) {
-    return(x)
-  }
-
-  if (!is.character(priors)) {
-    stop("Invalid type for new priors.")
-  }
-
+  # separate the pieces we need
+  priors_error_check(priors)
   params_to_change <- names(priors)
-  if(is.null(params_to_change)) {
-    stop("New priors must be named.")
+  current_priors <- attr(x, "parameters")
+  llh <- attr(x, "distribution")
+  llh_current_priors <- attr(llh, "llh_parameters")
+
+  # clear bad inputs before splitting btw model and llh
+  if (!all(params_to_change %in% c(names(current_priors), names(llh_current_priors)))) {
+    stop("Attempting to change prior of non-existent parameter.")
   }
 
-  if (any(vapply(params_to_change, function(x) {
-    x == ""
-  }, TRUE))) {
-    stop("All new priors must be named.")
-  }
-  if (length(params_to_change) != length(unique(params_to_change))) {
-    stop("New priors must have unique names.")
-  }
-  current_priors <- attr(x, "parameters")
-  if ("sigma.sq" %in% params_to_change) {
-    if (!all(params_to_change %in% c(names(current_priors), "sigma.sq"))) {
-      stop("Attempting to change prior of non-existent parameter.")
-    }
-    model_priors <- priors[names(priors) != "sigma.sq"]
-    current_priors[names(model_priors)] <- unlist(model_priors)
-    attr(x, "parameters") <- current_priors
-    sig <- priors["sigma.sq"]; attributes(sig) <- NULL
-    attr(x, "sigma.sq") <- sig
-    return(x)
-  } else if ("shape_par" %in% params_to_change) {
-    if (!all(params_to_change %in% c(names(current_priors), "shape_par"))) {
-      stop("Attempting to change prior of non-existent parameter.")
-    }
-    model_priors <- priors[names(priors) != "shape_par"]
-    current_priors[names(model_priors)] <- unlist(model_priors)
-    attr(x, "parameters") <- current_priors
-    sp <- priors["shape_par"]; attributes(sp) <- NULL
-    attr(x, "shape_par") <- sp
-    return(x)
-  } else {
-    if (!all(params_to_change %in% names(current_priors))) {
-      stop("Attempting to change prior of non-existent parameter.")
-    }
-    current_priors[params_to_change] <- unlist(priors)
-    attr(x, "parameters") <- current_priors
-    return(x)
-  }
+  # split input btw model and llh priors
+  model_new_priors <- priors[params_to_change %in% names(current_priors)]
+  llh_new_priors <- priors[params_to_change %in% names(llh_current_priors)]
+
+  #change both llh and model priors
+  modified_llh <- change_priors(llh, llh_new_priors)
+  current_priors[names(model_new_priors)] <- unlist(model_new_priors)
+
+  # attach back into model object
+  attr(x, "distribution") <- modified_llh
+  attr(x, "parameters") <- current_priors
+
+  return(x)
 }
+
 #' @export
 change_priors.default <- function(x, priors) {
   stop("Invalid type of specification.")
@@ -407,27 +409,24 @@ change_priors.default <- function(x, priors) {
 #' @details `bayesTPC` does not verify if constants specified are compatible with NIMBLE's dialect of BUGS.
 #'   All available distributions and formatting are provided on the
 #'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
-#' @param model `btpc_model`, The specification to be changed.
+#' @param x `btpc_model` or `btpc_likelihood`, The specification to be changed.
 #' @param constants named character, The names should correspond to the constants to change, and the values should be the new desired constants.
 #' @returns Returns the modified model. Does not change the default values of any registered model type.
-change_constants <- function(model, constants) {
-  if (!("btpc_model" %in% class(model))) {
-    stop("Invalid type for model.")
-  }
+change_constants <- function(x, constants) {
+  UseMethod("change_constants")
+}
 
-  if (length(constants) == 0) {
-    return(model)
-  }
 
+constants_error_check <- function(constants) {
   if (!is.double(constants)) {
     stop("Invalid type for new constants.")
   }
 
-  current_constants <- attr(model, "constants")
   constants_to_change <- names(constants)
   if(is.null(constants_to_change)) {
     stop("New constants must be named.")
   }
+
   if (any(vapply(constants_to_change, function(x) {
     x == ""
   }, TRUE))) {
@@ -436,18 +435,51 @@ change_constants <- function(model, constants) {
   if (length(constants_to_change) != length(unique(constants_to_change))) {
     stop("New constants must have unique names.")
   }
-  if (length(current_constants) == 0) {
+}
+
+#' @rdname change_constants
+#' @export
+change_constants.btpc_model <- function(x, constants) {
+  if (!("btpc_model" %in% class(x))) stop("Invalid type for model.")
+  if (is.null(constants)) return(x)
+  if (length(constants) == 0) return(x)
+
+
+  llh <- attr(x, "distribution")
+  llh_current_constants <- attr(llh, "llh_constants")
+
+  current_constants <- attr(x, "constants")
+  if (length(c(current_constants, llh_current_constants)) == 0) {
     stop("Attempting to change constants for a model without constants.")
   }
-  if (!all(constants_to_change %in% names(current_constants))) {
+
+  constants_error_check(constants)
+  constants_to_change <- names(constants)
+
+  if (!all(constants_to_change %in% names(c(current_constants, llh_current_constants)))) {
     stop("Attempting to change non-existent constant.")
   }
 
-  current_constants[constants_to_change] <- unlist(constants)
-  attr(model, "constants") <- current_constants
-  return(model)
+
+  # split input btw model and llh constants
+  model_new_constants <- constants[constants_to_change %in% names(current_constants)]
+  llh_new_constants <- constants[constants_to_change %in% names(llh_current_constants)]
+
+  #change both llh and model constants
+  modified_llh <- change_constants(llh, llh_new_constants)
+  current_constants[names(model_new_constants)] <- unlist(model_new_constants)
+
+  # attach back into model object
+  attr(x, "distribution") <- modified_llh
+  attr(x, "constants") <- current_constants
+
+  return(x)
 }
 
+#' @export
+change_constants.default <- function(x, priors) {
+  stop("Invalid type of specification.")
+}
 ## Removing Models ==================================================
 
 
@@ -486,25 +518,12 @@ print.btpc_model <- function(x, ...) {
   formula_string_wrapped <- paste(strwrap(paste0(.link_string(x), attr(x, "formula")), width = options()$width, simplify = F)[[1]], collapse = "\n")
   cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Formula:\n")), "  ",formula_string_wrapped, " )"))
   dist_string_wrapped <- paste(strwrap(paste0("  Trait[i] ~ ",.distribution_string(x)), width = options()$width, simplify = F)[[1]], collapse = "\n")
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Distribution:\n")),dist_string_wrapped))
+  cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Distribution:\n")), "  ",dist_string_wrapped))
   cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Parameters and Priors:"))))
-  params <- attr(x, "parameters")
-  cat(paste0("\n  ", names(params), " ~ ", params))
-  consts <- attr(x, "constants")
+  cat("", .priors_string(x), sep = "\n  ")
+  consts <- c(attr(x, "constants"),attr(attr(x,"distribution"),"llh_constants"))
   if (length(consts) > 0) {
     cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Constants:"))))
     cat(paste0("\n  ", names(consts), " = ", consts))
   }
-}
-
-#' @export
-print.btpc_normal <- function(x, ...) {
-  print.btpc_model(x)
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nPrior for Variance:")), "\n  sigma.sq ~ ", attr(x, "sigma.sq")))
-}
-
-#' @export
-print.btpc_gamma <- function(x, ...) {
-  print.btpc_model(x)
-  cat(paste0(cli::style_underline(cli::col_cyan("\n\nPrior for Shape:")), "\n  shape_par ~ ", attr(x, "shape_par")))
 }
