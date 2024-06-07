@@ -23,14 +23,15 @@ Uniform distributions should be used unless there is good reason to draw from an
 \item{formula}{expression, The actual formula being fit.
 Must include 'Temp' to represent temperature and all specified parameters and constants}
 
-\item{constants}{optional double, Represents any terms in the formula that should not be fit.}
+\item{constants}{optional named double, Represents any terms in the formula that should not be fit.}
+
+\item{dist_parameters}{optional named character, additional parameters used in the likelihood calculation (names) and their respective priors (value).
+Default value is 'c(sigma.sq = "dexp(1)")'.
+If not provided, an exponential distribution with rate = 1 is used.}
 
 \item{...}{Additional model specification attributes.
 If distribution is 'normal' or 'gamma', one can include an attribute named
 'sigma.sq' or 'shape_par' respectively to choose a non-default prior.}
-
-\item{sigma.sq}{optional character. The desired prior for the model variance.
-If not provided, an exponential distribution with rate = 1 is used.}
 }
 \value{
 Returns an object of type \code{btpc_normal_model}, which can then be used in other \code{bayesTPC} functions.

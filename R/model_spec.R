@@ -45,11 +45,13 @@ new_btpc_model <- function(name = character(),
 #'   Uniform distributions should be used unless there is good reason to draw from another.
 #' @param formula expression, The actual formula being fit.
 #'   Must include 'Temp' to represent temperature and all specified parameters and constants
-#' @param constants optional double, Represents any terms in the formula that should not be fit.
+#' @param constants optional named double, Represents any terms in the formula that should not be fit.
 #' @param link character, A link function between the model fit and the trait values.
 #'   Currently supported options are: 'identity', 'log', 'logit', and 'reciprocal'. Default is 'identity'.
 #' @param distribution character, The distribution used to calculate likelihoods.
 #'   Currently supported options are: 'normal', 'poisson', 'bernoulli', 'binomial', 'exponential', and 'gamma'. Default is 'normal'.
+#' @param dist_parameters optional named character, additional parameters used in the likelihood calculation (names) and their respective priors (value).
+#' @param dist_constants optional named double, additional constants used in the likelihood calculation (names) and their respective default values (value).
 #' @param ... Additional model specification attributes.
 #'   If distribution is 'normal' or 'gamma', one can include an attribute named
 #'   'sigma.sq' or 'shape_par' respectively to choose a non-default prior.
@@ -197,7 +199,8 @@ specify_binomial_model <- function(name = character(),
 #'   All available distributions and formatting are provided on the
 #'  \href{https://r-nimble.org/html_manual/cha-writing-models.html#subsec:dists-and-functions}{NIMBLE user manual}.
 #' @inheritParams specify_model
-#' @param sigma.sq optional character. The desired prior for the model variance.
+#' @param dist_parameters optional named character, additional parameters used in the likelihood calculation (names) and their respective priors (value).
+#'  Default value is 'c(sigma.sq = "dexp(1)")'.
 #'   If not provided, an exponential distribution with rate = 1 is used.
 #' @returns Returns an object of type `btpc_normal_model`, which can then be used in other `bayesTPC` functions.
 #'   The model name is also registered, and so can be accessed using by passing only the name into functions.
@@ -477,7 +480,7 @@ change_constants.btpc_model <- function(x, constants) {
 }
 
 #' @export
-change_constants.default <- function(x, priors) {
+change_constants.default <- function(x, constants) {
   stop("Invalid type of specification.")
 }
 ## Removing Models ==================================================

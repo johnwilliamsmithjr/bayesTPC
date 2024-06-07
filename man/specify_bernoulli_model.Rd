@@ -22,7 +22,7 @@ Uniform distributions should be used unless there is good reason to draw from an
 \item{formula}{expression, The actual formula being fit.
 Must include 'Temp' to represent temperature and all specified parameters and constants}
 
-\item{constants}{optional double, Represents any terms in the formula that should not be fit.}
+\item{constants}{optional named double, Represents any terms in the formula that should not be fit.}
 
 \item{...}{Additional model specification attributes. Unused by other functions.}
 }

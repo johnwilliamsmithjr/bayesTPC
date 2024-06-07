@@ -182,14 +182,8 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   # no printing because sampler hasn't changed yet, can be confusing
   mcmcConfig <- nimble::configureMCMC(nimTPCmod, print = F)
 
+  bugs_params <- names(c(attr(model, "parameters"), attr(attr(model, "distribution"), "llh_parameters")))
   # set correct sampler type (will also refactor this)
-  if ("btpc_normal" %in% class(model)) { # TODO refactor this with generics
-    bugs_params <- c(names(attr(model, "parameters")), "sigma.sq")
-  } else if ("btpc_gamma" %in% class(model)) {
-    bugs_params <- c(names(attr(model, "parameters")), "shape_par")
-  } else {
-    bugs_params <- names(attr(model, "parameters"))
-  }
   if (samplerType == "slice") { # TODO make this less weird. There was a reason it was set up this way i just cannot remember.
     for (i in bugs_params) {
       mcmcConfig$removeSamplers(i)

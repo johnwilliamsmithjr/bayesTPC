@@ -37,7 +37,7 @@ print.btpc_MCMC <- function(x, digits = 3, ...) {
 #' @param temp_interval numeric, reference values to use to compute values of the thermal performance curve.
 #'  If no vector is provided, temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1,000 equally spaced points.
 #' @param summaryType character, Determines what method is used to create credible intervals. Currently supported options are "quantile" and "hdi" (default).
-#' @param centralSummary character, central summary measure used. Currently supported options are "median" (default) and "mean".
+#' @param centralSummary character, central summary measure used. Currently supported options are "median" (default), "mean", and "MAP" (maximum a posteriori).
 #' @param prob numeric, the credible mass used to compute the highest density interval. Used if summaryType = "hdi".
 #' @param quantiles numeric, quantiles used for a credible interval. Used if summaryType = "quantile".
 #' @param type character, should the summaries be calculated for the link or the response?
@@ -59,7 +59,7 @@ summary.btpc_MCMC <- function(object,
   # input validation
   if (!"btpc_MCMC" %in% class(object)) stop("Unexpected type for parameter 'object'. Only use this method with the output of b_TPC().")
   if (!(summaryType %in% c("hdi", "quantile"))) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported.')
-  if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
+  if (!(centralSummary %in% c("mean", "median", "MAP"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
   if (is.null(temp_interval)) temp_interval <- seq(from = min(object$data$Temp), to = max(object$data$Temp), length.out = 1000)
   if (!is.numeric(temp_interval)) stop('Parameter `temp_interval` must be numeric.')
   if (!is.numeric(burn) || length(burn) != 1) {
@@ -120,6 +120,9 @@ summary.btpc_MCMC <- function(object,
     centers <- matrixStats::rowMedians(tpc_evals)
   } else if (centralSummary == "mean") {
     centers <- matrixStats::rowMeans2(tpc_evals)
+  } else if (centralSummary == "MAP") {
+    map_row <- which(apply(object$samples, 1, function(x) all(x == object$MAP_parameters[1:ncol(object$samples)])))
+    centers <- tpc_evals[,map_row]
   }
 
   if (summaryType == "hdi") {
