@@ -79,7 +79,7 @@ summary.btpc_MCMC <- function(object,
 
 
 
-
+  llh <- attr(object, "distribution")
   tpc_fun <- get_model_function(object$model_spec)
   max.ind <- nrow(object$samples)
 
@@ -91,15 +91,16 @@ summary.btpc_MCMC <- function(object,
     }
   }
 
+  llh_params <- attr(llh, "llh_parameters")
+  samp_params <- colnames(object$samples)
+  formula_params <- samp_params[!(samp_params %in% names(llh_params))]
   link_evals <- simplify2array(.mapply(
-    FUN = tpc_fun, dots = data.frame(object$samples[(burn + 1):max.ind, colnames(object$samples) != "sigma.sq" & colnames(object$samples) != "shape_par"]),
+    FUN = tpc_fun, dots = data.frame(object$samples[(burn + 1):max.ind, formula_params]),
     MoreArgs = MA
   ))
 
   # transform link into response. I want to verify w/ Leah if this is theoretically sound
-  if (type == "link") {
-    tpc_evals <- link_evals
-  } else if (type == "response") {
+  if (type == "response") {
     if ("btpc_identity" %in% class(object$model_spec)) {
       tpc_evals <- link_evals
     } else if ("btpc_logit" %in% class(object$model_spec)) {
@@ -112,6 +113,8 @@ summary.btpc_MCMC <- function(object,
       # this error check is redundant, but is here just in case.
       stop("Misconfigured Model Specification.")
     }
+  } else if (type == "link") {
+    tpc_evals <- link_evals
   } else {
     stop("Invalid input for parameter 'type'. Supported options are 'link' and 'response'.")
   }
@@ -251,24 +254,26 @@ posterior_predictive <- function(TPC,
   }
 
   if (is.null(temp_interval)) temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
-  tpc_fun <- get_model_function(TPC$model_spec)
-  max.ind <- nrow(TPC$samples)
+  llh <- attr(object, "distribution")
+  if (!llh %in% immutable_llh_list) {
+    stop("posterior_predictive is only available for non-custom likelihood objects.")
+  }
+  tpc_fun <- get_model_function(object$model_spec)
+  max.ind <- nrow(object$samples)
 
   # assign constants
   MA <- list(Temp = temp_interval)
-  if (length(TPC$constants) > 0) {
-    MA[names(TPC$constants)] <- TPC$constants
+  if (length(object$constants) > 0) {
+    for (i in 1:length(object$constants)) {
+      MA[names(object$constants)[i]] <- object$constants[i]
+    }
   }
 
-  # find evaluations
-  # each row is a temperature, each column is a different sample
+  llh_params <- attr(llh, "llh_parameters")
+  samp_params <- colnames(object$samples)
+  formula_params <- samp_params[!(samp_params %in% names(llh_params))]
   link_evals <- simplify2array(.mapply(
-    FUN = tpc_fun,
-    dots = data.frame(TPC$samples[
-      (burn + 1):max.ind,
-      colnames(TPC$samples) != "sigma.sq" &
-        colnames(TPC$samples) != "shape_par"
-    ]),
+    FUN = tpc_fun, dots = data.frame(object$samples[(burn + 1):max.ind, formula_params]),
     MoreArgs = MA
   ))
 

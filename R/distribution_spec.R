@@ -50,7 +50,7 @@ validate.btpc_likelihood <- function(x) {
   # name
   if (length(name) == 0) stop("Likelihood specification must have a name.")
   if (length(name) != 1) stop("Likelihood specification must only have one name.")
-  if (name %in% model_list) stop("Likelihood must have unique name. To remove all user-defined models, use reset_likelihoods().")
+  if (name %in% llh_list) stop("Likelihood must have unique name. To remove all user-defined models, use reset_likelihoods().")
 
   #formula
   if (length(formula) == 0) stop("Likelihood specification must have a formula.")
@@ -86,7 +86,7 @@ validate.btpc_likelihood <- function(x) {
 #' @export
 change_priors.btpc_likelihood <- function(x, priors) {
   if (!("btpc_likelihood" %in% class(x))) {
-    stop("Invalid type for model.")
+    stop("Invalid type for likelihood.")
   }
 
   if (length(priors) == 0) {

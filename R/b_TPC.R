@@ -148,15 +148,16 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
     model <- model_list[[model]]
   }
 
+  llh <- attr(model, "distribution")
   # misc error check (will refactor this when possible)
-  if ("btpc_binomial" %in% class(model)) {
+  if (llh == "binomial") {
     if (is.null(data$n)) stop("For a Binomial GLM, data list must have a variable called 'n'. Perhaps check spelling and capitalization?")
     # const.list$n = unlist(data['n'])
   }
 
   # Error checking is done in change_priors() and change_constants()
-  if (!is.null(priors)) model <- change_priors(model, unlist(priors))
-  if (!is.null(constants)) model <- change_constants(model, unlist(constants))
+  model <- change_priors(model, unlist(priors))
+  model <- change_constants(model, unlist(constants))
 
   cat(cli::style_underline(cli::col_cyan("Creating NIMBLE model:\n")))
   if (!verbose) cat(" - Configuring model.\n")
@@ -182,7 +183,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   # no printing because sampler hasn't changed yet, can be confusing
   mcmcConfig <- nimble::configureMCMC(nimTPCmod, print = F)
 
-  bugs_params <- names(c(attr(model, "parameters"), attr(attr(model, "distribution"), "llh_parameters")))
+  bugs_params <- names(c(attr(model, "parameters"), attr(llh, "llh_parameters")))
   # set correct sampler type (will also refactor this)
   if (samplerType == "slice") { # TODO make this less weird. There was a reason it was set up this way i just cannot remember.
     for (i in bugs_params) {
@@ -219,7 +220,7 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   cat(cli::style_underline(cli::col_cyan("\nConfiguring Output:\n")))
   samples <- coda::as.mcmc(as.matrix(tpc_mcmc$mvSamples)) # TODO theres a way to do this in nimble
 
-  prior_out <- c(attr(model, "parameters"), attr(attr(model, "distribution"), "llh_parameters"))
+  prior_out <- c(attr(model, "parameters"), attr(llh, "llh_parameters"))
 
 
 
