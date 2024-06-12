@@ -7,6 +7,7 @@ test_that("get errors checked", {
   expect_error(get_model_constants("heeey"), regexp = "Unsupported model")
   expect_error(get_default_constants("heeey"), regexp = "Unsupported model")
   expect_error(get_model_function("heeey"), regexp = "Unsupported model")
+  expect_error(get_model_function("quadratic", type = "goofy"), regexp = "Invalid input")
   expect_error(get_default_model_specification("heeey"), regexp = "Unsupported model")
 })
 
@@ -43,4 +44,39 @@ test_that("get functions work", {
 
   # all models
   expect_equal(get_models(), names(model_list))
+
+  # get model function
+
+  qd <- function(q, T_max, T_min, Temp) {
+    l <- -1 * q * (Temp - T_min) * (Temp - T_max) * (T_max >
+                                                       Temp) * (Temp > T_min)
+    l
+  }
+
+  bin_resp <- function (B0, B1, Temp)
+  {
+    l <- B0 + B1 * Temp
+    exp(l)/(1 + exp(l))
+  }
+
+  bin_link <- function (B0, B1, Temp)
+  {
+    l <- B0 + B1 * Temp
+    l
+  }
+
+  quad_test <- get_model_function("quadratic")
+  bin_resp_test <- get_model_function("binomial_glm_lin")
+  bin_link_test <- get_model_function("binomial_glm_lin", type = "link")
+
+  expect_equal(sort(names(formals(quad_test))), sort(names(formals(qd))))
+  expect_equal(body(quad_test), body(qd))
+
+  expect_equal(sort(names(formals(bin_resp_test))), sort(names(formals(bin_resp))))
+  expect_equal(   body(bin_resp_test),    body(bin_resp))
+
+  expect_equal(sort(names(formals(bin_link_test))), sort(names(formals(bin_link))))
+  expect_equal(   body(bin_link_test),    body(bin_link))
+
+
 })

@@ -157,6 +157,8 @@ get_models <- function() {
 #' @details This function provides a more accessible way to directly evaluate implemented models.
 #'  Manual evaluation is available through [get_formula()].
 #' @inheritParams get_formula
+#' @param type character, should the function calculate the link or the response?
+#'  Supported inputs are "response" and "link". Default is "response".
 #' @returns `get_model_function` returns a function that evaluates the implemented formula of the specified model.
 #' The parameters of the specified model along with constants (if present) are used as the arguments to the returned function.
 #' @seealso [get_formula()]
@@ -168,7 +170,7 @@ get_models <- function() {
 #' # compare to example in get_formula()
 #' quadratic_function <- get_model_function("quadratic")
 #' quadratic_function(q = .75, T_max = 35, T_min = 10, Temp = c(15, 20, 25, 30))
-get_model_function <- function(model) { #if you could enter a fit and get the model function it would be nice
+get_model_function <- function(model, type = "response") { #if you could enter a fit and get the model function it would be nice
   if (!("btpc_model" %in% class(model))) {
     if (!(model %in% model_list)) {
       stop("Unsupported model, use get_models() to view implemented models.")
@@ -176,17 +178,31 @@ get_model_function <- function(model) { #if you could enter a fit and get the mo
     model <- model_list[[model]]
   }
 
-  sorted_pars <- sort(names(attr(model, "parameters")))
-  sorted_consts <- sort(names(attr(model, "constants")))
+  inputs <- sort(c(names(attr(model, "parameters")),names(attr(model, "constants"))))
+  input_string <- paste0(inputs, ", ", collapse = "")
   formula_string <- as.character(attr(model, "formula"))
 
-  params_string <- paste0(sorted_pars, ", ", collapse = "")
-  if (is.null(sorted_consts)) {
-    function_string <- paste0("function(", params_string, "Temp){return(", formula_string, ")}")
+
+  out <-  if (type == "response") {
+    if ("btpc_identity" %in% class(model)) {
+      "l"
+    } else if ("btpc_logit" %in% class(model)) {
+      "exp(l) / (1 + exp(l))"
+    } else if ("btpc_log" %in% class(model)) {
+      "exp(link_evals)"
+    } else if ("btpc_reciprocal" %in% class(model)) {
+      "1 / link_evals"
+    } else {
+      stop("Misconfigured Model Specification.")
+    }
+  } else if (type == "link") {
+    "l"
   } else {
-    constant_string <- paste0(sorted_consts, ", ", collapse = "")
-    function_string <- paste0("function(", params_string, constant_string, "Temp){return(", formula_string, ")}")
+    stop("Invalid input for parameter 'type'. Supported options are 'link' and 'response'.")
   }
+
+  function_string <- paste0("function(", input_string, "Temp){l <- ", formula_string, "; ",out,"}")
+
   return(eval(str2lang(function_string)))
 }
 

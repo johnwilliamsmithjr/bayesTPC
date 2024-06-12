@@ -254,26 +254,26 @@ posterior_predictive <- function(TPC,
   }
 
   if (is.null(temp_interval)) temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
-  llh <- attr(object, "distribution")
+  llh <- attr(TPC$model_spec, "distribution")
   if (!llh %in% immutable_llh_list) {
     stop("posterior_predictive is only available for non-custom likelihood objects.")
   }
-  tpc_fun <- get_model_function(object$model_spec)
-  max.ind <- nrow(object$samples)
+  tpc_fun <- get_model_function(TPC$model_spec)
+  max.ind <- nrow(TPC$samples)
 
   # assign constants
   MA <- list(Temp = temp_interval)
-  if (length(object$constants) > 0) {
-    for (i in 1:length(object$constants)) {
-      MA[names(object$constants)[i]] <- object$constants[i]
+  if (length(TPC$constants) > 0) {
+    for (i in 1:length(TPC$constants)) {
+      MA[names(TPC$constants)[i]] <- TPC$constants[i]
     }
   }
 
   llh_params <- attr(llh, "llh_parameters")
-  samp_params <- colnames(object$samples)
+  samp_params <- colnames(TPC$samples)
   formula_params <- samp_params[!(samp_params %in% names(llh_params))]
   link_evals <- simplify2array(.mapply(
-    FUN = tpc_fun, dots = data.frame(object$samples[(burn + 1):max.ind, formula_params]),
+    FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, formula_params]),
     MoreArgs = MA
   ))
 
