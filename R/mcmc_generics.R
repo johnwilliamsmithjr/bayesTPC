@@ -79,7 +79,7 @@ summary.btpc_MCMC <- function(object,
 
 
 
-  llh <- attr(object, "distribution")
+  llh <- attr(object$model_spec, "distribution")
   tpc_fun <- get_model_function(object$model_spec)
   max.ind <- nrow(object$samples)
 
@@ -292,7 +292,11 @@ posterior_predictive <- function(TPC,
     stop("Misconfigured Model Specification. If you see this error, please contact the package developers.")
   }
 
-  # draw from posterior sample, will use generic when I have time
+  # get one sample at each temperature from each posterior sample
+
+  # I REALLLY hate how this is written
+  # I would love to simulate directly in the NIMBLE model but this cannot be done at
+  # points not included in the original training dataset, because ?????
   if ("btpc_normal" %in% class(TPC$model_spec)) {
     post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
       return(truncnorm::rtruncnorm(
