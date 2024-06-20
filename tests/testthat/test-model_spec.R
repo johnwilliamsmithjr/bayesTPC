@@ -121,6 +121,13 @@ test_that("validate special cases work", {
                               distribution = "normal"))
   expect_equal(attr(attr(get_default_model_specification("my_cool_new_normal_model"), "distribution"), "llh_parameters"),c(sigma.sq = "dexp(1)"))
 
+  expect_no_error(specify_model("my_cooler_new_normal_model",
+                                parameters = c(a = "dunif(0,1)", b = "dunif(0,2)"),
+                                formula =expression(a*Temp/c + b*d),
+                                constants = c(c = 3, d = 4), link = "identity",
+                                distribution = "normal",
+                                llh_parameters = c(sigma.sq = "dexp(2)")))
+  expect_equal(attr(attr(get_default_model_specification("my_cooler_new_normal_model"), "distribution"), "llh_parameters"),c(sigma.sq = "dexp(2)"))
   #gamma
   expect_no_error(specify_model("my_cool_new_gamma_model",
                                    parameters = c(a = "dunif(0,1)", b = "dunif(0,2)"),
@@ -129,6 +136,13 @@ test_that("validate special cases work", {
                                    distribution = "gamma"))
   expect_equal(attr(attr(get_default_model_specification("my_cool_new_gamma_model"), "distribution"), "llh_parameters"),c(shape_par = "dexp(1)"))
 
+  expect_no_error(specify_model("my_cooler_new_gamma_model",
+                                parameters = c(a = "dunif(0,1)", b = "dunif(0,2)"),
+                                formula =expression(a*Temp/c + b*d),
+                                constants = c(c = 3, d = 4), link = "identity",
+                                distribution = "gamma",
+                                llh_parameters = c(shape_par = "dexp(2)")))
+  expect_equal(attr(attr(get_default_model_specification("my_cooler_new_gamma_model"), "distribution"), "llh_parameters"),c(shape_par = "dexp(2)"))
 })
 
 test_that("change of priors / constants", {

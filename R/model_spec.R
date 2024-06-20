@@ -50,8 +50,8 @@ new_btpc_model <- function(name = character(),
 #'   Currently supported options are: 'identity', 'log', 'logit', and 'reciprocal'. Default is 'identity'.
 #' @param distribution character, The distribution used to calculate likelihoods.
 #'   Currently supported options are: 'normal', 'poisson', 'bernoulli', 'binomial', 'exponential', and 'gamma'. Default is 'normal'.
-#' @param dist_parameters optional named character, additional parameters used in the likelihood calculation (names) and their respective priors (value).
-#' @param dist_constants optional named double, additional constants used in the likelihood calculation (names) and their respective default values (value).
+#' @param llh_parameters optional named character, additional parameters used in the likelihood calculation (names) and their respective priors (value).
+#' @param llh_constants optional named double, additional constants used in the likelihood calculation (names) and their respective default values (value).
 #' @param ... Additional model specification attributes.
 #'   If distribution is 'normal' or 'gamma', one can include an attribute named
 #'   'sigma.sq' or 'shape_par' respectively to choose a non-default prior.
@@ -80,15 +80,15 @@ specify_model <- function(name = character(),
                           constants = double(),
                           link = "identity",
                           distribution = "normal",
-                          dist_parameters = character(),
-                          dist_constants = double(),
+                          llh_parameters = character(),
+                          llh_constants = double(),
                           ...) {
 
 
   x <- new_btpc_model(name, parameters, formula, constants, link, distribution, ...)
   x <- validate(x) #adds the default llh priors
-  x <- change_priors(x, dist_parameters) #set to user llh priors :)
-  x <- change_constants(x, dist_constants)
+  x <- change_priors(x, llh_parameters) #set to user llh priors :)
+  x <- change_constants(x, llh_constants)
 
   # add to model list. lets us check that model has been input validated
   model_list[[name]] <- x
@@ -526,7 +526,7 @@ print.btpc_model <- function(x, ...) {
   cat("", .priors_string(x), sep = "\n  ")
   consts <- c(attr(x, "constants"),attr(attr(x,"distribution"),"llh_constants"))
   if (length(consts) > 0) {
-    cat(paste0(cli::style_underline(cli::col_cyan("\n\nModel Constants:"))))
+    cat(paste0(cli::style_underline(cli::col_cyan("\nModel Constants:"))))
     cat(paste0("\n  ", names(consts), " = ", consts))
   }
 }

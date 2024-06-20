@@ -11,8 +11,8 @@ specify_model(
   constants = double(),
   link = "identity",
   distribution = "normal",
-  dist_parameters = character(),
-  dist_constants = double(),
+  llh_parameters = character(),
+  llh_constants = double(),
   ...
 )
 }
@@ -34,9 +34,9 @@ Currently supported options are: 'identity', 'log', 'logit', and 'reciprocal'. D
 \item{distribution}{character, The distribution used to calculate likelihoods.
 Currently supported options are: 'normal', 'poisson', 'bernoulli', 'binomial', 'exponential', and 'gamma'. Default is 'normal'.}
 
-\item{dist_parameters}{optional named character, additional parameters used in the likelihood calculation (names) and their respective priors (value).}
+\item{llh_parameters}{optional named character, additional parameters used in the likelihood calculation (names) and their respective priors (value).}
 
-\item{dist_constants}{optional named double, additional constants used in the likelihood calculation (names) and their respective default values (value).}
+\item{llh_constants}{optional named double, additional constants used in the likelihood calculation (names) and their respective default values (value).}
 
 \item{...}{Additional model specification attributes.
 If distribution is 'normal' or 'gamma', one can include an attribute named
