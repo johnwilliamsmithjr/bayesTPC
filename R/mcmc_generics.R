@@ -255,6 +255,8 @@ posterior_predictive <- function(TPC,
 
   if (is.null(temp_interval)) temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
   llh <- attr(TPC$model_spec, "distribution")
+
+  if (is.null(llh)) stop("Misconfigured Model Specification.")
   if (!llh %in% immutable_llh_list) {
     stop("posterior_predictive is only available for non-custom likelihood objects.")
   }

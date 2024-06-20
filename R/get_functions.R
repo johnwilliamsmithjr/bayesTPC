@@ -189,9 +189,9 @@ get_model_function <- function(model, type = "response") { #if you could enter a
     } else if ("btpc_logit" %in% class(model)) {
       "exp(l) / (1 + exp(l))"
     } else if ("btpc_log" %in% class(model)) {
-      "exp(link_evals)"
+      "exp(l)"
     } else if ("btpc_reciprocal" %in% class(model)) {
-      "1 / link_evals"
+      "1 / l"
     } else {
       stop("Misconfigured Model Specification.")
     }
