@@ -45,7 +45,7 @@ ask_for_ID <- function(max_id) {
 get_dataset <- function(ID = -1, check_interactive = TRUE) {
   if (length(ID) != 1) stop("Invalid length for input 'ID'. If pulling multiple datasets, please use get_datasets() instead.")
   td <- as.integer(
-    get_web_data("https://vectorbyte-qa.crc.nd.edu/portal/api/vectraits-explorer/?format=json")$data$count
+    get_web_data("https://vectorbyte.crc.nd.edu/portal/api/vectraits-explorer/?format=json")$data$count
   )
 
   if (!is.numeric(ID) || is.na(ID) || ID < 1 || ID > td) {
@@ -62,7 +62,7 @@ get_dataset <- function(ID = -1, check_interactive = TRUE) {
   }
 
   dataset <- get_web_data(paste0(
-    "https://vectorbyte-qa.crc.nd.edu/portal/api/vectraits-dataset/",
+    "https://vectorbyte.crc.nd.edu/portal/api/vectraits-dataset/",
     trunc(dataset_ID), #dont wanna throw an error for non-integer values
     "/?format=json"
   ))
