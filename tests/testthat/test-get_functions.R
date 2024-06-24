@@ -9,7 +9,8 @@ test_that("get errors checked", {
   expect_error(get_model_function("heeey"), regexp = "Unsupported model")
   expect_error(get_model_function("quadratic", type = "goofy"), regexp = "Invalid input")
   expect_error(get_default_model_specification("heeey"), regexp = "Unsupported model")
-})
+  expect_error(get_WAIC("garbage"), regexp = "Unexpected type for parameter")
+  })
 
 test_that("get functions work", {
   ## These tests shouldn't ever really fail unless something goes really wrong

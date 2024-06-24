@@ -38,9 +38,7 @@ Currently supported options are: 'normal', 'poisson', 'bernoulli', 'binomial', '
 
 \item{llh_constants}{optional named double, additional constants used in the likelihood calculation (names) and their respective default values (value).}
 
-\item{...}{Additional model specification attributes.
-If distribution is 'normal' or 'gamma', one can include an attribute named
-'sigma.sq' or 'shape_par' respectively to choose a non-default prior.}
+\item{...}{Additional model specification attributes.}
 }
 \value{
 Returns an object of type \code{btpc_model}, which can then be used in other \code{bayesTPC} functions.

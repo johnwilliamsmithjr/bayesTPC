@@ -29,9 +29,7 @@ Must include 'Temp' to represent temperature and all specified parameters and co
 Default value is 'c(sigma.sq = "dexp(1)")'.
 If not provided, an exponential distribution with rate = 1 is used.}
 
-\item{...}{Additional model specification attributes.
-If distribution is 'normal' or 'gamma', one can include an attribute named
-'sigma.sq' or 'shape_par' respectively to choose a non-default prior.}
+\item{...}{Additional model specification attributes.}
 }
 \value{
 Returns an object of type \code{btpc_normal_model}, which can then be used in other \code{bayesTPC} functions.

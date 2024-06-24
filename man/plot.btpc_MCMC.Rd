@@ -38,7 +38,7 @@ If no vector is provided, temp_interval is set as a sequence from the lowest obs
 
 \item{burn}{numeric, initial number of iterations to be discarded as burn-in. Default is 0.}
 
-\item{print_summary}{logical, should summary be printed? Default is TRUE.}
+\item{print_summary}{logical, should summary be printed? Default is FALSE.}
 
 \item{type}{character, should the summaries be calculated for the link or the response?
 Supported inputs are "response" and "link". Default is "response".}

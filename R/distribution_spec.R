@@ -22,6 +22,18 @@ new_btpc_likelihood <- function(name = character(),
             ...)
   }
 
+
+#' Specify a Trait Data Likelihood
+#'
+#' Creates and registers a new likelihood for trait data. Useful for custom parameterizations of trait likelihoods, like using precision instead of variance in a normal distribution.
+#'
+#' @param name character, the name of the new likelihood. Must not match any existing likelihood in bayesTPC.
+#' @param formula expression, the likelihood code for trait data. The inferential parameter must be named 'm'.
+#' @param llh_parameters optional named character, additional parameters used in the likelihood calculation (names) and their respective priors (value).
+#' @param llh_constants optional named double, additional constants used in the likelihood calculation (names) and their respective default values (value).
+#'
+#' @return Returns a `btpc_likelihood` object, which can be modified or used in [specify_model()] to create model specifications. Additionally, the name is registered so that the default specification can be referenced in the same fashion as the pre-included likelihoods.
+#' @export
 specify_likelihood <- function(name = character(),
                                formula = expression(),
                                llh_parameters = character(), #names are parameter names, body are default priors
@@ -160,5 +172,5 @@ reset_likelihoods <- function() {
   cat("All user-defined likelihoods have been removed.")
 }
 
-## Methods
+## Methods ========================================================
 

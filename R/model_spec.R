@@ -53,8 +53,6 @@ new_btpc_model <- function(name = character(),
 #' @param llh_parameters optional named character, additional parameters used in the likelihood calculation (names) and their respective priors (value).
 #' @param llh_constants optional named double, additional constants used in the likelihood calculation (names) and their respective default values (value).
 #' @param ... Additional model specification attributes.
-#'   If distribution is 'normal' or 'gamma', one can include an attribute named
-#'   'sigma.sq' or 'shape_par' respectively to choose a non-default prior.
 #' @returns Returns an object of type `btpc_model`, which can then be used in other `bayesTPC` functions.
 #'   The model name is also registered, and so can be accessed using by passing only the name into functions.
 #'   However, user-defined models are not saved between sessions, and will be reset whenever the package is reloaded.

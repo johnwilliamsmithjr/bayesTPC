@@ -164,7 +164,7 @@ summary.btpc_MCMC <- function(object,
 #' @export
 #' @inheritParams summary.btpc_MCMC
 #' @param x `btpc_MCMC`, object output from performing MCMC using the `bTPC` function.
-#' @param print_summary logical, should summary be printed? Default is TRUE.
+#' @param print_summary logical, should summary be printed? Default is FALSE.
 #' @param ylab character, a title for the y axis. Default is "Trait".
 #' @param xlab character, a title for the x-axis. Default is "Temperature (C)"
 #' @param ylim numeric, the limits for the y-axis.
@@ -258,7 +258,7 @@ posterior_predictive <- function(TPC,
 
   if (is.null(llh)) stop("Misconfigured Model Specification.")
   if (!llh %in% immutable_llh_list) {
-    stop("posterior_predictive is only available for non-custom likelihood objects.")
+    stop("posterior_predictive is only available for non-custom likelihood specifications.")
   }
   tpc_fun <- get_model_function(TPC$model_spec)
   max.ind <- nrow(TPC$samples)
@@ -406,41 +406,51 @@ posterior_predictive <- function(TPC,
   return(output)
 }
 
-
 #' Plots posterior predictive samples
 #'
 #' Plots the output of [posterior_predictive()].
 #'
 #' @export
-#' @param prediction `btpc_prediction`, output from [posterior_predictive()].
+#' @param x `btpc_prediction` or `btpc_MCMC`, output from [posterior_predictive()] or [b_TPC()], respectively.
 #' @param ylab character, a title for the y-axis. Default is "Trait".
 #' @param legend logical, should a legend be added to the plot? Default is TRUE.
 #' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
 #' @param ... additional parameters passed to [plot.default()].
-plot_prediction <- function(prediction, ylab = "Trait",
+plot_prediction <- function(x, ...) {
+  UseMethod("plot_prediction")
+}
+
+#' @export
+plot_prediction.default <- function(x, ...) {
+  stop("Invalid type for parameter 'x'. Input should be the output of 'posterior_predictive()' or `b_TPC()`.")
+}
+
+#' @export
+#' @rdname plot_prediction
+plot_prediction.btpc_prediction <- function(x, ylab = "Trait",
                             legend = TRUE, legend_position = "bottomright", ...) {
-  if (!"btpc_prediction" %in% class(prediction)) {
-    stop("Input should be the output of 'posterior_predictive'.")
+  if (!"btpc_prediction" %in% class(x)) {
+    stop("Invalid type for parameter 'x'. Input should be the output of 'posterior_predictive()'.")
   }
-  if ("btpc_binomial" %in% class(prediction$model_spec)) {
-    plot(prediction$temp_interval, prediction$upper_bounds,
+  if ("btpc_binomial" %in% class(x$model_spec)) {
+    plot(x$temp_interval, x$upper_bounds,
          type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
          ylab = paste0(ylab, " / n"), ylim = c(0, 1.2), ...
     )
   } else {
-    plot(prediction$temp_interval, prediction$upper_bounds,
+    plot(x$temp_interval, x$upper_bounds,
          type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
-         ylab = ylab, ylim = c(0, max(max(prediction$upper_bounds), max(prediction$data$Trait))), ...
+         ylab = ylab, ylim = c(0, max(max(x$upper_bounds), max(x$data$Trait))), ...
     )
   }
 
-  graphics::points(prediction$temp_interval, prediction$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
-  graphics::points(prediction$temp_interval, prediction$lower_bounds, type = "l", col = "blue", lty = 3)
-  graphics::points(prediction$temp_interval, prediction$medians, type = "l", col = "blue")
-  if ("btpc_binomial" %in% class(prediction$model_spec)) {
-    graphics::points(prediction$data$Temp, prediction$data$Trait / prediction$data$n, pch = 16, cex = .75)
+  graphics::points(x$temp_interval, x$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
+  graphics::points(x$temp_interval, x$lower_bounds, type = "l", col = "blue", lty = 3)
+  graphics::points(x$temp_interval, x$medians, type = "l", col = "blue")
+  if ("btpc_binomial" %in% class(x$model_spec)) {
+    graphics::points(x$data$Temp, x$data$Trait / x$data$n, pch = 16, cex = .75)
   } else {
-    graphics::points(prediction$data$Temp, prediction$data$Trait, pch = 16, cex = .75)
+    graphics::points(x$data$Temp, x$data$Trait, pch = 16, cex = .75)
   }
 
   if (legend) {
@@ -451,6 +461,33 @@ plot_prediction <- function(prediction, ylab = "Trait",
   }
 }
 
+#' @export
+#' @inheritParams plot_prediction
+#' @param ... additional parameters passed to `plot()`.
+#' @rdname posterior_predictive
+plot_prediction.btpc_MCMC <- function(x, ylab = "Trait",
+                                      legend = TRUE, legend_position = "bottomright",
+                                      temp_interval = NULL,
+                                      summaryType = "hdi",
+                                      centralSummary = "median",
+                                      prob = .9,
+                                      quantiles = c(.05, .95),
+                                      burn = 0,
+                                      seed = NULL,
+                                      ...) {
+  if (!"btpc_MCMC" %in% class(x)) {
+    stop("Invalid type for parameter 'x'. Input should be the output of 'b_TPC()'.")
+  }
+  pred <- posterior_predictive(x, temp_interval = temp_interval,
+                               summaryType = summaryType,
+                               centralSummary = centralSummary,
+                               prob = prob,
+                               quantiles = quantiles,
+                               burn = burn,
+                               seed = seed)
+
+  plot_prediction(x = pred, ylab = ylab, legend = legend, legend_position = legend_position, ...)
+}
 
 #' Plots Posterior Sample Histogram
 #'
