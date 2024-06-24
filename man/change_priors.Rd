@@ -6,11 +6,11 @@
 \alias{change_priors.btpc_model}
 \title{Change priors of pre-specified model}
 \usage{
-\method{change_priors}{btpc_likelihood}(x, priors)
+\method{change_priors}{btpc_likelihood}(x, priors = character())
 
 change_priors(x, priors)
 
-\method{change_priors}{btpc_model}(x, priors)
+\method{change_priors}{btpc_model}(x, priors = character())
 }
 \arguments{
 \item{x}{\code{btpc_model} or \code{btpc_likelihood}, The specification to be changed.}

@@ -41,3 +41,41 @@ test_that("likelihood validation works", {
                                   llh_parameters = c(a = "a"), llh_constants = c(b = 5)),
                regexp = "not included in the model formula")
   })
+
+test_that("changing likelihoods works", {
+  expect_error(change_priors.btpc_likelihood("garbage"), regexp = "Invalid type for likelihood")
+
+  def_normal <- llh_list[["normal"]]
+  expect_equal(change_priors(def_normal), def_normal)
+  expect_equal(change_priors(def_normal, priors = character()), def_normal)
+  expect_equal(change_priors(def_normal, priors = NULL), def_normal)
+
+  expect_error(change_priors(def_normal, priors = 5), regexp = "Invalid type for new priors")
+  expect_error(change_priors(def_normal, priors = c(garbage = "dnorm(1,1)")), regexp = "Attempting to change prior of non-existent parameter")
+
+  expect_equal(attr(def_normal, "llh_parameters"), c(sigma.sq = "dexp(1)"))
+  changed <- change_priors(def_normal, priors = c(sigma.sq = "dexp(2)"))
+  expect_equal(attr(changed, "llh_parameters"), c(sigma.sq = "dexp(2)"))
+  expect_equal(attr(def_normal, "llh_parameters"), c(sigma.sq = "dexp(1)"))
+})
+
+test_that("removing likelihoods works", {
+
+  expect_output(specify_likelihood(name = "my_normal", formula = expression(a + m[i]),
+                     llh_parameters = c(a = "dnorm(0,1)")), regexp = "can now be accessed using other bayesTPC functions")
+  expect_error(specify_likelihood(name = "my_normal", formula = expression(a + m),
+                                  llh_parameters = c(a = "a")), regexp = "must have unique name")
+
+  expect_error(remove_likelihood("garbage"), regexp = "Attempting to remove non")
+  expect_error(remove_likelihood("normal"), regexp = "defined likelihoods can be removed")
+  expect_output(remove_likelihood("my_normal"), regexp = "has been removed and can no longer")
+  expect_error(remove_likelihood("my_normal"), regexp = "Attempting to remove non")
+
+  expect_output(specify_likelihood(name = "my_normal", formula = expression(a + m[i]),
+                                   llh_parameters = c(a = "dnorm(0,1)")), regexp = "can now be accessed using other bayesTPC functions")
+  expect_error(specify_likelihood(name = "my_normal", formula = expression(a + m),
+                                  llh_parameters = c(a = "a")), regexp = "must have unique name")
+
+  reset_likelihoods()
+  expect_error(remove_likelihood("my_normal"), regexp = "Attempting to remove non")
+})

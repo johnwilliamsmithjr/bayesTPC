@@ -41,6 +41,7 @@ specify_likelihood <- function(name = character(),
 
 ## Likelihood Validation =============================================
 
+#' @export
 validate.btpc_likelihood <- function(x) {
   name <- unclass(x)
   parameters <- attr(x, "llh_parameters")
@@ -84,14 +85,13 @@ validate.btpc_likelihood <- function(x) {
 
 #' @rdname change_priors
 #' @export
-change_priors.btpc_likelihood <- function(x, priors) {
+change_priors.btpc_likelihood <- function(x, priors = character()) {
   if (!("btpc_likelihood" %in% class(x))) {
     stop("Invalid type for likelihood.")
   }
 
-  if (length(priors) == 0) {
-    return(x)
-  }
+  if (is.null(priors)) return(x)
+  if (length(priors) == 0) return(x)
 
   priors_error_check(priors)
   params_to_change <- names(priors)

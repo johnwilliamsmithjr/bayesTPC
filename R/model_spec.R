@@ -367,7 +367,7 @@ change_priors <- function(x, priors) {
 
 #' @rdname change_priors
 #' @export
-change_priors.btpc_model <- function(x, priors) {
+change_priors.btpc_model <- function(x, priors = character()) {
   if (!("btpc_model" %in% class(x))) stop("Invalid type for model.")
   if (is.null(priors)) return(x)
   if (length(priors) == 0) return(x)
