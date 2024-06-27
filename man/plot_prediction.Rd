@@ -7,6 +7,7 @@
 plot_prediction(
   prediction,
   ylab = "Trait",
+  ylim = NULL,
   legend = TRUE,
   legend_position = "bottomright",
   ...
@@ -16,6 +17,8 @@ plot_prediction(
 \item{prediction}{\code{btpc_prediction}, output from \code{\link[=posterior_predictive]{posterior_predictive()}}.}
 
 \item{ylab}{character, a title for the y-axis. Default is "Trait".}
+
+\item{ylim}{numeric, the limits for the y-axis.}
 
 \item{legend}{logical, should a legend be added to the plot? Default is TRUE.}
 
