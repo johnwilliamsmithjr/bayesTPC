@@ -10,6 +10,7 @@ plot_prediction(x, ...)
 \method{plot_prediction}{btpc_prediction}(
   x,
   ylab = "Trait",
+  ylim = NULL,
   legend = TRUE,
   legend_position = "bottomright",
   ...
@@ -21,6 +22,8 @@ plot_prediction(x, ...)
 \item{...}{additional parameters passed to \code{\link[=plot.default]{plot.default()}}.}
 
 \item{ylab}{character, a title for the y-axis. Default is "Trait".}
+
+\item{ylim}{numeric, the limits for the y-axis.}
 
 \item{legend}{logical, should a legend be added to the plot? Default is TRUE.}
 

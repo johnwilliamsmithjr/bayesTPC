@@ -197,25 +197,28 @@ plot.btpc_MCMC <- function(x,
     print = print_summary
   )
 
-  ylim <- if (is.null(ylim)) {
-    c(0, max(sm$upper_bounds, x$data$Trait))
-  } else {
-    ylim
-  }
-
-  plot(sm$temp_interval, sm$upper_bounds,
-       type = "l", col = "blue", lty = 2,
-       ylab = ylab, xlab = xlab, ylim = ylim, ...
-  )
-  graphics::points(sm$temp_interval, sm$lower_bounds, type = "l", col = "blue", lty = 2)
-  graphics::points(sm$temp_interval, sm[[paste0(centralSummary, "s")]], type = "l", col = "red")
   if ("btpc_binomial" %in% class(x$model_spec)) {
+    yl <- if (is.null(ylim)) c(0, 1.2) else ylim
+
     plot(sm$temp_interval, sm$upper_bounds,
          type = "l", col = "blue", lty = 2,
-         ylab = paste0(ylab, " / n"), xlab = "Temperature (C)", ylim = c(0, 1.2), ...
+         ylab = paste0(ylab, " / n"), xlab = xlab, ylim = yl, ...
     )
-    graphics::points(sm$temp_interval, sm$lower_bounds, type = "l", col = "blue", lty = 2)
-    graphics::points(sm$temp_interval, sm[[paste0(centralSummary, "s")]], type = "l", col = "red")
+
+  } else {
+    yl <- if (is.null(ylim)) c(0, max(sm$upper_bounds, x$data$Trait)) else ylim
+
+    plot(sm$temp_interval, sm$upper_bounds,
+         type = "l", col = "blue", lty = 2,
+         ylab = ylab, xlab = xlab, ylim = yl, ...
+    )
+  }
+
+  graphics::points(sm$temp_interval, sm$lower_bounds, type = "l", col = "blue", lty = 2)
+  graphics::points(sm$temp_interval, sm[[paste0(centralSummary, "s")]], type = "l", col = "red")
+
+
+  if ("btpc_binomial" %in% class(x$model_spec)) {
     graphics::points(x$data$Temp, x$data$Trait / x$data$n, pch = 16, cex = .75)
   } else {
     graphics::points(x$data$Temp, x$data$Trait, pch = 16, cex = .75)
@@ -253,13 +256,19 @@ posterior_predictive <- function(TPC,
     set.seed(seed)
   }
 
-  if (is.null(temp_interval)) temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
+
+  if (is.null(temp_interval)) {
+    temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
+  } else if (length(temp_interval) < 1000) {
+    warning("Taking posterior predictive samples at less than 1000 points may lead to innaccurate results.")
+  }
   llh <- attr(TPC$model_spec, "distribution")
 
   if (is.null(llh)) stop("Misconfigured Model Specification.")
   if (!llh %in% immutable_llh_list) {
     stop("posterior_predictive is only available for non-custom likelihood specifications.")
   }
+
   tpc_fun <- get_model_function(TPC$model_spec)
   max.ind <- nrow(TPC$samples)
 
@@ -337,7 +346,7 @@ posterior_predictive <- function(TPC,
     } else if ("btpc_binomial" %in% class(TPC$model_spec)) {
       post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
         return(stats::rbinom(
-          n = length(X), size = 1, prob = X
+          n = length(X), size = 10, prob = X
         )) # TODO verify if this is parameterized correctly
       }
     } else if ("btpc_exponential" %in% class(TPC$model_spec)) {
@@ -413,6 +422,7 @@ posterior_predictive <- function(TPC,
 #' @export
 #' @param x `btpc_prediction` or `btpc_MCMC`, output from [posterior_predictive()] or [b_TPC()], respectively.
 #' @param ylab character, a title for the y-axis. Default is "Trait".
+#' @param ylim numeric, the limits for the y-axis.
 #' @param legend logical, should a legend be added to the plot? Default is TRUE.
 #' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
 #' @param ... additional parameters passed to [plot.default()].
@@ -432,21 +442,43 @@ plot_prediction.btpc_prediction <- function(x, ylab = "Trait",
   if (!"btpc_prediction" %in% class(x)) {
     stop("Invalid type for parameter 'x'. Input should be the output of 'posterior_predictive()'.")
   }
+
   if ("btpc_binomial" %in% class(x$model_spec)) {
-    plot(x$temp_interval, x$upper_bounds,
-         type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
-         ylab = paste0(ylab, " / n"), ylim = c(0, 1.2), ...
+    if (missing(ylim)) {
+      yl <- c(0,1.2)
+    } else {
+      yl <- ylim
+    }
+
+    # make average N in data for sample_n
+    sample_n <- 10
+    plot(x$temp_interval, x$upper_bounds / sample_n,
+      type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
+      ylab = paste0(ylab, " / n"), ylim = yl, ...
+
     )
+
+    graphics::points(x$temp_interval, x$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
+    graphics::points(x$temp_interval, x$lower_bounds / sample_n, type = "l", col = "blue", lty = 3)
+    graphics::points(x$temp_interval, x$medians / sample_n, type = "l", col = "blue")
   } else {
+
+    if (missing(ylim)) {
+      yl <- c(0, max(max(x$upper_bounds), max(x$data$Trait)))
+    } else {
+      yl <- ylim
+    }
     plot(x$temp_interval, x$upper_bounds,
-         type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
-         ylab = ylab, ylim = c(0, max(max(x$upper_bounds), max(x$data$Trait))), ...
+      type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
+      ylab = ylab, ylim = yl, ...
+
     )
+    graphics::points(x$temp_interval, x$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
+    graphics::points(x$temp_interval, x$lower_bounds, type = "l", col = "blue", lty = 3)
+    graphics::points(x$temp_interval, x$medians, type = "l", col = "blue")
   }
 
-  graphics::points(x$temp_interval, x$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
-  graphics::points(x$temp_interval, x$lower_bounds, type = "l", col = "blue", lty = 3)
-  graphics::points(x$temp_interval, x$medians, type = "l", col = "blue")
+
   if ("btpc_binomial" %in% class(x$model_spec)) {
     graphics::points(x$data$Temp, x$data$Trait / x$data$n, pch = 16, cex = .75)
   } else {
