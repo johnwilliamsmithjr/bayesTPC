@@ -436,8 +436,9 @@ plot_prediction.default <- function(x, ...) {
 }
 
 #' @export
+#' @param ylim length 2 numeric, The limits of the y-axis of the plot. Defaults to the range of the data if unspecified.
 #' @rdname plot_prediction
-plot_prediction.btpc_prediction <- function(x, ylab = "Trait",
+plot_prediction.btpc_prediction <- function(x, ylab = "Trait", ylim = NULL,
                             legend = TRUE, legend_position = "bottomright", ...) {
   if (!"btpc_prediction" %in% class(x)) {
     stop("Invalid type for parameter 'x'. Input should be the output of 'posterior_predictive()'.")

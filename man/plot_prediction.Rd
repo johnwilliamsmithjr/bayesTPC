@@ -23,7 +23,7 @@ plot_prediction(x, ...)
 
 \item{ylab}{character, a title for the y-axis. Default is "Trait".}
 
-\item{ylim}{numeric, the limits for the y-axis.}
+\item{ylim}{length 2 numeric, The limits of the y-axis of the plot. Defaults to the range of the data if unspecified.}
 
 \item{legend}{logical, should a legend be added to the plot? Default is TRUE.}
 
