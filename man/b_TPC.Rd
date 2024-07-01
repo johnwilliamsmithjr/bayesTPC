@@ -12,6 +12,7 @@ b_TPC(
   niter = 10000,
   inits = NULL,
   burn = 0,
+  nchains = 1,
   constants = NULL,
   verbose = FALSE,
   ...
@@ -43,6 +44,8 @@ Currently, supported options are:
 \item{inits}{optional list, initial parameter values to be provided to nimble MCMC.}
 
 \item{burn}{optional integer, number of initial MCMC iterations to be discarded as burn-in. Default is burn = 0.}
+
+\item{nchains}{integer, the number of MCMC chains to be run. Default is nchains = 1.}
 
 \item{constants}{optional named list or numeric, constants to be provided to model. If constants are needed and not provided, constant values are used.
 Currently only used for model = 'pawar-shsch'.}

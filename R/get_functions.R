@@ -62,7 +62,7 @@ get_model_params <- function(model) {
     }
     model <- model_list[[model]]
   }
-  return(names(attr(model, "parameters")))
+  return(names(c(attr(model, "parameters"), attr(attr(model, "distribution"), "llh_parameters") ) ) )
 }
 
 #' @rdname get_model_params
@@ -74,7 +74,7 @@ get_default_priors <- function(model) {
     }
     model <- model_list[[model]]
   }
-  return(attr(model, "parameters"))
+  return(c(attr(model, "parameters"), attr(attr(model, "distribution"), "llh_parameters")))
 }
 
 #' Get Model Constants
@@ -105,7 +105,7 @@ get_model_constants <- function(model) {
     }
     model <- model_list[[model]]
   }
-  consts <- names(attr(model, "constants"))
+  consts <- names(c(attr(model, "constants"), attr(attr(model, "distribution"), "llh_constants")))
 
   if (length(consts) > 0) {
     return(consts)
@@ -122,7 +122,7 @@ get_default_constants <- function(model) {
   }
 
   model <- model_list[[model]]
-  consts <- attr(model, "constants")
+  consts <- c(attr(model, "constants"), attr(attr(model, "distribution"), "llh_constants"))
 
   if (length(consts) > 0) {
     return(consts)
