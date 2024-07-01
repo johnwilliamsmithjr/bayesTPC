@@ -2,10 +2,13 @@
 % Please edit documentation in R/mcmc_generics.R
 \name{plot_prediction}
 \alias{plot_prediction}
+\alias{plot_prediction.btpc_prediction}
 \title{Plots posterior predictive samples}
 \usage{
-plot_prediction(
-  prediction,
+plot_prediction(x, ...)
+
+\method{plot_prediction}{btpc_prediction}(
+  x,
   ylab = "Trait",
   ylim = NULL,
   legend = TRUE,
@@ -14,17 +17,17 @@ plot_prediction(
 )
 }
 \arguments{
-\item{prediction}{\code{btpc_prediction}, output from \code{\link[=posterior_predictive]{posterior_predictive()}}.}
+\item{x}{\code{btpc_prediction} or \code{btpc_MCMC}, output from \code{\link[=posterior_predictive]{posterior_predictive()}} or \code{\link[=b_TPC]{b_TPC()}}, respectively.}
+
+\item{...}{additional parameters passed to \code{\link[=plot.default]{plot.default()}}.}
 
 \item{ylab}{character, a title for the y-axis. Default is "Trait".}
 
-\item{ylim}{numeric, the limits for the y-axis.}
+\item{ylim}{length 2 numeric, The limits of the y-axis of the plot. Defaults to the range of the data if unspecified.}
 
 \item{legend}{logical, should a legend be added to the plot? Default is TRUE.}
 
 \item{legend_position}{character, position of the legend. Only used if legend = TRUE. Default is "bottomright".}
-
-\item{...}{additional parameters passed to \code{\link[=plot.default]{plot.default()}}.}
 }
 \description{
 Plots the output of \code{\link[=posterior_predictive]{posterior_predictive()}}.

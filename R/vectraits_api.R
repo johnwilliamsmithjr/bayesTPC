@@ -42,7 +42,7 @@ ask_for_ID <- function(max_id) {
 #' @return A dataframe containing the dataset in Vectraits corresponding to ID
 #' @export
 #'
-get_dataset <- function(ID = -1, check_interactive = TRUE) {
+get_VB_dataset <- function(ID = -1, check_interactive = TRUE) {
   if (length(ID) != 1) stop("Invalid length for input 'ID'. If pulling multiple datasets, please use get_datasets() instead.")
   td <- as.integer(
     get_web_data("https://vectorbyte.crc.nd.edu/portal/api/vectraits-explorer/?format=json")$data$count
@@ -76,7 +76,7 @@ get_dataset <- function(ID = -1, check_interactive = TRUE) {
 #' @param safety logical, should an error be thrown if too many datasets are retreived?. Default is TRUE.
 #' @return A list of the datasets requested.
 #' @export
-get_datasets <- function(IDS, safety = TRUE) {
+get_VB_datasets <- function(IDS, safety = TRUE) {
   if (length(IDS) < 1) stop("Input 'IDS' must have at least length 1.")
   if(length(IDS) > 10) {
     if (safety) {
@@ -89,7 +89,7 @@ get_datasets <- function(IDS, safety = TRUE) {
   out <- list()
   for (i in 1:length(IDS)) {
     cat("Retrieving dataset:",IDS[i],"\n")
-    out[[i]] <- get_dataset(IDS[i], check_interactive = F)
+    out[[i]] <- get_VB_dataset(IDS[i], check_interactive = F)
   }
   out
 }
@@ -102,7 +102,7 @@ get_datasets <- function(IDS, safety = TRUE) {
 #'
 #' @return A list of all datasets matching the search terms provided.
 #' @export
-find_datasets <- function(keywords, safety = TRUE) {
+find_VB_datasets <- function(keywords, safety = TRUE) {
   stopifnot("Invalid keyword" = is.character(keywords))
   stopifnot("Keyword must be provided" = length(keywords) > 0)
 
@@ -118,6 +118,6 @@ find_datasets <- function(keywords, safety = TRUE) {
 
 
   cat(paste0(length(set_search$ids)," datasets found. Attempting to retreive.\n\n"))
-  return(get_datasets(set_search$ids, safety))
+  return(get_VB_datasets(set_search$ids, safety))
 
 }

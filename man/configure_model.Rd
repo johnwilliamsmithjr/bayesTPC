@@ -10,11 +10,11 @@ configure_model(model, priors = NULL, constants = NULL, verbose = T)
 \item{model}{character or \code{btpc_model}. If a character, a string specifying the model name. Otherwise, a model specification.
 If a string is provided, the default values are used if the model is implemented. Use \code{\link[=get_models]{get_models()}} to view all options.}
 
-\item{priors}{list, optional input specifying prior distributions for parameters (default = NULL).
+\item{priors}{list or character, optional input specifying prior distributions for parameters (default = NULL).
 Elements of the list should correspond to model parameters, and written using nimble logic.
 For parameters not specified in the list, default priors are used.}
 
-\item{constants}{list, optional input specifying model constants.
+\item{constants}{list or character, optional input specifying model constants.
 If model requires constant values and none are provided, default values are used.}
 
 \item{verbose}{optional logical. If verbose = TRUE, messages are printed when user-end priors are used, rather than the default values. Default is TRUE.}
