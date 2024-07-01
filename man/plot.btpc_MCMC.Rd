@@ -30,7 +30,7 @@ If no vector is provided, temp_interval is set as a sequence from the lowest obs
 
 \item{summaryType}{character, Determines what method is used to create credible intervals. Currently supported options are "quantile" and "hdi" (default).}
 
-\item{centralSummary}{character, central summary measure used. Currently supported options are "median" (default) and "mean".}
+\item{centralSummary}{character, central summary measure used. Currently supported options are "median" (default), "mean", and "MAP" (maximum a posteriori).}
 
 \item{prob}{numeric, the credible mass used to compute the highest density interval. Used if summaryType = "hdi".}
 
@@ -38,7 +38,7 @@ If no vector is provided, temp_interval is set as a sequence from the lowest obs
 
 \item{burn}{numeric, initial number of iterations to be discarded as burn-in. Default is 0.}
 
-\item{print_summary}{logical, should summary be printed? Default is TRUE.}
+\item{print_summary}{logical, should summary be printed? Default is FALSE.}
 
 \item{type}{character, should the summaries be calculated for the link or the response?
 Supported inputs are "response" and "link". Default is "response".}

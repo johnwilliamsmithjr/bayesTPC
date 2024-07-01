@@ -37,7 +37,7 @@ print.btpc_MCMC <- function(x, digits = 3, ...) {
 #' @param temp_interval numeric, reference values to use to compute values of the thermal performance curve.
 #'  If no vector is provided, temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1,000 equally spaced points.
 #' @param summaryType character, Determines what method is used to create credible intervals. Currently supported options are "quantile" and "hdi" (default).
-#' @param centralSummary character, central summary measure used. Currently supported options are "median" (default) and "mean".
+#' @param centralSummary character, central summary measure used. Currently supported options are "median" (default), "mean", and "MAP" (maximum a posteriori).
 #' @param prob numeric, the credible mass used to compute the highest density interval. Used if summaryType = "hdi".
 #' @param quantiles numeric, quantiles used for a credible interval. Used if summaryType = "quantile".
 #' @param type character, should the summaries be calculated for the link or the response?
@@ -59,7 +59,7 @@ summary.btpc_MCMC <- function(object,
   # input validation
   if (!"btpc_MCMC" %in% class(object)) stop("Unexpected type for parameter 'object'. Only use this method with the output of b_TPC().")
   if (!(summaryType %in% c("hdi", "quantile"))) stop('Unsupported argument for "summaryType". Currently only "quantile" and "hdi" are supported.')
-  if (!(centralSummary %in% c("mean", "median"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
+  if (!(centralSummary %in% c("mean", "median", "MAP"))) stop('Unsupported argument for "centralSummary". Currently only "median" and "mean" are supported.')
   if (is.null(temp_interval)) temp_interval <- seq(from = min(object$data$Temp), to = max(object$data$Temp), length.out = 1000)
   if (!is.numeric(temp_interval)) stop('Parameter `temp_interval` must be numeric.')
   if (!is.numeric(burn) || length(burn) != 1) {
@@ -79,7 +79,7 @@ summary.btpc_MCMC <- function(object,
 
 
 
-
+  llh <- attr(object$model_spec, "distribution")
   tpc_fun <- get_model_function(object$model_spec)
   max.ind <- nrow(object$samples)
 
@@ -91,15 +91,16 @@ summary.btpc_MCMC <- function(object,
     }
   }
 
+  llh_params <- attr(llh, "llh_parameters")
+  samp_params <- colnames(object$samples)
+  formula_params <- samp_params[!(samp_params %in% names(llh_params))]
   link_evals <- simplify2array(.mapply(
-    FUN = tpc_fun, dots = data.frame(object$samples[(burn + 1):max.ind, colnames(object$samples) != "sigma.sq" & colnames(object$samples) != "shape_par"]),
+    FUN = tpc_fun, dots = data.frame(object$samples[(burn + 1):max.ind, formula_params]),
     MoreArgs = MA
   ))
 
   # transform link into response. I want to verify w/ Leah if this is theoretically sound
-  if (type == "link") {
-    tpc_evals <- link_evals
-  } else if (type == "response") {
+  if (type == "response") {
     if ("btpc_identity" %in% class(object$model_spec)) {
       tpc_evals <- link_evals
     } else if ("btpc_logit" %in% class(object$model_spec)) {
@@ -112,6 +113,8 @@ summary.btpc_MCMC <- function(object,
       # this error check is redundant, but is here just in case.
       stop("Misconfigured Model Specification.")
     }
+  } else if (type == "link") {
+    tpc_evals <- link_evals
   } else {
     stop("Invalid input for parameter 'type'. Supported options are 'link' and 'response'.")
   }
@@ -120,6 +123,9 @@ summary.btpc_MCMC <- function(object,
     centers <- matrixStats::rowMedians(tpc_evals)
   } else if (centralSummary == "mean") {
     centers <- matrixStats::rowMeans2(tpc_evals)
+  } else if (centralSummary == "MAP") {
+    map_row <- which(apply(object$samples, 1, function(x) all(x == object$MAP_parameters[1:ncol(object$samples)])))
+    centers <- tpc_evals[,map_row]
   }
 
   if (summaryType == "hdi") {
@@ -158,7 +164,7 @@ summary.btpc_MCMC <- function(object,
 #' @export
 #' @inheritParams summary.btpc_MCMC
 #' @param x `btpc_MCMC`, object output from performing MCMC using the `bTPC` function.
-#' @param print_summary logical, should summary be printed? Default is TRUE.
+#' @param print_summary logical, should summary be printed? Default is FALSE.
 #' @param ylab character, a title for the y axis. Default is "Trait".
 #' @param xlab character, a title for the x-axis. Default is "Temperature (C)"
 #' @param ylim numeric, the limits for the y-axis.
@@ -220,8 +226,8 @@ plot.btpc_MCMC <- function(x,
 
   if (legend) {
     graphics::legend(legend_position,
-      legend = c("Bounds", tools::toTitleCase(paste0(centralSummary, "s"))),
-      lty = c(2, 1), col = c("blue", "red")
+                     legend = c("Bounds", tools::toTitleCase(paste0(centralSummary, "s"))),
+                     lty = c(2, 1), col = c("blue", "red")
     )
   }
 }
@@ -232,7 +238,7 @@ plot.btpc_MCMC <- function(x,
 #'
 #' @export
 #' @details This function returns various summaries of the output of the thermal performance curve posterior predictive model samples, generated using MCMC samples from the object returned by `b_TPC()`.
-#' @param TPC `btpc_MCMC`, object output from performing MCMC using the `bTPC` function.
+#' @param TPC `btpc_MCMC`, object output from performing MCMC using the `b_TPC` function.
 #' @inheritParams summary.btpc_MCMC
 #' @param seed integer, seed value to be used. Useful for ensuring that results are reproducible. Default is NULL.
 #' @returns A list containing the central summary and the bounds of the credible interval generated by the posterior samples.
@@ -250,10 +256,17 @@ posterior_predictive <- function(TPC,
     set.seed(seed)
   }
 
+
   if (is.null(temp_interval)) {
     temp_interval <- seq(from = min(TPC$data$Temp), to = max(TPC$data$Temp), length.out = 1000)
   } else if (length(temp_interval) < 1000) {
     warning("Taking posterior predictive samples at less than 1000 points may lead to innaccurate results.")
+  }
+  llh <- attr(TPC$model_spec, "distribution")
+
+  if (is.null(llh)) stop("Misconfigured Model Specification.")
+  if (!llh %in% immutable_llh_list) {
+    stop("posterior_predictive is only available for non-custom likelihood specifications.")
   }
 
   tpc_fun <- get_model_function(TPC$model_spec)
@@ -262,18 +275,16 @@ posterior_predictive <- function(TPC,
   # assign constants
   MA <- list(Temp = temp_interval)
   if (length(TPC$constants) > 0) {
-    MA[names(TPC$constants)] <- TPC$constants
+    for (i in 1:length(TPC$constants)) {
+      MA[names(TPC$constants)[i]] <- TPC$constants[i]
+    }
   }
 
-  # find evaluations
-  # each row is a temperature, each column is a different sample
+  llh_params <- attr(llh, "llh_parameters")
+  samp_params <- colnames(TPC$samples)
+  formula_params <- samp_params[!(samp_params %in% names(llh_params))]
   link_evals <- simplify2array(.mapply(
-    FUN = tpc_fun,
-    dots = data.frame(TPC$samples[
-      (burn + 1):max.ind,
-      colnames(TPC$samples) != "sigma.sq" &
-        colnames(TPC$samples) != "shape_par"
-    ]),
+    FUN = tpc_fun, dots = data.frame(TPC$samples[(burn + 1):max.ind, formula_params]),
     MoreArgs = MA
   ))
 
@@ -292,7 +303,12 @@ posterior_predictive <- function(TPC,
     stop("Misconfigured Model Specification. If you see this error, please contact the package developers.")
   }
 
-  # draw from posterior sample, will make this into a switch when i have time
+  # get one sample at each temperature from each posterior sample
+
+  # I REALLLY hate how this is written
+  # I would love to simulate directly in the NIMBLE model but this cannot be done at
+  # points not included in the original training dataset, because ?????
+  # prevents issue #38 on github from being fixed
   if ("btpc_normal" %in% class(TPC$model_spec)) {
     post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
       return(truncnorm::rtruncnorm(
@@ -399,24 +415,35 @@ posterior_predictive <- function(TPC,
   return(output)
 }
 
-
 #' Plots posterior predictive samples
 #'
 #' Plots the output of [posterior_predictive()].
 #'
 #' @export
-#' @param prediction `btpc_prediction`, output from [posterior_predictive()].
+#' @param x `btpc_prediction` or `btpc_MCMC`, output from [posterior_predictive()] or [b_TPC()], respectively.
 #' @param ylab character, a title for the y-axis. Default is "Trait".
 #' @param ylim numeric, the limits for the y-axis.
 #' @param legend logical, should a legend be added to the plot? Default is TRUE.
 #' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
 #' @param ... additional parameters passed to [plot.default()].
-plot_prediction <- function(prediction, ylab = "Trait", ylim = NULL,
+plot_prediction <- function(x, ...) {
+  UseMethod("plot_prediction")
+}
+
+#' @export
+plot_prediction.default <- function(x, ...) {
+  stop("Invalid type for parameter 'x'. Input should be the output of 'posterior_predictive()' or `b_TPC()`.")
+}
+
+#' @export
+#' @rdname plot_prediction
+plot_prediction.btpc_prediction <- function(x, ylab = "Trait",
                             legend = TRUE, legend_position = "bottomright", ...) {
-  if (!"btpc_prediction" %in% class(prediction)) {
-    stop("Input should be the output of 'posterior_predictive'.")
+  if (!"btpc_prediction" %in% class(x)) {
+    stop("Invalid type for parameter 'x'. Input should be the output of 'posterior_predictive()'.")
   }
-  if ("btpc_binomial" %in% class(prediction$model_spec)) {
+
+  if ("btpc_binomial" %in% class(x$model_spec)) {
     if (missing(ylim)) {
       yl <- c(0,1.2)
     } else {
@@ -425,40 +452,105 @@ plot_prediction <- function(prediction, ylab = "Trait", ylim = NULL,
 
     # make average N in data for sample_n
     sample_n <- 10
-    plot(prediction$temp_interval, prediction$upper_bounds / sample_n,
+    plot(x$temp_interval, x$upper_bounds / sample_n,
       type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
       ylab = paste0(ylab, " / n"), ylim = yl, ...
+
     )
 
-
-    graphics::points(prediction$temp_interval, prediction$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
-    graphics::points(prediction$temp_interval, prediction$lower_bounds / sample_n, type = "l", col = "blue", lty = 3)
-    graphics::points(prediction$temp_interval, prediction$medians / sample_n, type = "l", col = "blue")
+    graphics::points(x$temp_interval, x$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
+    graphics::points(x$temp_interval, x$lower_bounds / sample_n, type = "l", col = "blue", lty = 3)
+    graphics::points(x$temp_interval, x$medians / sample_n, type = "l", col = "blue")
   } else {
+
     if (missing(ylim)) {
-      yl <- c(0, max(max(prediction$upper_bounds), max(prediction$data$Trait)))
+      yl <- c(0, max(max(x$upper_bounds), max(x$data$Trait)))
     } else {
       yl <- ylim
     }
-    plot(prediction$temp_interval, prediction$upper_bounds,
+    plot(x$temp_interval, x$upper_bounds,
       type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
       ylab = ylab, ylim = yl, ...
+
     )
-    graphics::points(prediction$temp_interval, prediction$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
-    graphics::points(prediction$temp_interval, prediction$lower_bounds, type = "l", col = "blue", lty = 3)
-    graphics::points(prediction$temp_interval, prediction$medians, type = "l", col = "blue")
+    graphics::points(x$temp_interval, x$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
+    graphics::points(x$temp_interval, x$lower_bounds, type = "l", col = "blue", lty = 3)
+    graphics::points(x$temp_interval, x$medians, type = "l", col = "blue")
   }
 
-  if ("btpc_binomial" %in% class(prediction$model_spec)) {
-    graphics::points(prediction$data$Temp, prediction$data$Trait / prediction$data$n, pch = 16, cex = .75)
+
+  if ("btpc_binomial" %in% class(x$model_spec)) {
+    graphics::points(x$data$Temp, x$data$Trait / x$data$n, pch = 16, cex = .75)
   } else {
-    graphics::points(prediction$data$Temp, prediction$data$Trait, pch = 16, cex = .75)
+    graphics::points(x$data$Temp, x$data$Trait, pch = 16, cex = .75)
   }
 
   if (legend) {
     graphics::legend(legend_position,
-      legend = c("Bounds", "Means", "Medians"),
-      lty = c(3, 2, 1), col = c("blue", "red", "blue")
+                     legend = c("Bounds", "Means", "Medians"),
+                     lty = c(3, 2, 1), col = c("blue", "red", "blue")
     )
+  }
+}
+
+#' @export
+#' @inheritParams plot_prediction
+#' @param ... additional parameters passed to `plot()`.
+#' @rdname posterior_predictive
+plot_prediction.btpc_MCMC <- function(x, ylab = "Trait",
+                                      legend = TRUE, legend_position = "bottomright",
+                                      temp_interval = NULL,
+                                      summaryType = "hdi",
+                                      centralSummary = "median",
+                                      prob = .9,
+                                      quantiles = c(.05, .95),
+                                      burn = 0,
+                                      seed = NULL,
+                                      ...) {
+  if (!"btpc_MCMC" %in% class(x)) {
+    stop("Invalid type for parameter 'x'. Input should be the output of 'b_TPC()'.")
+  }
+  pred <- posterior_predictive(x, temp_interval = temp_interval,
+                               summaryType = summaryType,
+                               centralSummary = centralSummary,
+                               prob = prob,
+                               quantiles = quantiles,
+                               burn = burn,
+                               seed = seed)
+
+  plot_prediction(x = pred, ylab = ylab, legend = legend, legend_position = legend_position, ...)
+}
+
+#' Plots Posterior Sample Histogram
+#'
+#' @importFrom graphics hist.default
+#' @param x `btpc_MCMC`, object output from performing MCMC using the `bTPC` function.
+#' @param plot logical, should histograms be plotted? Default is TRUE.
+#' @param burn numeric, initial number of iterations to be discarded as burn-in. Default is 0.
+#' @param ... parameters passed to [hist.default].
+#'
+#' @return Returns a named list of the `histogram` objects for each model parameter. Returned invisibly unless plot = F.
+#' @export
+hist.btpc_MCMC <- function(x, plot = T, burn = 0, ...) {
+  stopifnot("Unexpected type for parameter 'x'. Only use this method with the output of b_TPC()." = "btpc_MCMC" %in% class(x))
+  stopifnot("Parameter 'burn' must be numeric." = is.numeric(burn))
+
+  burn <- floor(burn)
+  smp <- x$samples
+  N <- nrow(smp)
+  names <- colnames(smp)
+  out <- list()
+
+  if (burn >= N) stop("Parameter 'burn' must be smaller than the total number of samples.")
+  if (plot) {
+    for (i in 1:ncol(smp)) {
+      out[[names[i]]] <- hist.default(smp[(burn+1):N,i], main = paste("Posterior Histogram of", names[i]), xlab = names[i], ...)
+    }
+    invisible(out)
+  } else {
+    for (i in 1:ncol(smp)) {
+      out[[names[i]]] <- hist.default(smp[(burn+1):N,i], plot = F, ...)
+    }
+    out
   }
 }
