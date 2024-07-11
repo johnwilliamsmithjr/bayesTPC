@@ -2,43 +2,16 @@
 % Please edit documentation in R/mcmc_generics.R
 \name{summary.btpc_MCMC}
 \alias{summary.btpc_MCMC}
-\title{Provide thermal performance curve summaries}
+\title{Summary statistics for MCMCs}
 \usage{
-\method{summary}{btpc_MCMC}(
-  object,
-  temp_interval = NULL,
-  summaryType = "hdi",
-  centralSummary = "median",
-  prob = 0.9,
-  quantiles = c(0.05, 0.95),
-  burn = 0,
-  type = "response",
-  print = TRUE,
-  ...
-)
+\method{summary}{btpc_MCMC}(object, quantiles = c(0.025, 0.25, 0.5, 0.75, 0.975), ...)
 }
 \arguments{
 \item{object}{\code{btpc_MCMC}, object output from performing MCMC using the \code{bTPC} function.}
 
-\item{temp_interval}{numeric, reference values to use to compute values of the thermal performance curve.
-If no vector is provided, temp_interval is set as a sequence from the lowest observed temperature in the data to the highest observed temperature in the data, with 1,000 equally spaced points.}
+\item{quantiles}{numeric, calculated quantiles for each variable.}
 
-\item{summaryType}{character, Determines what method is used to create credible intervals. Currently supported options are "quantile" and "hdi" (default).}
-
-\item{centralSummary}{character, central summary measure used. Currently supported options are "median" (default), "mean", and "MAP" (maximum a posteriori).}
-
-\item{prob}{numeric, the credible mass used to compute the highest density interval. Used if summaryType = "hdi".}
-
-\item{quantiles}{numeric, quantiles used for a credible interval. Used if summaryType = "quantile".}
-
-\item{burn}{numeric, initial number of iterations to be discarded as burn-in. Default is 0.}
-
-\item{type}{character, should the summaries be calculated for the link or the response?
-Supported inputs are "response" and "link". Default is "response".}
-
-\item{print}{logical, should summary be printed? Default is TRUE.}
-
-\item{...}{additional parameters, unused.}
+\item{...}{additional parameters, passed to \link{summary.mcmc}}
 }
 \value{
 A list (invisible) containing the central summary and the bounds of the credible interval generated.

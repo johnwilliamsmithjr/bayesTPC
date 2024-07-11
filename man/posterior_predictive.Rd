@@ -39,7 +39,7 @@ If no vector is provided, temp_interval is set as a sequence from the lowest obs
 
 \item{summaryType}{character, Determines what method is used to create credible intervals. Currently supported options are "quantile" and "hdi" (default).}
 
-\item{centralSummary}{character, central summary measure used. Currently supported options are "median" (default), "mean", and "MAP" (maximum a posteriori).}
+\item{centralSummary}{character, central summary measure used. Currently supported options are "median" (default) and "mean".}
 
 \item{prob}{numeric, the credible mass used to compute the highest density interval. Used if summaryType = "hdi".}
 

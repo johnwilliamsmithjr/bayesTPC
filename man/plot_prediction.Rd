@@ -11,6 +11,7 @@ plot_prediction(x, ...)
   x,
   ylab = "Trait",
   ylim = NULL,
+  main = NULL,
   legend = TRUE,
   legend_position = "bottomright",
   ...
@@ -24,6 +25,8 @@ plot_prediction(x, ...)
 \item{ylab}{character, a title for the y-axis. Default is "Trait".}
 
 \item{ylim}{length 2 numeric, The limits of the y-axis of the plot. Defaults to the range of the data if unspecified.}
+
+\item{main}{character, the title of the plot(s). Must be length 1 or the same length as the number of chains.}
 
 \item{legend}{logical, should a legend be added to the plot? Default is TRUE.}
 
