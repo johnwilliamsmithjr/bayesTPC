@@ -1,4 +1,5 @@
 test_that("plotting errors are checked", {
+  withr::local_package("nimble")
   set.seed(12345)
   N <- 16
   q <- .75
