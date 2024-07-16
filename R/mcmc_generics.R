@@ -330,7 +330,7 @@ posterior_predictive <- function(TPC,
     } else if ("btpc_binomial" %in% class(TPC$model_spec)) {
       post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
         return(stats::rbinom(
-          n = length(X), size = 10, prob = X
+          n = length(X), size = mean(TPC$data$n), prob = X
         )) # TODO verify if this is parameterized correctly
       }
     } else if ("btpc_exponential" %in% class(TPC$model_spec)) {
