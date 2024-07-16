@@ -330,7 +330,7 @@ posterior_predictive <- function(TPC,
     } else if ("btpc_binomial" %in% class(TPC$model_spec)) {
       post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
         return(stats::rbinom(
-          n = length(X), size = mean(TPC$data$n), prob = X
+          n = length(X), size = floor(mean(TPC$data$n)), prob = X
         )) # TODO verify if this is parameterized correctly
       }
     } else if ("btpc_exponential" %in% class(TPC$model_spec)) {
@@ -424,7 +424,7 @@ plot_prediction <- function(prediction, ylab = "Trait", ylim = NULL,
     }
 
     # make average N in data for sample_n
-    sample_n <- 10
+    sample_n <- floor(mean(prediction$data$n))
     plot(prediction$temp_interval, prediction$upper_bounds / sample_n,
       type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
       ylab = paste0(ylab, " / n"), ylim = yl, ...
