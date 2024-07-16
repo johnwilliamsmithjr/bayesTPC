@@ -13,27 +13,39 @@
 #' @return Returns invisible(NULL) and creates trace plots for MCMC parameters.
 traceplot <- function(object, burn = 0, thin = 1, ...) {
   ## checks to see if samples are contained in list object
-  if (is.list(object)) if (is.null(object$samples)) stop('Object of class list must have element "samples"')
-  if (is.list(object)) {
-    if (coda::is.mcmc(object$samples)) {
-      ## if samples is an mcmc list, extract number of rows
-      N <- nrow(object$samples)
-      ## thin samples
-      thinned <- seq(from = burn + 1, to = N, by = thin)
-      ## create traceplots
-      coda::traceplot(x = coda::as.mcmc(object$samples[thinned, ]), ...)
-      return(invisible(NULL))
-    }
-  } else { ## if samples is not class coda mcmc list
-    ## extract number of rows
-    N <- nrow(object)
-    ## thin samples
-    thinned <- seq(from = burn + 1, to = N, by = thin)
-    ## create traceplots
+  if (coda::is.mcmc.list(object)) { #this needs to be checked before #is.list
+
+    if (length(object) == 0) stop("Sample list must have at least one element.")
+    thinned <- seq(from = burn + 1, to = nrow(object[[1]]), by = thin)
+    for (s in object) coda::traceplot(x = coda::as.mcmc(s[thinned, ]), ...)
+
+  } else if (coda::is.mcmc(object)) {
+
+    thinned <- seq(from = burn + 1, to = nrow(object), by = thin)
     coda::traceplot(x = coda::as.mcmc(object[thinned, ]), ...)
-    ## return invisible NULL
-    return(invisible(NULL))
+
+  } else if (is.list(object)) {
+
+    if (is.null(object$samples)) stop('Object of class list must have element "samples".')
+    if (coda::is.mcmc(object$samples)) {
+
+      thinned <- seq(from = burn + 1, to = nrow(object$samples), by = thin)
+      coda::traceplot(x = coda::as.mcmc(object$samples[thinned, ]), ...)
+
+    } else if (coda::is.mcmc.list(object$samples)) {
+
+      if (length(object$samples) == 0) stop("Sample list must have at least one element.")
+      thinned <- seq(from = burn + 1, to = nrow(object$samples[[1]]), by = thin)
+      for (s in object$samples) coda::traceplot(x = coda::as.mcmc(s[thinned, ]), ...)
+    } else {
+      stop("Misconfigured MCMC.")
+    }
+
+  } else {
+    stop("Invalid input. Parameter 'object' must be an mcmc, mcmc.list, or a list containing an element named 'samples' which is an mcmc or mcmc.list.")
   }
+
+  return(invisible(NULL))
 }
 
 #' Wrapper for IDPmisc::ipairs() to create pairs plots of bTPC output
