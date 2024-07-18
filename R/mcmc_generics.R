@@ -380,8 +380,8 @@ posterior_predictive <- function(TPC,
       )
     } else if ("btpc_gamma" %in% class(TPC$model_spec)) {
       post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
-        return(stats::rgamma(
-          n = length(X) - 1, rate = X[1:(length(X) - 1)], shape = X[length(X)]
+        return(stats::rbinom(
+          n = length(X), size = floor(mean(TPC$data$n)), prob = X
         )) # TODO verify if this is parameterized correctly
       }
       post_pred_samples <- apply(
@@ -522,17 +522,17 @@ plot_prediction.btpc_prediction <- function(x, ylab = "Trait", ylim = NULL, main
       }
 
       # make average N in data for sample_n
-      sample_n <- 10
-      plot(s$temp_interval, s$upper_bounds / sample_n, main = main[i],
-           type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
-           ylab = paste0(ylab, " / n"), ylim = yl, ...
-
+      sample_n <- floor(mean(prediction$data$n))
+      plot(prediction$temp_interval, prediction$upper_bounds / sample_n,
+        type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
+        ylab = paste0(ylab, " / n"), ylim = yl, ...
       )
 
       graphics::points(s$temp_interval, s$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
       graphics::points(s$temp_interval, s$lower_bounds / sample_n, type = "l", col = "blue", lty = 3)
       graphics::points(s$temp_interval, s$medians / sample_n, type = "l", col = "blue")
     } else {
+
 
       if (missing(ylim)) {
         yl <- c(0, max(max(s$upper_bounds), max(s$data$Trait)))
