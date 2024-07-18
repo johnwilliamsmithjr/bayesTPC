@@ -380,8 +380,8 @@ posterior_predictive <- function(TPC,
       )
     } else if ("btpc_gamma" %in% class(TPC$model_spec)) {
       post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
-        return(stats::rbinom(
-          n = length(X), size = floor(mean(TPC$data$n)), prob = X
+        return(stats::rgamma(
+          n = length(X) - 1, rate = X[1:(length(X) - 1)], shape = X[length(X)]
         )) # TODO verify if this is parameterized correctly
       }
       post_pred_samples <- apply(
@@ -404,7 +404,7 @@ posterior_predictive <- function(TPC,
       } else if ("btpc_binomial" %in% class(TPC$model_spec)) {
         post_pred_draw <- function(X) { # this can be optimized i think. a lot of overhead
           return(stats::rbinom(
-            n = length(X), size = 10, prob = X
+            n = length(X), size = floor(mean(TPC$data$n)), prob = X
           )) # TODO verify if this is parameterized correctly
         }
       } else if ("btpc_exponential" %in% class(TPC$model_spec)) {
