@@ -9,3 +9,4 @@ paths
 
 tests\testthat\Rplots.pdf
 tests/testthat/Rplots.pdf
+*.pdf
