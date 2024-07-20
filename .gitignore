@@ -7,4 +7,5 @@ paths
 .Rproj.user/shared/notebooks/paths
 .Rproj.user/shared/notebooks/paths
 
+tests\testthat\Rplots.pdf
 tests/testthat/Rplots.pdf
