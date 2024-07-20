@@ -115,6 +115,8 @@ ipairs <- function(x, burn = 0, thin = 1,
 #' @return Returns invisible(NULL) and creates a prior posterior overlap plot, with the prior density shown using a red line and the posterior density shown using a blue dashed line.
 ppo_plot <- function(model, burn = 0, seq.length = 100, legend = TRUE, legend_position = "topleft") {
 
+  if (!"btpc_MCMC" %in% class(model)) stop("Unexpected type for parameter 'model'. Only use this method with the output of b_TPC().")
+
   # This fails with gamma likelihoods but i dont have the patience to change it right now
   # I also dont think its the most necessary part of this code
   ## extract model parameters and sort alphabetically
@@ -134,48 +136,55 @@ ppo_plot <- function(model, burn = 0, seq.length = 100, legend = TRUE, legend_po
     return(exp(model$uncomp_model$calculate(name)))
   }
 
-  for (i in 1:length(param_list)) {
-    param_string <- param_list[i]
-    ## extract sequence lower bound to evaluate prior density on. if the bound of a particular
-    ## parameter is infinite, one half of the smallest observed posterior sample is used.
-    ## otherwise, the lower bound of the prior is used.
-    seq_lower <- ifelse(
-      test = is.infinite(nimble::getBound(model$uncomp_model, param_string, "lower")),
-      yes = .5 * min(model$samples[(burn + 1):nrow(model$samples), param_list[i]]),
-      no = nimble::getBound(model$uncomp_model, param_string, "lower")
-    )
-    ## extract sequence upper bound to evaluate prior density on. if the bound of a particular
-    ## parameter is infinite, twice the largest observed posterior sample is used.
-    ## otherwise, the upper bound of the prior is used.
-    seq_upper <- ifelse(
-      test = is.infinite(nimble::getBound(model$uncomp_model, param_string, "upper")),
-      yes = 2 * max(model$samples[(burn + 1):nrow(model$samples), param_list[i]]),
-      no = nimble::getBound(model$uncomp_model, param_string, "upper")
-    )
-    ## create evaluation sequence
-    eval_seq <- seq(from = seq_lower, to = seq_upper, length.out = seq.length)
+  if (is(model$samples, "mcmc")) s_list <- list(model$samples)
+  else s_list <- model$samples
 
-
-    ## generate prior evaluations
-    prior_evals <- sapply(X = eval_seq, FUN = get_prior_eval, name = param_string)
-    ## create density of posterior MCMC samples
-    posterior_approx <- stats::density(model$samples[(burn + 1):nrow(model$samples), param_list[i]])
-
-    ## create ylimits
-    ylim_ppo <- c(0, 1.05 * max(c(max(posterior_approx$y), max(prior_evals))))
-    ## generate plot
-    plot(eval_seq, prior_evals,
-      ylim = ylim_ppo, type = "l", col = "red",
-      ylab = "Density", xlab = param_list[i], lwd = 2,
-      main = paste0("Prior-Posterior Overlap Plot for ", param_list[i])
-    )
-    graphics::points(posterior_approx, type = "l", col = "blue", lwd = 2, lty = 2)
-    if (legend) {
-      graphics::legend(legend_position,
-                       legend = c("Prior", "Posterior"), col = c("red", "blue"),
-                       lty = c(1, 2), lwd = c(2, 2)
+  for (j in 1:length(s_list)) {
+    s <- s_list[[j]]
+    for (i in 1:length(param_list)) {
+      param_string <- param_list[i]
+      ## extract sequence lower bound to evaluate prior density on. if the bound of a particular
+      ## parameter is infinite, one half of the smallest observed posterior sample is used.
+      ## otherwise, the lower bound of the prior is used.
+      seq_lower <- ifelse(
+        test = is.infinite(nimble::getBound(model$uncomp_model, param_string, "lower")),
+        yes = .5 * min(s[(burn + 1):nrow(s), param_list[i]]),
+        no = nimble::getBound(model$uncomp_model, param_string, "lower")
       )
-    }
+      ## extract sequence upper bound to evaluate prior density on. if the bound of a particular
+      ## parameter is infinite, twice the largest observed posterior sample is used.
+      ## otherwise, the upper bound of the prior is used.
+      seq_upper <- ifelse(
+        test = is.infinite(nimble::getBound(model$uncomp_model, param_string, "upper")),
+        yes = 2 * max(s[(burn + 1):nrow(s), param_list[i]]),
+        no = nimble::getBound(model$uncomp_model, param_string, "upper")
+      )
+      ## create evaluation sequence
+      eval_seq <- seq(from = seq_lower, to = seq_upper, length.out = seq.length)
 
+
+      ## generate prior evaluations
+      prior_evals <- sapply(X = eval_seq, FUN = get_prior_eval, name = param_string)
+      ## create density of posterior MCMC samples
+      posterior_approx <- stats::density(s[(burn + 1):nrow(s), param_list[i]])
+
+      ## create ylimits
+      ylim_ppo <- c(0, 1.05 * max(c(max(posterior_approx$y), max(prior_evals))))
+      ## generate plot
+      plot(eval_seq, prior_evals,
+           ylim = ylim_ppo, type = "l", col = "red",
+           ylab = "Density", xlab = param_list[i], lwd = 2,
+           main = paste0("Chain ",j, ": Prior-Posterior Overlap Plot for ", param_list[i])
+      )
+      graphics::points(posterior_approx, type = "l", col = "blue", lwd = 2, lty = 2)
+      if (legend) {
+        graphics::legend(legend_position,
+                         legend = c("Prior", "Posterior"), col = c("red", "blue"),
+                         lty = c(1, 2), lwd = c(2, 2)
+        )
+      }
+
+    }
   }
+
 }
