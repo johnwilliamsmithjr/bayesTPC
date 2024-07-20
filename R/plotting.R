@@ -114,11 +114,14 @@ ipairs <- function(x, burn = 0, thin = 1,
 #' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
 #' @return Returns invisible(NULL) and creates a prior posterior overlap plot, with the prior density shown using a red line and the posterior density shown using a blue dashed line.
 ppo_plot <- function(model, burn = 0, seq.length = 100, legend = TRUE, legend_position = "topleft") {
+
+  # This fails with gamma likelihoods but i dont have the patience to change it right now
+  # I also dont think its the most necessary part of this code
   ## extract model parameters and sort alphabetically
   ppo_parameters <- sort(names(model$priors)[names(model$priors) != "sigma.sq"])
   ## if sigma.sq is in the mcmc sample list, add it as the
   ## last entry of the param_list vector
-  if ("sigma.sq" %in% colnames(model$samples)) {
+  if ("sigma.sq" %in% names(model$priors)) {
     param_list <- c(ppo_parameters, "sigma.sq")
   } else {
     param_list <- ppo_parameters

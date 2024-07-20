@@ -522,8 +522,8 @@ plot_prediction.btpc_prediction <- function(x, ylab = "Trait", ylim = NULL, main
       }
 
       # make average N in data for sample_n
-      sample_n <- floor(mean(prediction$data$n))
-      plot(prediction$temp_interval, prediction$upper_bounds / sample_n,
+      sample_n <- floor(mean(s$data$n))
+      plot(s$temp_interval, s$upper_bounds / sample_n,
         type = "l", lty = 3, col = "blue", xlab = "Temperature (C)",
         ylab = paste0(ylab, " / n"), ylim = yl, ...
       )
