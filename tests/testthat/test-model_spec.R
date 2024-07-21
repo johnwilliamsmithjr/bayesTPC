@@ -219,3 +219,34 @@ test_that("removing models works", {
   expect_error(remove_model("quadratic"), regexp = "Only user")
   expect_error(remove_model("not a model"), regexp = "Attempting to remove non")
 })
+
+test_that("specialized model spec constructors work", {
+  ## normal
+  #copying this code from paul's aedes project
+  my_posquad_formula <- expression(a *(Temp - mu)^2 + c)
+  my_posquad_priors <- c(a = "dexp(0.01)",
+                         mu = "dunif(0.01,50)",
+                         c = "dexp(0.01)")
+
+  my_posquad <- specify_normal_model("my_posquad", #model name
+                                               parameters = my_posquad_priors, #names are parameters, values are priors
+                                               formula = my_posquad_formula)
+  expect_equal(attr(my_posquad, "link"), "identity")
+  expect_equal(attr(my_posquad, "distribution"), llh_list[["normal"]])
+  ## binomial
+
+  my_bin <- specify_binomial_model("my_bin",
+                                   parameters = my_posquad_priors,
+                                   formula = my_posquad_formula)
+
+  expect_equal(attr(my_bin, "link"), "logit")
+  expect_equal(attr(my_bin, "distribution"), llh_list[["binomial"]])
+  ## bernoulli
+
+  my_bern <- specify_bernoulli_model("my_bern",
+                                   parameters = my_posquad_priors,
+                                   formula = my_posquad_formula)
+
+  expect_equal(attr(my_bern, "link"), "logit")
+  expect_equal(attr(my_bern, "distribution"), llh_list[["bernoulli"]])
+})

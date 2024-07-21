@@ -343,7 +343,6 @@ change_priors <- function(x, priors) {
 #' @rdname change_priors
 #' @export
 change_priors.btpc_model <- function(x, priors = character()) {
-  if (!("btpc_model" %in% class(x))) stop("Invalid type for model.")
   if (is.null(priors)) return(x)
   if (length(priors) == 0) return(x)
 
@@ -418,7 +417,6 @@ constants_error_check <- function(constants) {
 #' @rdname change_constants
 #' @export
 change_constants.btpc_model <- function(x, constants) {
-  if (!("btpc_model" %in% class(x))) stop("Invalid type for model.")
   if (is.null(constants)) return(x)
   if (length(constants) == 0) return(x)
 
