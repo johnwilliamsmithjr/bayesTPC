@@ -40,8 +40,8 @@ test_that("plotting errors are checked", {
   expect_error(ipairs("something"), regexp = "Invalid input")
   expect_error(ipairs(list(some = "thing")), regexp = "Object of class list must have element")
 
-  expect_error(ipairs("something"), regexp = "Unexpected type")
-  expect_error(ipairs("something"), regexp = "Unexpected type")
+  expect_error(ppo_plot("something"), regexp = "Unexpected type")
+  expect_error(ppo_plot("something"), regexp = "Unexpected type")
 
   mult_chain$samples$chain1 <- NULL
   mult_chain$samples$chain2 <- NULL
