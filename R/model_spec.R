@@ -290,32 +290,9 @@ validate.btpc_model <- function(x) {
   if (!distribution %in% llh_list) stop("Unsupported distribution.")
 
   if (!"btpc_likelihood" %in% class(distribution)) {
+    if (!distribution %in% llh_list) stop("Unsupported likelihood function. ")
     distribution <- llh_list[[distribution]]
     attr(x, "distribution") <- distribution
-  }
-
-  return(x)
-}
-
-#' @export
-validate.btpc_normal <- function(x) {
-  x <- validate.btpc_model(x)
-  var <- attr(x, "sigma.sq")
-  if (length(var) == 0) {
-    cat("Using default prior for model variance.\n")
-    attr(x, "sigma.sq") <- "dexp(1)"
-  }
-
-  return(x)
-}
-
-#' @export
-validate.btpc_gamma <- function(x) {
-  x <- validate.btpc_model(x)
-  var <- attr(x, "shape_par")
-  if (length(var) == 0) {
-    cat("Using default prior for shape parameter.\n")
-    attr(x, "shape_par") <- "dexp(1)"
   }
 
   return(x)

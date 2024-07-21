@@ -162,7 +162,6 @@ ppo_plot <- function(model, burn = 0, seq.length = 100, legend = TRUE, legend_po
       ## create evaluation sequence
       eval_seq <- seq(from = seq_lower, to = seq_upper, length.out = seq.length)
 
-
       ## generate prior evaluations
       prior_evals <- sapply(X = eval_seq, FUN = get_prior_eval, name = param_string)
       ## create density of posterior MCMC samples

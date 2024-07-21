@@ -174,3 +174,12 @@ reset_likelihoods <- function() {
 
 ## Methods ========================================================
 
+#' Get implemented likelihoods.
+#'
+#' Returns the names of all implemented likelihoods in `bayesTPC`.
+#'
+#' @export
+#'
+get_likelihoods <- function() {
+  names(llh_list)
+}
