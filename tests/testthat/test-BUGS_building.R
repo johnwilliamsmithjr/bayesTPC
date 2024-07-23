@@ -35,7 +35,7 @@ test_that("configure model works", {
   # i dont know how to use regex :)
   expect_match(default_quad, regexp = "q ~ dunif(0, 1)", fixed = TRUE)
   expect_match(default_quad, regexp = "T_max ~ dunif(25, 60)", fixed = TRUE)
-  expect_match(default_quad, regexp = "T_min ~ dunif(0, 24)", fixed = TRUE)
+  expect_match(default_quad, regexp = "T_min ~ dunif(-10, 20)", fixed = TRUE)
   expect_match(default_quad, regexp = "sigma.sq ~ dexp(1)", fixed = TRUE)
 
   expect_match(changed_quad, regexp = "q ~ dunif(0, 1.5)", fixed = TRUE)
