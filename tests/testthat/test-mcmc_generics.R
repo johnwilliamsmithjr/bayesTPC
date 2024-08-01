@@ -5,6 +5,7 @@ test_that("MCMC methods errors checked", {
   # bad object type
   expect_error(summary.btpc_MCMC("object"), regexp = "Only use this method")
   expect_error(print.btpc_MCMC("good morning!"), regexp = "Only use this method")
+  expect_error(predict.btpc_MCMC("good morning!"), regexp = "Only use this method")
   expect_error(plot.btpc_MCMC("object"), regexp = "Only use this method")
   expect_error(posterior_predictive("object"), regexp = "Only use this method")
 
@@ -24,23 +25,23 @@ test_that("MCMC methods errors checked", {
   dat <- list(Trait = Traits, Temp = Temps)
   quad <- b_TPC(dat, "quadratic")
 
-  ## Summary
+  ## Predict
   # bad link
-  expect_error(summary.btpc_MCMC(quad, type = "teehee"), regexp = "'type'")
+  expect_error(predict.btpc_MCMC(quad, type = "teehee"), regexp = "'type'")
   # bad quantiles / hdi
-  expect_error(summary.btpc_MCMC(quad, summaryType = "whatever"), regexp = "summaryType")
+  expect_error(predict.btpc_MCMC(quad, summaryType = "whatever"), regexp = "summaryType")
   # bad centers
-  expect_error(summary.btpc_MCMC(quad, centralSummary = "whatever"), regexp = "centralSummary")
+  expect_error(predict.btpc_MCMC(quad, centralSummary = "whatever"), regexp = "centralSummary")
 
   # broken model spec. this should NEVER happen.
   bad_quad <- quad
   class(bad_quad$model_spec) <- "btpc_model"
-  expect_error(summary.btpc_MCMC(bad_quad), regexp = "Misconfigured Model Specification")
+  expect_error(predict.btpc_MCMC(bad_quad), regexp = "Misconfigured Model Specification")
 
   bad_quad$model_spec <- "quadratic"
-  expect_error(summary.btpc_MCMC(bad_quad), regexp = "Misconfigured Model Specification")
+  expect_error(predict.btpc_MCMC(bad_quad), regexp = "Misconfigured Model Specification")
 
-  ## Plot (shouldn't be necessary because this is just passed to summary)
+  ## Plot (shouldn't be necessary because this is just passed to predict)
 
   # bad link
   expect_error(plot.btpc_MCMC(quad, type = "teehee"), regexp = "'type'")
@@ -69,6 +70,13 @@ test_that("MCMC methods errors checked", {
 
   ## plot_prediction
   expect_error(plot_prediction("heeeey"), regexp = "should be the output of")
+
+  ## hist
+
+  expect_error(hist.btpc_MCMC("not a model"), regexp = "output of b")
+  expect_error(hist.btpc_MCMC(quad, burn = "hehe"), regexp = "Parameter 'burn' must be numeric")
+  expect_error(hist.btpc_MCMC(quad, burn = 100000), regexp = "Parameter 'burn' must be smaller than")
+  expect_error(hist.btpc_MCMC(quad, plot = "not_logical"))
 })
 
 test_that("MCMC methods output correctly", {
@@ -124,7 +132,6 @@ test_that("MCMC methods output correctly", {
   summary_quad <- paste0(capture.output(summary(quad)), collapse = "\n")
   summary_bin <- paste0(capture.output(summary(bin)), collapse = "\n")
 
-  expect_output(summary(quad, print = F), regexp = NA)
 
   expect_match(summary_quad, regexp = "quadratic")
   expect_match(summary_quad, regexp = "m[i] <- ( ", fixed = T)
@@ -142,10 +149,10 @@ test_that("MCMC methods output correctly", {
   expect_match(summary_bin, regexp = get_default_priors("binomial_glm_lin")[2], fixed = T)
 
   # checking different central summaries and interval types
-  median_hdi_90 <- summary(quad)
-  mean_hdi_95 <- summary(quad, centralSummary = "mean", prob = .95)
-  mean_quantile_90 <- summary(quad, summaryType = "quantile", centralSummary = "mean")
-  median_quantile_95 <- summary(quad, summaryType = "quantile", quantiles = c(.025, .975))
+  median_hdi_90 <- predict(quad)[[1]]
+  mean_hdi_95 <- predict(quad, centralSummary = "mean", prob = .95)[[1]]
+  mean_quantile_90 <- predict(quad, summaryType = "quantile", centralSummary = "mean")[[1]]
+  median_quantile_95 <- predict(quad, summaryType = "quantile", quantiles = c(.025, .975))[[1]]
 
   quad_evals <- simplify2array(.mapply(
     FUN = get_model_function("quadratic"), dots = data.frame(quad$samples[, !colnames(quad$samples) %in% "sigma.sq"]),
@@ -173,8 +180,8 @@ test_that("MCMC methods output correctly", {
   expect_equal(mean_quantile_90$upper_bounds, quad_q_90[, 2])
   expect_equal(median_quantile_95$lower_bounds, quad_q_95[, 1])
   expect_equal(median_quantile_95$upper_bounds, quad_q_95[, 2])
-  link <- summary(bin, type = "link")
-  response <- summary(bin, type = "response")
+  link <- predict(bin, type = "link")[[1]]
+  response <- predict(bin, type = "response")[[1]]
 
   bin_link_evals <- simplify2array(.mapply(
     FUN = get_model_function("binomial_glm_lin"), dots = data.frame(bin$samples[, !colnames(bin$samples) %in% "sigma.sq"]),
@@ -186,4 +193,11 @@ test_that("MCMC methods output correctly", {
 
   expect_equal(link$medians, link_medians)
   expect_equal(response$medians, response_medians)
+
+  ## hist
+
+  expect_no_error(hist.btpc_MCMC(quad))
+  expect_no_error(hist.btpc_MCMC(quad, burn = 1000))
+  expect_invisible(hist.btpc_MCMC(quad))
+  expect_visible(hist.btpc_MCMC(quad, plot = F))
 })
