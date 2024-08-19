@@ -56,3 +56,6 @@ my_model <- specify_bernoulli_model(
 )
 }
 }
+\seealso{
+\code{\link[=remove_model]{remove_model()}}, \code{\link[=reset_models]{reset_models()}}, \code{\link[=specify_model]{specify_model()}}, \code{\link[=specify_normal_model]{specify_normal_model()}}, \code{\link[=specify_binomial_model]{specify_binomial_model()}}
+}

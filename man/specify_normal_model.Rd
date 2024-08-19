@@ -49,7 +49,6 @@ my_name <- "my_model"
 my_formula <- expression(a * Temp^c + b)
 my_parameters <- c(a = "dunif(0,1)", b = "dnorm(0,1)")
 my_constants <- c(c = 1.5)
-
 \dontrun{
 my_model <- specify_normal_model(
   name = my_name,
@@ -58,4 +57,7 @@ my_model <- specify_normal_model(
   constants = my_constants
 )
 }
+}
+\seealso{
+\code{\link[=remove_model]{remove_model()}}, \code{\link[=reset_models]{reset_models()}}, \code{\link[=specify_bernoulli_model]{specify_bernoulli_model()}}, \code{\link[=specify_model]{specify_model()}}, \code{\link[=specify_binomial_model]{specify_binomial_model()}}
 }

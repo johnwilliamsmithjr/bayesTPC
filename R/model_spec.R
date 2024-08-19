@@ -56,6 +56,7 @@ new_btpc_model <- function(name = character(),
 #' @returns Returns an object of type `btpc_model`, which can then be used in other `bayesTPC` functions.
 #'   The model name is also registered, and so can be accessed using by passing only the name into functions.
 #'   However, user-defined models are not saved between sessions, and will be reset whenever the package is reloaded.
+#' @seealso [remove_model()], [reset_models()], [specify_bernoulli_model()], [specify_normal_model()], [specify_binomial_model()]
 #' @examples
 #' my_name <- "my_model"
 #' my_formula <- expression(a * Temp^c + b)
@@ -114,6 +115,7 @@ specify_model <- function(name = character(),
 #' @returns Returns an object of type `btpc_bernoulli_model`, which can then be used in other `bayesTPC` functions.
 #'   The model name is also registered, and so can be accessed using by passing only the name into functions.
 #'   However, user-defined models are not saved between sessions, and will be reset whenever the package is reloaded.
+#' @seealso [remove_model()], [reset_models()], [specify_model()], [specify_normal_model()], [specify_binomial_model()]
 #' @examples
 #' my_name <- "my_model"
 #' my_formula <- expression(a * Temp^c + b)
@@ -158,6 +160,7 @@ specify_bernoulli_model <- function(name = character(),
 #' @returns Returns an object of type `btpc_binomial_model`, which can then be used in other `bayesTPC` functions.
 #'   The model name is also registered, and so can be accessed using by passing only the name into functions.
 #'   However, user-defined models are not saved between sessions, and will be reset whenever the package is reloaded.
+#' @seealso [remove_model()], [reset_models()], [specify_bernoulli_model()], [specify_normal_model()], [specify_model()]
 #' @examples
 #' my_name <- "my_model"
 #' my_formula <- expression(a * Temp^c + b)
@@ -203,12 +206,12 @@ specify_binomial_model <- function(name = character(),
 #' @returns Returns an object of type `btpc_normal_model`, which can then be used in other `bayesTPC` functions.
 #'   The model name is also registered, and so can be accessed using by passing only the name into functions.
 #'   However, user-defined models are not saved between sessions, and will be reset whenever the package is reloaded.
+#' @seealso [remove_model()], [reset_models()], [specify_bernoulli_model()], [specify_model()], [specify_binomial_model()]
 #' @examples
 #' my_name <- "my_model"
 #' my_formula <- expression(a * Temp^c + b)
 #' my_parameters <- c(a = "dunif(0,1)", b = "dnorm(0,1)")
 #' my_constants <- c(c = 1.5)
-#'
 #' \dontrun{
 #' my_model <- specify_normal_model(
 #'   name = my_name,
@@ -463,6 +466,7 @@ change_constants.default <- function(x, constants) {
 #'
 #' Removes one or all user-defined models accessible to other `bayesTPC` functions. `remove_model()` only removes one specific model, while `reset_models()` removes **all** user-defined models.
 #' @param name character, the name of the model to be removed
+#' @seealso [specify_model()], [specify_bernoulli_model()], [specify_normal_model()], [specify_binomial_model()]
 #' @export
 remove_model <- function(name) {
   if(!name %in% model_list) {

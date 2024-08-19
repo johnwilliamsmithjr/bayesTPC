@@ -15,3 +15,6 @@ reset_models()
 \description{
 Removes one or all user-defined models accessible to other \code{bayesTPC} functions. \code{remove_model()} only removes one specific model, while \code{reset_models()} removes \strong{all} user-defined models.
 }
+\seealso{
+\code{\link[=specify_model]{specify_model()}}, \code{\link[=specify_bernoulli_model]{specify_bernoulli_model()}}, \code{\link[=specify_normal_model]{specify_normal_model()}}, \code{\link[=specify_binomial_model]{specify_binomial_model()}}
+}

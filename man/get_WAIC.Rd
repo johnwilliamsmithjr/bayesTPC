@@ -12,7 +12,7 @@ get_WAIC(x, include_warning = FALSE)
 \item{include_warning}{logical, should warnings be printed? Default is FALSE.}
 }
 \value{
-A named vector containing the WAIC, log probability, and pWAIC values of the model.
+A named vector containing the WAIC of the model.
 }
 \description{
 Presents appropriate model selection in a convenient form.

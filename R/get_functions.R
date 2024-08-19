@@ -230,10 +230,10 @@ get_default_model_specification <- function(model) {
 #'
 #' @param x `btpc_MCMC`, object output from performing MCMC using the `bTPC` function.
 #' @param include_warning logical, should warnings be printed? Default is FALSE.
-#' @return A named vector containing the WAIC, log probability, and pWAIC values of the model.
+#' @return A named vector containing the WAIC of the model.
 #' @export
 get_WAIC <- function(x, include_warning = FALSE) {
   stopifnot("Unexpected type for parameter 'x'. Only use this method with the output of b_TPC()." = "btpc_MCMC" %in% class(x))
   if (include_warning) wc <- x$mcmc$getWAIC() else utils::capture.output(wc <- x$mcmc$getWAIC())
-  return(c(WAIC = wc$WAIC, lppd = wc$lppd, pWAIC = wc$pWAIC))
+  return(c(WAIC = wc$WAIC))
 }
