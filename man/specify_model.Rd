@@ -11,6 +11,8 @@ specify_model(
   constants = double(),
   link = "identity",
   distribution = "normal",
+  llh_parameters = character(),
+  llh_constants = double(),
   ...
 )
 }
@@ -24,7 +26,7 @@ Uniform distributions should be used unless there is good reason to draw from an
 \item{formula}{expression, The actual formula being fit.
 Must include 'Temp' to represent temperature and all specified parameters and constants}
 
-\item{constants}{optional double, Represents any terms in the formula that should not be fit.}
+\item{constants}{optional named double, Represents any terms in the formula that should not be fit.}
 
 \item{link}{character, A link function between the model fit and the trait values.
 Currently supported options are: 'identity', 'log', 'logit', and 'reciprocal'. Default is 'identity'.}
@@ -32,9 +34,11 @@ Currently supported options are: 'identity', 'log', 'logit', and 'reciprocal'. D
 \item{distribution}{character, The distribution used to calculate likelihoods.
 Currently supported options are: 'normal', 'poisson', 'bernoulli', 'binomial', 'exponential', and 'gamma'. Default is 'normal'.}
 
-\item{...}{Additional model specification attributes.
-If distribution is 'normal' or 'gamma', one can include an attribute named
-'sigma.sq' or 'shape_par' respectively to choose a non-default prior.}
+\item{llh_parameters}{optional named character, additional parameters used in the likelihood calculation (names) and their respective priors (value).}
+
+\item{llh_constants}{optional named double, additional constants used in the likelihood calculation (names) and their respective default values (value).}
+
+\item{...}{Additional model specification attributes.}
 }
 \value{
 Returns an object of type \code{btpc_model}, which can then be used in other \code{bayesTPC} functions.
@@ -67,4 +71,7 @@ my_model <- specify_model(
   distribution = "binomial"
 )
 }
+}
+\seealso{
+\code{\link[=remove_model]{remove_model()}}, \code{\link[=reset_models]{reset_models()}}, \code{\link[=specify_bernoulli_model]{specify_bernoulli_model()}}, \code{\link[=specify_normal_model]{specify_normal_model()}}, \code{\link[=specify_binomial_model]{specify_binomial_model()}}
 }

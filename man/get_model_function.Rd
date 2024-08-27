@@ -4,10 +4,13 @@
 \alias{get_model_function}
 \title{Get Model as a Function}
 \usage{
-get_model_function(model)
+get_model_function(model, type = "response")
 }
 \arguments{
 \item{model}{character or \code{btpc_model}. Use \code{\link[=get_models]{get_models()}} to view all options.}
+
+\item{type}{character, should the function calculate the link or the response?
+Supported inputs are "response" and "link". Default is "response".}
 }
 \value{
 \code{get_model_function} returns a function that evaluates the implemented formula of the specified model.

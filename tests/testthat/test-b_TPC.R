@@ -85,16 +85,6 @@ test_that("b_TPC catches errors", {
   # misc errors
   expect_error(b_TPC(dat, model = "quadratic", sampler = "something silly"), regexp = "Currently only RW")
   expect_error(b_TPC(dat, model = "binomial_glm_lin"), regexp = "must have a variable called 'n'")
-
-  # bad priors
-  expect_error(b_TPC(dat, model = "quadratic", priors = list()), regexp = "cannot be empty")
-  expect_error(b_TPC(dat, model = "quadratic", priors = c(q = "dunif(0,.5)")), regexp = "Unexpected type")
-  expect_error(b_TPC(dat, model = "quadratic", priors = list("dunif(0,.5)")), regexp = "must be named")
-
-  # bad constants
-  expect_error(b_TPC(dat, model = "quadratic", constants = list()), regexp = "cannot be empty")
-  expect_error(b_TPC(dat, model = "quadratic", constants = c(q = 10)), regexp = "Unexpected type")
-  expect_error(b_TPC(dat, model = "quadratic", constants = list(10)), regexp = "must be named")
 })
 
 test_that("b_TPC parameters work", {
@@ -116,22 +106,16 @@ test_that("b_TPC parameters work", {
 
   dat <- list(Trait = Traits, Temp = Temps)
   default_quad <- b_TPC(dat, "quadratic")
+  mult_chain <- b_TPC(dat, "quadratic", nchains = 2)
 
   expect_equal(c(default_quad$model_spec), "quadratic")
   expect_equal(length(default_quad$constants), 0)
   expect_equal(nrow(default_quad$samples), 10000)
-  expect_equal(default_quad$priors[1:3], get_default_priors("quadratic"))
-  expect_equal(default_quad$priors[4], c(sigma.sq = "dexp(1)"))
-  true_MAP <- c(
-    T_max = 35.1866801,
-    T_min = 9.8571586,
-    q = 0.7272414,
-    sigma.sq = 1.9262398,
-    log_prob = -38.2568138
-  )
-  expect_equal(default_quad$MAP_parameters, true_MAP)
+  expect_equal(default_quad$priors, get_default_priors("quadratic"))
   expect_equal(MAP_estimate(default_quad), default_quad$MAP_parameters)
-
+  expect_equal(names(default_quad$MAP_parameters), c(colnames(default_quad$samples), "log_prob"))
+  expect_true(is(default_quad$samples, "mcmc"))
+  expect_true(is(mult_chain$samples, "mcmc.list"))
   changed_quad <- b_TPC(dat, "quadratic",
     niter = 8000, burn = 1000,
     samplerType = "slice",

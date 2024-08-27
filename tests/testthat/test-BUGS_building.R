@@ -13,14 +13,13 @@ test_that("configure_model catches errors", {
   expect_error(configure_model(model = weird_model_spec), regexp = "incorrectly")
 
   # bad priors
-  expect_error(configure_model(model = "quadratic", priors = list()), regexp = "cannot be empty")
-  expect_error(configure_model(model = "quadratic", priors = c(q = "dunif(0,.5)")), regexp = "Unexpected type")
+  expect_equal(configure_model(model = "quadratic", priors = list()), configure_model("quadratic"))
   expect_error(configure_model(model = "quadratic", priors = list("dunif(0,.5)")), regexp = "must be named")
 
   # bad constants
-  expect_error(configure_model(model = "quadratic", constants = list()), regexp = "cannot be empty")
-  expect_error(configure_model(model = "quadratic", constants = c(q = 10)), regexp = "Unexpected type")
-  expect_error(configure_model(model = "quadratic", constants = list(10)), regexp = "must be named")
+  expect_equal(configure_model(model = "quadratic", constants = list()), configure_model("quadratic"))
+  expect_error(configure_model(model = "quadratic", constants = c(q = 10)), regexp = "model without constants")
+  expect_error(configure_model(model = "pawar_shsch", constants = list(10)), regexp = "must be named")
 })
 
 test_that("configure model works", {
@@ -36,7 +35,7 @@ test_that("configure model works", {
   # i dont know how to use regex :)
   expect_match(default_quad, regexp = "q ~ dunif(0, 1)", fixed = TRUE)
   expect_match(default_quad, regexp = "T_max ~ dunif(25, 60)", fixed = TRUE)
-  expect_match(default_quad, regexp = "T_min ~ dunif(0, 24)", fixed = TRUE)
+  expect_match(default_quad, regexp = "T_min ~ dunif(-10, 20)", fixed = TRUE)
   expect_match(default_quad, regexp = "sigma.sq ~ dexp(1)", fixed = TRUE)
 
   expect_match(changed_quad, regexp = "q ~ dunif(0, 1.5)", fixed = TRUE)
@@ -45,7 +44,7 @@ test_that("configure model works", {
   expect_match(changed_quad, regexp = "sigma.sq ~ dexp(2)", fixed = TRUE)
 })
 test_that("default S3 BUGS functions throw errors", {
-  expect_error(.link_string("random string"), regexp = "Misconfigured")
-  expect_error(.distribution_string("random string"), regexp = "Misconfigured")
-  expect_error(.priors_string("random string"), regexp = "Misconfigured")
+  expect_error(.link_string("random string"),         regexp = "Misconfigured Model Specification")
+  expect_error(.distribution_string("random string"), regexp = "Invalid input")
+  expect_error(.priors_string("random string"),       regexp = "Invalid input")
 })
