@@ -117,7 +117,6 @@ predict.btpc_MCMC <- function(object,
   }
 
 
-
   if (length(s_list) > 1 && centralSummary == "MAP") {
     #ive already spent too much time refactoring do_map, add support for this laaater
     stop("centralSummary = 'MAP' can only be used if the fit object has one chain.")
