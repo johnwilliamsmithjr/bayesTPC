@@ -45,7 +45,7 @@ print.btpc_MCMC <- function(x, digits = 3, ...) {
 #' @param object `btpc_MCMC`, object output from performing MCMC using the `bTPC` function.
 #' @param quantiles numeric, calculated quantiles for each variable.
 #' @param ... additional parameters, passed to [summary.mcmc]
-#' @returns A list (invisible) containing the central summary and the bounds of the credible interval generated.
+#' @returns A list (invisible) containing the information about and summary statistics of the MCMC chain(s).
 summary.btpc_MCMC <- function(object,
                               quantiles = c(0.025, 0.25, 0.5, 0.75, 0.975),
                               ...) {

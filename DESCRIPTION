@@ -1,7 +1,7 @@
 Type: Package
 Package: bayesTPC
 Title: bayesTPC
-Version: 1.1.1
+Version: 1.1.2
 Description: An R package for fitting mathematical models that describe
     thermal performance curves.
 License: GPL-3
