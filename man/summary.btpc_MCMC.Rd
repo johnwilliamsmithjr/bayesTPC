@@ -14,7 +14,7 @@
 \item{...}{additional parameters, passed to \link{summary.mcmc}}
 }
 \value{
-A list (invisible) containing the central summary and the bounds of the credible interval generated.
+A list (invisible) containing the information about and summary statistics of the MCMC chain(s).
 }
 \description{
 Provide thermal performance curve summaries using output from \code{\link[=b_TPC]{b_TPC()}}'s nimble MCMC.
