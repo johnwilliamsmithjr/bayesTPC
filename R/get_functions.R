@@ -230,10 +230,11 @@ get_default_model_specification <- function(model) {
 #'
 #' @param x `btpc_MCMC`, object output from performing MCMC using the `bTPC` function.
 #' @param include_warning logical, should warnings be printed? Default is FALSE.
-#' @return A named vector containing the WAIC of the model.
+#' @return A named vector containing the Watanabe-Akaike information criterion (WAIC), log point-wise predictive density (lppd), and pWAIC (a measure of the effective number of parameters being estimated) of the model.
+#' @references Gelman, A., Hwang, J. & Vehtari, A. Understanding predictive information criteria for Bayesian models. Stat Comput 24, 997–1016 (2014). https://doi.org/10.1007/s11222-013-9416-2
 #' @export
 get_WAIC <- function(x, include_warning = FALSE) {
   stopifnot("Unexpected type for parameter 'x'. Only use this method with the output of b_TPC()." = "btpc_MCMC" %in% class(x))
   if (include_warning) wc <- x$mcmc$getWAIC() else utils::capture.output(wc <- x$mcmc$getWAIC())
-  return(c(WAIC = wc$WAIC))
+  return(c(WAIC = wc$WAIC, lppd = wc$lppd, pWAIC = wc$pWAIC))
 }
