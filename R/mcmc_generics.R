@@ -506,6 +506,7 @@ plot_prediction.btpc_prediction <- function(x, ylab = "Trait", ylim = NULL, main
     stop("Invalid type for parameter 'x'. Input should be the output of 'posterior_predictive()'.")
   }
 
+
   if (is.null(main) || (length(main) != 1 && length(main) != length(x))) {
     warning("Using default title for plots. Either one title or individual titles for each plot may be provided.")
     main <- paste0("Chain ", 1:length(x))
@@ -513,6 +514,16 @@ plot_prediction.btpc_prediction <- function(x, ylab = "Trait", ylim = NULL, main
 
   for (i in 1:length(x)) {
     s <- x[[i]]
+
+    if (!is.null(s$medians)) {
+      center_name <- "Medians"
+      s$centers <- s$medians
+    } else if (!is.null(s$means)) {
+      center_name <- "Means"
+      s$centers <- s$means
+    } else {
+      stop("Misconfigured posterior predictive. Input must contain either posterior means or medians.")
+    }
 
     if ("btpc_binomial" %in% class(x$model_spec)) {
       if (missing(ylim)) {
@@ -530,7 +541,7 @@ plot_prediction.btpc_prediction <- function(x, ylab = "Trait", ylim = NULL, main
 
       graphics::points(s$temp_interval, s$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
       graphics::points(s$temp_interval, s$lower_bounds / sample_n, type = "l", col = "blue", lty = 3)
-      graphics::points(s$temp_interval, s$medians / sample_n, type = "l", col = "blue")
+      graphics::points(s$temp_interval, s$centers / sample_n, type = "l", col = "blue")
     } else {
 
 
@@ -546,7 +557,7 @@ plot_prediction.btpc_prediction <- function(x, ylab = "Trait", ylim = NULL, main
       )
       graphics::points(s$temp_interval, s$TPC_means, col = "red", type = "l", lty = 2, lwd = 1.1)
       graphics::points(s$temp_interval, s$lower_bounds, type = "l", col = "blue", lty = 3)
-      graphics::points(s$temp_interval, s$medians, type = "l", col = "blue")
+      graphics::points(s$temp_interval, s$centers, type = "l", col = "blue")
     }
 
 
@@ -558,7 +569,7 @@ plot_prediction.btpc_prediction <- function(x, ylab = "Trait", ylim = NULL, main
 
     if (legend) {
       graphics::legend(legend_position,
-                       legend = c("Bounds", "Means", "Medians"),
+                       legend = c("PP Bounds", "TPC Means", paste0("PP ",center_name)),
                        lty = c(3, 2, 1), col = c("blue", "red", "blue")
       )
     }
