@@ -184,7 +184,7 @@ test_that("MCMC methods output correctly", {
   response <- predict(bin, type = "response")[[1]]
 
   bin_link_evals <- simplify2array(.mapply(
-    FUN = get_model_function("binomial_glm_lin"), dots = data.frame(bin$samples[, !colnames(bin$samples) %in% "sigma.sq"]),
+    FUN = get_model_function("binomial_glm_lin", type = "link"), dots = data.frame(bin$samples[, !colnames(bin$samples) %in% "sigma.sq"]),
     MoreArgs = list(Temp = seq(from = min(bin$data$Temp), to = max(bin$data$Temp), length.out = 1000))
   ))
   bin_response_evals <- exp(bin_link_evals) / (1 + exp(bin_link_evals))

@@ -106,7 +106,7 @@ predict.btpc_MCMC <- function(object,
 
   samp_params <- colnames(s_list[[1]])
   formula_params <- samp_params[!(samp_params %in% names(llh_params))]
-  tpc_fun <- get_model_function(object$model_spec)
+  tpc_fun <- get_model_function(object$model_spec, type = type)
 
   # assign constants
   MA <- list(Temp = temp_interval)
@@ -129,30 +129,10 @@ predict.btpc_MCMC <- function(object,
     max.ind <- nrow(s)
 
     #evaluate the TPC
-    link_evals <- simplify2array(.mapply(
+    tpc_evals <- simplify2array(.mapply(
       FUN = tpc_fun, dots = data.frame(s[(burn + 1):max.ind, formula_params]),
       MoreArgs = MA
     ))
-
-    # transform link into response. TY plug in principle :)
-    if (type == "response") {
-      if ("btpc_identity" %in% class(object$model_spec)) {
-        tpc_evals <- link_evals
-      } else if ("btpc_logit" %in% class(object$model_spec)) {
-        tpc_evals <- exp(link_evals) / (1 + exp(link_evals))
-      } else if ("btpc_log" %in% class(object$model_spec)) {
-        tpc_evals <- exp(link_evals)
-      } else if ("btpc_reciprocal" %in% class(object$model_spec)) {
-        tpc_evals <- 1 / link_evals
-      } else {
-        # this error check is redundant, but is here just in case.
-        stop("Misconfigured Model Specification.")
-      }
-    } else if (type == "link") {
-      tpc_evals <- link_evals
-    } else {
-      stop("Invalid input for parameter 'type'. Supported options are 'link' and 'response'.")
-    }
 
     #calculate location statistic
     if (centralSummary == "median") {
@@ -299,6 +279,7 @@ posterior_predictive <- function(TPC,
                                  prob = .9,
                                  quantiles = c(.05, .95),
                                  burn = 0,
+                                 type = "response",
                                  seed = NULL) {
   if (!"btpc_MCMC" %in% class(TPC)) stop("Unexpected type for parameter 'TPC'. Only use this method with the output of b_TPC().")
   if (!(is.null(seed))) {
@@ -325,7 +306,7 @@ posterior_predictive <- function(TPC,
 
   samp_params <- colnames(s_list[[1]])
   formula_params <- samp_params[!(samp_params %in% names(llh_params))]
-  tpc_fun <- get_model_function(TPC$model_spec)
+  tpc_fun <- get_model_function(TPC$model_spec, type = type)
 
   # assign constants
   MA <- list(Temp = temp_interval)
@@ -341,23 +322,10 @@ posterior_predictive <- function(TPC,
     max.ind <- nrow(s)
 
     #evaluate the TPC
-    link_evals <- simplify2array(.mapply(
+    tpc_evals <- simplify2array(.mapply(
       FUN = tpc_fun, dots = data.frame(s[(burn + 1):max.ind, formula_params]),
       MoreArgs = MA
     ))
-
-    if ("btpc_identity" %in% class(TPC$model_spec)) {
-      tpc_evals <- link_evals
-    } else if ("btpc_logit" %in% class(TPC$model_spec)) {
-      tpc_evals <- exp(link_evals) / (1 + exp(link_evals))
-    } else if ("btpc_log" %in% class(TPC$model_spec)) {
-      tpc_evals <- exp(link_evals)
-    } else if ("btpc_reciprocal" %in% class(TPC$model_spec)) {
-      tpc_evals <- 1 / link_evals
-    } else {
-      # this error check is redundant, but is here just in case.
-      stop("Misconfigured Model Specification.")
-    }
 
     tpc_ev <- matrixStats::rowMeans2(tpc_evals)
 
