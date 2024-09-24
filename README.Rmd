@@ -74,5 +74,5 @@ The `ppo_plot()` function shows the overlap between the priors specified versus 
 
 ### Vectraits API
 
-`bayesTPC` also includes a basic API to access the Vectraits database of disease vector trait data. One can either retrieve a pre-known dataset using `get_dataset()` or `get_datasets()`, or search specific keywords using `find_datasets()`.
+`bayesTPC` also includes a basic API to access the Vectraits database of disease vector trait data. One can either retrieve a pre-known dataset using `get_VB_dataset()` or `get_VB_datasets()`, or search specific keywords using `find_VB_datasets()`.
 

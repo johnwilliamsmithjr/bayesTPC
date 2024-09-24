@@ -53,17 +53,16 @@ get_default_model_specification("briere")
 #>   briere
 #> 
 #> Model Formula:
-#>   m[i] <- ( q * Temp * (Temp - T_min) * sqrt((T_max > Temp) * abs(T_max - Temp)) * (T_max > Temp) * (Temp > T_min) )
+#>   m[i] <- ( q * Temp * (Temp - T_min) * sqrt((T_max > Temp) * abs(T_max - Temp))
+#> * (T_max > Temp) * (Temp > T_min) )
 #> 
 #> Model Distribution:
 #>   Trait[i] ~ T(dnorm(mean = m[i], tau = 1/sigma.sq), 0, )
 #> 
 #> Model Parameters and Priors:
-#>   q ~ dunif(0, 1) 
-#>   T_max ~ dunif(25, 60) 
-#>   T_min ~ dunif(0, 24)
-#> 
-#> Prior for Variance:
+#>   q ~ dexp(1)
+#>   T_max ~ dunif(25, 60)
+#>   T_min ~ dunif(0, 20)
 #>   sigma.sq ~ dexp(1)
 ```
 
@@ -119,5 +118,5 @@ versus a kernel density estimation of the posterior sample.
 
 `bayesTPC` also includes a basic API to access the Vectraits database of
 disease vector trait data. One can either retrieve a pre-known dataset
-using `get_dataset()` or `get_datasets()`, or search specific keywords
-using `find_datasets()`.
+using `get_VB_dataset()` or `get_VB_datasets()`, or search specific
+keywords using `find_VB_datasets()`.
