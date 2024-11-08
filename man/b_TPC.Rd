@@ -15,6 +15,7 @@ b_TPC(
   nchains = 1,
   constants = NULL,
   verbose = FALSE,
+  store_nimble_model = TRUE,
   ...
 )
 }
@@ -51,6 +52,8 @@ Currently, supported options are:
 Currently only used for model = 'pawar-shsch'.}
 
 \item{verbose}{logical, determines whether to print additional information, Default is FALSE.}
+
+\item{store_nimble_model}{logical, should the underlying nimble model be stored? Default is TRUE.}
 
 \item{...}{Additional parameters passed to nimble during MCMC configuration and sampling.}
 }

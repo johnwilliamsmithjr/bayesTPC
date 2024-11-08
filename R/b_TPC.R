@@ -77,6 +77,7 @@ check_data <- function(data) {
 #' @param constants optional named list or numeric, constants to be provided to model. If constants are needed and not provided, constant values are used.
 #'  Currently only used for model = 'pawar-shsch'.
 #' @param verbose logical, determines whether to print additional information, Default is FALSE.
+#' @param store_nimble_model logical, should the underlying nimble model be stored? Default is TRUE.
 #' @param ... Additional parameters passed to nimble during MCMC configuration and sampling.
 #' @return `b_TPC` returns a list containing entries:
 #'  * `samples` - `mcmc.list` containing posterior samples of parameters for corresponding model.
@@ -117,7 +118,8 @@ check_data <- function(data) {
 #' }
 b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
                   niter = 10000, inits = NULL, burn = 0, nchains = 1,
-                  constants = NULL, verbose = FALSE, ...) {
+                  constants = NULL, verbose = FALSE, store_nimble_model = TRUE,
+                  ...) {
   # exception handling and variable setup
   if (is.null(model) || !(model %in% model_list)) {
     if ("btpc_model" %in% class(model)) {
@@ -233,6 +235,11 @@ b_TPC <- function(data, model, priors = NULL, samplerType = "RW",
   cat(" - Finding Max. a Post. parameters.\n")
   out$MAP_parameters <- do_map(out)
 
+  if (!store_nimble_model) {
+    out$uncomp_model <- NULL
+    out$comp_model <- NULL
+    out$tpc_mcmc <- NULL
+  }
   return(out)
 }
 

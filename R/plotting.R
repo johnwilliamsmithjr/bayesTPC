@@ -112,22 +112,19 @@ ipairs <- function(x, burn = 0, thin = 1,
 #' @param seq.length integer, length of sequence used to evaluate prior density. Default is 100.
 #' @param legend logical, should a legend be included? Default is TRUE.
 #' @param legend_position character, position of the legend. Only used if legend = TRUE. Default is "bottomright".
+#' @details
+#' Priors are evaluated using the `setInits()` and `calculate()` methods of `model$uncomp_model()`. Posteriors are approximated using `stats::density()` on the posterior sample of each parameter.
+#'
+#'
 #' @return Returns invisible(NULL) and creates a prior posterior overlap plot, with the prior density shown using a red line and the posterior density shown using a blue dashed line.
 ppo_plot <- function(model, burn = 0, seq.length = 100, legend = TRUE, legend_position = "topleft") {
 
   if (!"btpc_MCMC" %in% class(model)) stop("Unexpected type for parameter 'model'. Only use this method with the output of b_TPC().")
-
+  if (is.null(model$uncomp_model)) stop("The NIMBLE model object must exist to generate the prior posterior overlap. Make sure store_nimble_models = TRUE in b_TPC()")
   # This fails with gamma likelihoods but i dont have the patience to change it right now
   # I also dont think its the most necessary part of this code
   ## extract model parameters and sort alphabetically
-  ppo_parameters <- sort(names(model$priors)[names(model$priors) != "sigma.sq"])
-  ## if sigma.sq is in the mcmc sample list, add it as the
-  ## last entry of the param_list vector
-  if ("sigma.sq" %in% names(model$priors)) {
-    param_list <- c(ppo_parameters, "sigma.sq")
-  } else {
-    param_list <- ppo_parameters
-  }
+  param_list <- sort(names(model$priors))
 
   get_prior_eval <- function(x, name) {
     init_list <- list()

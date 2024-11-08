@@ -31,4 +31,6 @@ Create a prior-posterior overlap plot from output of \code{\link[=b_TPC]{b_TPC()
 }
 \details{
 Creates a prior-posterior overlap plot. This is useful in determining the impact that the choice of prior distribution has on the analyses.
+
+Priors are evaluated using the \code{setInits()} and \code{calculate()} methods of \code{model$uncomp_model()}. Posteriors are approximated using \code{stats::density()} on the posterior sample of each parameter.
 }
