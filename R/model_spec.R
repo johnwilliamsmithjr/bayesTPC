@@ -486,6 +486,7 @@ remove_model <- function(name) {
 }
 
 #' @rdname remove_model
+#' @export
 reset_models <- function() {
   utils::assignInMyNamespace("model_list", immutable_model_list)
   cat("All user-defined models have been removed.")
